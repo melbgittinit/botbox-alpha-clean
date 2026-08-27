@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  CONTRIBUTOR
+  VIEWER
+}
+
+enum AssetType {
+  PHOTO
+  DOCUMENT
+  AUDIO
+  VIDEO
+  OTHER
+}
+
+enum FindingStatus {
+  SUGGESTED
+  CONFIRMED
+  REJECTED
+}
+
+enum ConfidenceLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CONFIRMED
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  displayName String?
+  memberships Membership[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Family {
+  id          String       @id @default(cuid())
+  name        String
+  tagline     String?
+  coverImage  String?
+  memberships Membership[]
+  people      Person[]
+  assets      Asset[]
+  events      Event[]
+  places      Place[]
+  questions   Question[]
+  tasks       Task[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Membership {
+  id        String         @id @default(cuid())
+  role      MembershipRole @default(CONTRIBUTOR)
+  userId    String
+  familyId  String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family    Family         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, familyId])
+}
+
+model Person {
+  id          String         @id @default(cuid())
+  familyId    String
+  family      Family         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  firstName   String
+  middleName  String?
+  lastName    String?
+  nickname    String?
+  birthDate   DateTime?
+  deathDate   DateTime?
+  birthPlace  String?
+  summary     String?
+  portraitUrl String?
+  assetLinks  AssetPerson[]
+  relationsA  Relationship[] @relation("PersonA")
+  relationsB  Relationship[] @relation("PersonB")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Relationship {
+  id        String   @id @default(cuid())
+  familyId  String
+  personAId String
+  personBId String
+  type      String
+  personA   Person   @relation("PersonA", fields: [personAId], references: [id], onDelete: Cascade)
+  personB   Person   @relation("PersonB", fields: [personBId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([familyId])
+}
+
+model Asset {
+  id           String        @id @default(cuid())
+  familyId     String
+  family       Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  type         AssetType
+  title        String?
+  storageUrl   String
+  thumbnailUrl String?
+  description  String?
+  capturedAt   DateTime?
+  sourceLabel  String?
+  personLinks  AssetPerson[]
+  findings     AiFinding[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model AssetPerson {
+  id       String @id @default(cuid())
+  assetId  String
+  personId String
+  asset    Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, personId])
+}
+
+model AiFinding {
+  id         String          @id @default(cuid())
+  assetId    String
+  asset      Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  kind       String
+  value      String
+  confidence ConfidenceLevel @default(MEDIUM)
+  status     FindingStatus   @default(SUGGESTED)
+  createdAt  DateTime        @default(now())
+}
+
+model Event {
+  id          String          @id @default(cuid())
+  familyId    String
+  family      Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  occurredAt  DateTime?
+  confidence  ConfidenceLevel @default(MEDIUM)
+  createdAt   DateTime        @default(now())
+}
+
+model Place {
+  id        String   @id @default(cuid())
+  familyId  String
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  name      String
+  city      String?
+  region    String?
+  country   String?
+  createdAt DateTime @default(now())
+}
+
+model Question {
+  id         String          @id @default(cuid())
+  familyId   String
+  family     Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  prompt     String
+  assignedTo String?
+  status     String          @default("OPEN")
+  answer     String?
+  confidence ConfidenceLevel @default(LOW)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  familyId    String
+  family      Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  actionType  String
+  title       String
+  description String?
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
