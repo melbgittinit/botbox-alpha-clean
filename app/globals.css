@@ -1,40 +1,77 @@
 :root {
-  --bg: #0e0d0b;
-  --panel: #17140f;
-  --panel2: #211c14;
-  --text: #f6f0e3;
-  --muted: #b8ae9c;
+  --bg: #0b0a08;
+  --bg-soft: #12100c;
+
+  --panel: #17130f;
+  --panel2: #211b14;
+  --panel3: #2b2118;
+
+  --text: #f8f0df;
+  --muted: #b9ae9a;
+  --muted2: #8e8372;
+
   --gold: #d7b66d;
-  --gold2: #f1d99b;
-  --line: rgba(215, 182, 109, 0.25);
+  --gold2: #f2d99a;
+  --gold3: #8d6c35;
+
+  --ivory: #fff9ed;
+  --cream: #eadcc2;
+
+  --red: #b9413b;
+  --red2: #e26259;
+
+  --line: rgba(215, 182, 109, 0.23);
+  --line-strong: rgba(215, 182, 109, 0.46);
+
+  --shadow:
+    0 28px 70px rgba(0, 0, 0, 0.35);
+
+  --soft-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.23);
 }
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-}
 
-body {
   background:
     radial-gradient(
-      circle at top,
-      rgba(215, 182, 109, 0.09),
-      transparent 30rem
+      circle at 50% -5%,
+      rgba(215, 182, 109, 0.15),
+      transparent 32rem
     ),
     linear-gradient(
       180deg,
-      #12100c,
-      #0d0c0a 45%
+      #15110c 0%,
+      #0d0b09 24%,
+      #090806 100%
     );
 
+  color: var(--text);
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  min-height: 100%;
+}
+
+body {
   min-height: 100vh;
 }
 
@@ -43,56 +80,306 @@ a {
   text-decoration: none;
 }
 
-.shell {
-  max-width: 760px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 24px 18px 110px;
+button,
+input,
+textarea {
+  font: inherit;
 }
 
+
+/* =========================================================
+   MAIN APP SHELL
+========================================================= */
+
+.shell {
+  width: min(900px, calc(100% - 28px));
+  margin: 0 auto;
+
+  min-height: 100vh;
+
+  padding:
+    22px
+    0
+    125px;
+}
+
+
+/* =========================================================
+   BOTBOX BRAND
+========================================================= */
+
 .brand {
-  letter-spacing: 0.18em;
+  margin:
+    6px
+    0
+    1px;
+
+  color: var(--gold2);
+
+  font-size:
+    clamp(
+      42px,
+      10vw,
+      76px
+    );
+
   font-weight: 900;
-  font-size: clamp(36px, 9vw, 66px);
-  margin: 6px 0;
+
+  line-height: 0.94;
+
+  letter-spacing: 0.14em;
+
+  text-shadow:
+    0 8px 28px
+    rgba(215, 182, 109, 0.13);
 }
 
 .kicker {
   color: var(--gold);
-  font-weight: 800;
+
+  font-weight: 900;
+
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 12px;
+
+  letter-spacing: 0.12em;
+
+  font-size: 11px;
 }
 
+
+/* =========================================================
+   DEFAULT HERO
+========================================================= */
+
 .hero {
-  padding: 20px 0 14px;
+  padding:
+    28px
+    0
+    18px;
 }
 
 .hero h1 {
-  font-size: clamp(30px, 7vw, 52px);
-  margin: 6px 0;
-  line-height: 1.02;
+  margin:
+    8px
+    0
+    14px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      37px,
+      7vw,
+      66px
+    );
+
+  line-height: 0.98;
+
+  letter-spacing: -0.04em;
+
+  color: var(--ivory);
 }
 
 .hero p {
   color: var(--muted);
+
   font-size: 17px;
-  line-height: 1.55;
+
+  line-height: 1.6;
 }
 
+
+/* =========================================================
+   BOTBOX HOME HERO
+========================================================= */
+
+.botbox-home-hero {
+  position: relative;
+
+  text-align: center;
+
+  max-width: 850px;
+
+  margin:
+    22px
+    auto
+    40px;
+
+  padding:
+    60px
+    30px
+    46px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 36px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 15%,
+      rgba(215, 182, 109, 0.18),
+      transparent 22rem
+    ),
+    linear-gradient(
+      145deg,
+      rgba(56, 41, 26, 0.56),
+      rgba(14, 12, 9, 0.95)
+    );
+
+  box-shadow: var(--shadow);
+}
+
+.botbox-home-hero:before {
+  content: "";
+
+  position: absolute;
+
+  inset: 13px;
+
+  border:
+    1px solid
+    rgba(215, 182, 109, 0.13);
+
+  border-radius: 26px;
+
+  pointer-events: none;
+}
+
+.botbox-home-hero:after {
+  content: "♥";
+
+  position: absolute;
+
+  top: 18px;
+
+  right: 22px;
+
+  width: 38px;
+
+  height: 38px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--red2),
+      var(--red)
+    );
+
+  color: white;
+
+  font-size: 18px;
+
+  box-shadow:
+    0 8px 20px
+    rgba(185, 65, 59, 0.26);
+}
+
+.botbox-home-hero h1 {
+  position: relative;
+
+  z-index: 2;
+
+  max-width: 780px;
+
+  margin:
+    12px
+    auto
+    22px;
+
+  font-size:
+    clamp(
+      44px,
+      8vw,
+      79px
+    );
+}
+
+.hero-copy {
+  position: relative;
+
+  z-index: 2;
+
+  max-width: 740px;
+
+  margin:
+    0
+    auto;
+
+  font-size:
+    clamp(
+      16px,
+      2.4vw,
+      20px
+    ) !important;
+
+  line-height: 1.7 !important;
+}
+
+.hero-promise {
+  position: relative;
+
+  z-index: 2;
+
+  display: flex;
+
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap:
+    10px
+    20px;
+
+  margin-top: 29px;
+
+  color: var(--gold2);
+
+  font-size: 11px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.09em;
+}
+
+
+/* =========================================================
+   STANDARD CARD
+========================================================= */
+
 .card {
+  margin:
+    14px
+    0;
+
+  padding: 21px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 24px;
+
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.045),
       rgba(255, 255, 255, 0.015)
     );
 
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  padding: 18px;
-  margin: 14px 0;
+  box-shadow: var(--soft-shadow);
 }
 
 .card h2,
@@ -100,172 +387,1343 @@ a {
   margin-top: 0;
 }
 
-.grid {
+
+/* =========================================================
+   ENTRY / POWERED BY LOVE CARD
+========================================================= */
+
+.botbox-entry-card {
+  position: relative;
+
+  max-width: 790px;
+
+  margin:
+    0
+    auto
+    70px;
+
+  padding:
+    46px
+    40px
+    38px;
+
+  text-align: center;
+
+  border:
+    1px solid
+    var(--line-strong);
+
+  border-radius: 34px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      rgba(215, 182, 109, 0.15),
+      transparent 17rem
+    ),
+    linear-gradient(
+      180deg,
+      #201912,
+      #12100c
+    );
+
+  box-shadow: var(--shadow);
+}
+
+.botbox-entry-card h2 {
+  margin:
+    8px
+    auto
+    15px;
+
+  color: var(--ivory);
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      33px,
+      5vw,
+      55px
+    );
+
+  line-height: 1.02;
+
+  letter-spacing: -0.035em;
+}
+
+.botbox-entry-card p {
+  max-width: 600px;
+
+  margin:
+    0
+    auto
+    24px;
+
+  font-size: 15px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   HEART LOCK
+========================================================= */
+
+.botbox-lock {
+  width: 62px;
+
+  height: 62px;
+
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 
-.stat {
-  background: var(--panel2);
-  border-radius: 16px;
-  padding: 14px;
-}
+  place-items: center;
 
-.stat strong {
-  display: block;
+  margin:
+    -76px
+    auto
+    20px;
+
+  border:
+    5px solid
+    var(--bg-soft);
+
+  border-radius: 50%;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--red2),
+      var(--red)
+    );
+
   font-size: 27px;
-  color: var(--gold2);
+
+  box-shadow:
+    0 12px 28px
+    rgba(185, 65, 59, 0.32);
 }
 
-.stat span {
-  color: var(--muted);
-  font-size: 13px;
+.botbox-lock-large {
+  width: 78px;
+
+  height: 78px;
+
+  margin:
+    0
+    auto
+    22px;
+
+  border-width: 0;
+
+  font-size: 38px;
 }
+
+
+/* =========================================================
+   PRIMARY / SECONDARY BUTTONS
+========================================================= */
 
 .primary {
   width: 100%;
+
   display: block;
+
+  margin:
+    12px
+    0;
+
+  padding:
+    18px
+    20px;
+
   border: 0;
+
   border-radius: 18px;
-  padding: 18px 20px;
+
   background:
     linear-gradient(
       135deg,
       var(--gold2),
       var(--gold)
     );
+
   color: #1a140b;
+
+  font-size: 17px;
+
   font-weight: 900;
+
   text-align: center;
-  margin: 12px 0;
-  font-size: 18px;
+
+  box-shadow:
+    0 12px 30px
+    rgba(215, 182, 109, 0.16);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.primary:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 17px 38px
+    rgba(215, 182, 109, 0.24);
 }
 
 .secondary {
   width: 100%;
+
   display: block;
+
+  padding:
+    16px
+    18px;
+
+  border:
+    1px solid
+    var(--line);
+
   border-radius: 18px;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
-  background: transparent;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
   color: var(--text);
+
+  text-align: center;
+
+  font-weight: 800;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.secondary:hover {
+  background:
+    rgba(255, 255, 255, 0.055);
+
+  border-color:
+    var(--line-strong);
+}
+
+.botbox-big-button {
+  min-height: 61px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size:
+    clamp(
+      16px,
+      2.4vw,
+      20px
+    );
+
+  letter-spacing: 0.02em;
+}
+
+
+/* =========================================================
+   BIG DROP
+========================================================= */
+
+.botbox-drop-zone {
+  margin:
+    0
+    auto
+    72px;
+
+  padding:
+    52px
+    0;
+
   text-align: center;
 }
+
+.botbox-drop-zone h2 {
+  margin:
+    8px
+    0
+    12px;
+
+  color: var(--ivory);
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      35px,
+      5vw,
+      59px
+    );
+
+  line-height: 1;
+
+  letter-spacing: -0.035em;
+}
+
+.botbox-drop-zone > p {
+  max-width: 650px;
+
+  margin:
+    0
+    auto
+    30px;
+
+  font-size: 15px;
+
+  line-height: 1.6;
+}
+
+.botbox-drop-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 15px;
+
+  margin-top: 32px;
+}
+
+.botbox-drop-card {
+  min-height: 205px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: flex-end;
+
+  position: relative;
+
+  overflow: hidden;
+
+  padding: 25px;
+
+  text-align: left;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 26px;
+
+  background:
+    radial-gradient(
+      circle at 25% 15%,
+      rgba(215, 182, 109, 0.15),
+      transparent 10rem
+    ),
+    linear-gradient(
+      145deg,
+      #231b13,
+      #11100c
+    );
+
+  box-shadow:
+    0 15px 35px
+    rgba(0, 0, 0, 0.2);
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.botbox-drop-card:hover {
+  transform:
+    translateY(-4px);
+
+  border-color:
+    var(--line-strong);
+}
+
+.botbox-drop-icon {
+  position: absolute;
+
+  top: 22px;
+
+  left: 23px;
+
+  width: 54px;
+
+  height: 54px;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 17px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  font-size: 28px;
+}
+
+.botbox-drop-card strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--gold2);
+
+  font-size: 15px;
+
+  letter-spacing: 0.07em;
+}
+
+.botbox-drop-card span {
+  color: var(--muted);
+
+  font-size: 13px;
+
+  line-height: 1.45;
+}
+
+.botbox-mystery-card {
+  border-color:
+    rgba(185, 65, 59, 0.5);
+
+  background:
+    radial-gradient(
+      circle at 25% 15%,
+      rgba(185, 65, 59, 0.14),
+      transparent 10rem
+    ),
+    linear-gradient(
+      145deg,
+      #251614,
+      #11100c
+    );
+}
+
+.botbox-mystery-card
+.botbox-drop-icon {
+  color: #fff;
+
+  background:
+    rgba(185, 65, 59, 0.16);
+
+  border-color:
+    rgba(185, 65, 59, 0.5);
+}
+
+
+/* =========================================================
+   INTELLIGENCE / ASK BOTBOX
+========================================================= */
+
+.botbox-intelligence {
+  display: grid;
+
+  grid-template-columns:
+    0.92fr
+    1.08fr;
+
+  gap: 34px;
+
+  align-items: center;
+
+  margin:
+    0
+    auto
+    85px;
+
+  padding:
+    45px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 34px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #18130e,
+      #0c0b09
+    );
+
+  box-shadow:
+    var(--soft-shadow);
+}
+
+.botbox-intelligence h2 {
+  margin:
+    8px
+    0
+    14px;
+
+  color: var(--ivory);
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      33px,
+      4vw,
+      49px
+    );
+
+  line-height: 1.04;
+
+  letter-spacing: -0.035em;
+}
+
+.botbox-intelligence
+.small {
+  font-size: 14px;
+
+  line-height: 1.65;
+}
+
+.botbox-question-card {
+  padding: 18px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 26px;
+
+  background:
+    #080806;
+}
+
+.botbox-question {
+  margin-left: 12%;
+
+  padding:
+    15px
+    17px;
+
+  border-radius:
+    19px
+    19px
+    5px
+    19px;
+
+  color: var(--ivory);
+
+  background:
+    #2a2218;
+
+  line-height: 1.45;
+}
+
+.botbox-answer {
+  margin:
+    14px
+    8%
+    17px
+    0;
+
+  padding: 19px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:
+    19px
+    19px
+    19px
+    5px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(215, 182, 109, 0.12),
+      rgba(215, 182, 109, 0.04)
+    );
+}
+
+.botbox-answer strong {
+  color: var(--gold2);
+
+  font-size: 13px;
+
+  letter-spacing: 0.1em;
+}
+
+.botbox-answer p {
+  margin:
+    8px
+    0;
+
+  color: var(--cream);
+
+  line-height: 1.55;
+
+  font-size: 14px;
+}
+
+.botbox-answer span {
+  color: var(--muted2);
+
+  font-size: 12px;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   FAMILY LINKS
+========================================================= */
+
+.botbox-family-links {
+  margin:
+    0
+    auto
+    80px;
+
+  text-align: center;
+}
+
+.botbox-family-links h2 {
+  margin:
+    8px
+    0
+    30px;
+
+  color: var(--ivory);
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      35px,
+      5vw,
+      55px
+    );
+
+  line-height: 1.02;
+
+  letter-spacing: -0.035em;
+}
+
+.botbox-link-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 14px;
+}
+
+.botbox-link-card {
+  min-height: 190px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  justify-content: flex-end;
+
+  padding: 23px;
+
+  text-align: left;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 25px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.012)
+    );
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.botbox-link-card:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    var(--line-strong);
+}
+
+.botbox-link-card > span {
+  margin-bottom: auto;
+
+  font-size: 34px;
+}
+
+.botbox-link-card strong {
+  margin:
+    18px
+    0
+    7px;
+
+  color: var(--gold2);
+
+  letter-spacing: 0.06em;
+
+  font-size: 14px;
+}
+
+.botbox-link-card small {
+  color: var(--muted);
+
+  line-height: 1.45;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   FINAL HOME CTA
+========================================================= */
+
+.botbox-final-home {
+  position: relative;
+
+  max-width: 760px;
+
+  margin:
+    0
+    auto
+    20px;
+
+  padding:
+    56px
+    42px;
+
+  text-align: center;
+
+  border:
+    1px solid
+    var(--line-strong);
+
+  border-radius: 38px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 5%,
+      rgba(215, 182, 109, 0.2),
+      transparent 20rem
+    ),
+    linear-gradient(
+      145deg,
+      #2b2117,
+      #12100c
+    );
+
+  box-shadow:
+    var(--shadow);
+}
+
+.botbox-final-home h2 {
+  margin:
+    8px
+    auto
+    12px;
+
+  color: var(--ivory);
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      34px,
+      5vw,
+      54px
+    );
+
+  line-height: 1.02;
+
+  letter-spacing: -0.035em;
+}
+
+.botbox-final-home p {
+  max-width: 530px;
+
+  margin:
+    0
+    auto
+    24px;
+
+  color: var(--muted);
+
+  font-size: 17px;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   EXISTING APP GRIDS
+========================================================= */
+
+.grid {
+  display: grid;
+
+  gap: 12px;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+}
+
+.stat {
+  padding: 14px;
+
+  border-radius: 16px;
+
+  background:
+    var(--panel2);
+}
+
+.stat strong {
+  display: block;
+
+  color: var(--gold2);
+
+  font-size: 27px;
+}
+
+.stat span {
+  color: var(--muted);
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   FORM ELEMENTS
+========================================================= */
 
 .ask,
 input,
 textarea {
   width: 100%;
-  padding: 17px 18px;
-  border: 1px solid var(--line);
+
+  padding:
+    17px
+    18px;
+
+  border:
+    1px solid
+    var(--line);
+
   border-radius: 18px;
-  background: #0f0e0b;
-  color: var(--text);
+
+  outline: none;
+
+  background:
+    #0f0e0b;
+
+  color:
+    var(--text);
+}
+
+.ask:focus,
+input:focus,
+textarea:focus {
+  border-color:
+    var(--gold);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(215, 182, 109, 0.07);
+}
+
+textarea {
+  min-height: 130px;
+
+  resize: vertical;
+}
+
+label {
+  display: block;
+
+  margin:
+    14px
+    0
+    6px;
+
+  color:
+    var(--gold2);
+
+  font-size: 13px;
+
+  font-weight: 800;
 }
 
 .small {
-  color: var(--muted);
+  color:
+    var(--muted);
+
   font-size: 13px;
 }
+
+
+/* =========================================================
+   CHIPS
+========================================================= */
 
 .chips {
   display: flex;
+
   gap: 8px;
-  overflow: auto;
+
+  overflow-x: auto;
+
+  padding-bottom: 4px;
 }
 
 .chip {
-  white-space: nowrap;
-  padding: 9px 11px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--gold2);
-  font-size: 13px;
+  flex: none;
+
+  padding:
+    9px
+    11px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:
+    999px;
+
+  color:
+    var(--gold2);
+
+  font-size:
+    13px;
+
+  white-space:
+    nowrap;
 }
 
-.nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(12, 11, 9, 0.93);
-  backdrop-filter: blur(18px);
-  border-top: 1px solid var(--line);
-  padding: 10px 12px 16px;
-}
 
-.navin {
-  max-width: 760px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: end;
-  text-align: center;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.nav .add {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  margin: -18px auto 3px;
-  border-radius: 50%;
-  background: var(--gold);
-  color: #19130b;
-  font-size: 26px;
-  font-weight: 900;
-}
+/* =========================================================
+   PEOPLE / LIFE CARDS
+========================================================= */
 
 .person {
   display: flex;
+
   gap: 14px;
+
   align-items: center;
 }
 
 .avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
+  width:
+    68px;
+
+  height:
+    68px;
+
+  flex:
+    0 0
+    68px;
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:
+    20px;
+
   background:
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(215, 182, 109, 0.24),
+      transparent 5rem
+    ),
     linear-gradient(
       145deg,
       #5c4630,
       #1e1912
     );
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  font-size: 24px;
+
+  font-size:
+    25px;
+
+  box-shadow:
+    0 8px 20px
+    rgba(0, 0, 0, 0.18);
 }
 
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
 .timeline {
-  border-left: 2px solid var(--line);
-  padding-left: 18px;
+  margin-top: 20px;
+
+  padding-left:
+    20px;
+
+  border-left:
+    2px solid
+    var(--line);
 }
 
 .timeline-row {
-  margin: 0 0 20px;
-  position: relative;
+  position:
+    relative;
+
+  margin:
+    0
+    0
+    23px;
 }
 
 .timeline-row:before {
   content: "";
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--gold);
-  left: -24px;
-  top: 5px;
+
+  position:
+    absolute;
+
+  top:
+    5px;
+
+  left:
+    -26px;
+
+  width:
+    10px;
+
+  height:
+    10px;
+
+  border-radius:
+    50%;
+
+  background:
+    var(--gold);
+
+  box-shadow:
+    0 0 0 4px
+    rgba(215, 182, 109, 0.08);
 }
 
-label {
-  display: block;
-  margin: 14px 0 6px;
-  color: var(--gold2);
-  font-size: 13px;
-  font-weight: 800;
+
+/* =========================================================
+   BOTTOM NAVIGATION
+========================================================= */
+
+.nav {
+  position: fixed;
+
+  z-index: 100;
+
+  left: 0;
+
+  right: 0;
+
+  bottom: 0;
+
+  padding:
+    10px
+    12px
+    17px;
+
+  border-top:
+    1px solid
+    var(--line);
+
+  background:
+    rgba(10, 9, 7, 0.93);
+
+  backdrop-filter:
+    blur(20px);
+
+  -webkit-backdrop-filter:
+    blur(20px);
+
+  box-shadow:
+    0 -10px 35px
+    rgba(0, 0, 0, 0.2);
+}
+
+.navin {
+  max-width:
+    760px;
+
+  margin:
+    auto;
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      5,
+      1fr
+    );
+
+  align-items:
+    end;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10px;
+
+  text-align:
+    center;
+
+  letter-spacing:
+    0.02em;
+}
+
+.navin a {
+  padding:
+    5px
+    2px;
+}
+
+.nav .add {
+  width:
+    52px;
+
+  height:
+    52px;
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  margin:
+    -21px
+    auto
+    4px;
+
+  border:
+    4px solid
+    rgba(10, 9, 7, 0.94);
+
+  border-radius:
+    50%;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--gold2),
+      var(--gold)
+    );
+
+  color:
+    #19130b;
+
+  font-size:
+    27px;
+
+  font-weight:
+    900;
+
+  box-shadow:
+    0 11px 28px
+    rgba(215, 182, 109, 0.23);
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width: 760px) {
+
+  .botbox-drop-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .botbox-intelligence {
+    grid-template-columns:
+      1fr;
+  }
+
+  .botbox-link-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .botbox-link-card {
+    min-height:
+      150px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width: 520px) {
+
+  .shell {
+    width:
+      calc(100% - 20px);
+
+    padding-top:
+      14px;
+  }
+
+  .brand {
+    font-size:
+      43px;
+
+    letter-spacing:
+      0.11em;
+  }
+
+  .botbox-home-hero {
+    margin-top:
+      17px;
+
+    padding:
+      48px
+      20px
+      35px;
+
+    border-radius:
+      28px;
+  }
+
+  .botbox-home-hero h1 {
+    font-size:
+      42px;
+  }
+
+  .hero-copy br {
+    display:
+      none;
+  }
+
+  .hero-promise {
+    gap:
+      8px
+      13px;
+
+    font-size:
+      9px;
+  }
+
+  .botbox-entry-card {
+    padding:
+      42px
+      21px
+      27px;
+
+    border-radius:
+      28px;
+  }
+
+  .botbox-drop-zone {
+    padding:
+      35px
+      0;
+  }
+
+  .botbox-drop-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .botbox-drop-card {
+    min-height:
+      175px;
+  }
+
+  .botbox-intelligence {
+    padding:
+      25px;
+
+    border-radius:
+      27px;
+  }
+
+  .botbox-question {
+    margin-left:
+      5%;
+  }
+
+  .botbox-answer {
+    margin-right:
+      3%;
+  }
+
+  .botbox-final-home {
+    padding:
+      46px
+      22px;
+
+    border-radius:
+      29px;
+  }
+
+  .grid {
+    grid-template-columns:
+      1fr;
+  }
+
 }
