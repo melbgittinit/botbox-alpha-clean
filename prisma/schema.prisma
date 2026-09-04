@@ -35,13 +35,55 @@ enum ConfidenceLevel {
   CONFIRMED
 }
 
+enum WorkspaceMode {
+  PERSONAL
+  FAMILY
+  BUSINESS
+  CREATOR
+  ORGANIZATION
+}
+
+enum EventStepPhase {
+  BEFORE
+  DURING
+  AFTER
+}
+
 model User {
-  id          String       @id @default(cuid())
-  email       String       @unique
-  displayName String?
-  memberships Membership[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id                   String            @id @default(cuid())
+  email                String            @unique
+  displayName          String?
+  memberships          Membership[]
+  workspaceMemberships WorkspaceMember[]
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+}
+
+model Workspace {
+  id        String            @id @default(cuid())
+  name      String
+  mode      WorkspaceMode     @default(PERSONAL)
+  members   WorkspaceMember[]
+  families  Family[]
+  people    Person[]
+  groups    Group[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model WorkspaceMember {
+  id               String         @id @default(cuid())
+  workspaceId      String
+  userId           String
+  role             MembershipRole @default(CONTRIBUTOR)
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupMemberships GroupMember[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
 }
 
 model Family {
@@ -56,8 +98,12 @@ model Family {
   places      Place[]
   questions   Question[]
   tasks       Task[]
+  workspaceId String?
+  workspace   Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  @@index([workspaceId])
 }
 
 model Membership {
@@ -88,8 +134,12 @@ model Person {
   assetLinks  AssetPerson[]
   relationsA  Relationship[] @relation("PersonA")
   relationsB  Relationship[] @relation("PersonB")
+  workspaceId String?
+  workspace   Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+
+  @@index([workspaceId])
 }
 
 model Relationship {
@@ -151,7 +201,52 @@ model Event {
   description String?
   occurredAt  DateTime?
   confidence  ConfidenceLevel @default(MEDIUM)
+  steps       EventStep[]
   createdAt   DateTime        @default(now())
+}
+
+model EventStep {
+  id          String         @id @default(cuid())
+  eventId     String
+  event       Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  phase       EventStepPhase
+  type        String
+  status      String         @default("PENDING")
+  title       String
+  description String?
+  scheduledAt DateTime?
+  sortOrder   Int            @default(0)
+  payload     Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([eventId, phase, sortOrder])
+  @@index([scheduledAt])
+}
+
+model Group {
+  id          String        @id @default(cuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  members     GroupMember[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([workspaceId])
+}
+
+model GroupMember {
+  id                String          @id @default(cuid())
+  groupId           String
+  workspaceMemberId String
+  group             Group           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  workspaceMember   WorkspaceMember @relation(fields: [workspaceMemberId], references: [id], onDelete: Cascade)
+  createdAt         DateTime        @default(now())
+
+  @@unique([groupId, workspaceMemberId])
+  @@index([workspaceMemberId])
 }
 
 model Place {
