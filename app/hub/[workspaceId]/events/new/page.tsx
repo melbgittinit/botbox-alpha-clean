@@ -4,15 +4,7 @@ import { createEvent } from "../../../actions";
 
 export const dynamic = "force-dynamic";
 
-const fieldStyle = {
-  width: "100%",
-  marginTop: 8,
-  padding: "15px 16px",
-  borderRadius: 14,
-  border: "1px solid var(--line)",
-  background: "rgba(255,255,255,0.04)",
-  color: "var(--text)",
-};
+const EVENT_TYPES = ["CUSTOM", "MEETING", "SERVICE", "CLASS", "SESSION", "LAUNCH", "GATHERING"];
 
 export default async function NewEventPage({
   params,
@@ -23,71 +15,59 @@ export default async function NewEventPage({
 
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
-    select: {
-      id: true,
-      name: true,
-      mode: true,
-    },
+    select: { id: true, name: true, mode: true },
   });
 
-  if (!workspace) {
-    notFound();
-  }
+  if (!workspace) notFound();
 
   return (
-    <main className="shell">
-      <section className="hero">
-        <div className="kicker">HUB / {workspace.mode}</div>
-        <h1>New event</h1>
-        <p>{workspace.name}</p>
+    <main className="hub-shell">
+      <section className="hub-page-head">
+        <div className="hub-eyebrow">{workspace.mode} HUB · {workspace.name}</div>
+        <h1>What’s happening?</h1>
+        <p className="hub-copy">
+          Add the event once. HUB will turn it into a simple operating sequence you can work through.
+        </p>
       </section>
 
-      <form action={createEvent} className="card">
-        <input type="hidden" name="workspaceId" value={workspace.id} />
+      <section className="hub-onboarding-card">
+        <form action={createEvent} className="hub-form">
+          <input type="hidden" name="workspaceId" value={workspace.id} />
 
-        <label>
-          <div className="kicker">Title</div>
-          <input
-            name="title"
-            required
-            autoComplete="off"
-            style={fieldStyle}
-            placeholder="Event title"
-          />
-        </label>
+          <div className="hub-field">
+            <label htmlFor="event-title">Event title</label>
+            <input id="event-title" name="title" required autoComplete="off" placeholder="Sunday service, client session, launch day…" />
+          </div>
 
-        <label style={{ display: "block", marginTop: 20 }}>
-          <div className="kicker">Description — optional</div>
-          <textarea
-            name="description"
-            rows={4}
-            style={fieldStyle}
-            placeholder="What is this event for?"
-          />
-        </label>
+          <div className="hub-field">
+            <label htmlFor="event-type">Event type</label>
+            <select id="event-type" name="type" defaultValue="CUSTOM">
+              {EVENT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </div>
 
-        <label style={{ display: "block", marginTop: 20 }}>
-          <div className="kicker">Type</div>
-          <input
-            name="type"
-            defaultValue="CUSTOM"
-            autoComplete="off"
-            style={fieldStyle}
-          />
-        </label>
+          <div className="hub-field">
+            <label htmlFor="event-start">Date / time</label>
+            <input id="event-start" name="startsAt" type="datetime-local" required />
+          </div>
 
-        <label style={{ display: "block", marginTop: 20 }}>
-          <div className="kicker">Start date / time</div>
-          <input name="startsAt" type="datetime-local" required style={fieldStyle} />
-        </label>
+          <div className="hub-field">
+            <label htmlFor="event-description">Optional description</label>
+            <textarea id="event-description" name="description" rows={4} placeholder="Anything HUB should know about what this event is for?" />
+          </div>
 
-        <button className="primary" type="submit" style={{ marginTop: 24 }}>
-          CREATE EVENT + RUN OF SHOW
-        </button>
-      </form>
+          <div className="hub-runofshow-note">
+            HUB will automatically build your Before / During / After run-of-show.
+          </div>
 
-      <a className="secondary" href={`/hub/${workspace.id}`}>
-        Back to workspace
+          <button className="hub-button hub-button-primary hub-button-full" type="submit">
+            BUILD MY EVENT
+          </button>
+        </form>
+      </section>
+
+      <a className="hub-button hub-button-secondary" href={`/hub/${workspace.id}`} style={{ marginTop: 16 }}>
+        Back to {workspace.name}
       </a>
     </main>
   );
