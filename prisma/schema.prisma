@@ -87,11 +87,13 @@ model User {
 model Workspace {
   id        String            @id @default(cuid())
   name      String
+  tagline   String?
   mode      WorkspaceMode     @default(FAMILY)
   members   WorkspaceMember[]
   families  Family[]
   people    Person[]
   groups    Group[]
+  events    Event[]
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 }
@@ -144,8 +146,8 @@ model Membership {
 
 model Person {
   id               String          @id @default(cuid())
-  familyId         String
-  family           Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  familyId         String?
+  family           Family?         @relation(fields: [familyId], references: [id], onDelete: Cascade)
   firstName        String
   middleName       String?
   lastName         String?
@@ -165,6 +167,7 @@ model Person {
   updatedAt        DateTime        @updatedAt
 
   @@index([workspaceId])
+  @@index([familyId])
 }
 
 model Relationship {
@@ -220,14 +223,22 @@ model AiFinding {
 
 model Event {
   id          String          @id @default(cuid())
-  familyId    String
-  family      Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  familyId    String?
+  family      Family?         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  workspaceId String?
+  workspace   Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   title       String
   description String?
   occurredAt  DateTime?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  type        String          @default("CUSTOM")
   confidence  ConfidenceLevel @default(MEDIUM)
   steps       EventStep[]
   createdAt   DateTime        @default(now())
+
+  @@index([familyId])
+  @@index([workspaceId, startsAt])
 }
 
 model EventStep {
