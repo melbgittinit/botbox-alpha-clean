@@ -10,6 +10,7 @@ datasource db {
 enum MembershipRole {
   OWNER
   ADMIN
+  OPERATOR
   CONTRIBUTOR
   VIEWER
 }
@@ -36,17 +37,41 @@ enum ConfidenceLevel {
 }
 
 enum WorkspaceMode {
-  PERSONAL
   FAMILY
-  BUSINESS
   CREATOR
-  ORGANIZATION
+  BUSINESS
+  CHURCH
+  EVENT
+  COACH
+  TEACHER
+  GROUP
 }
 
 enum EventStepPhase {
   BEFORE
   DURING
   AFTER
+}
+
+enum EventStepType {
+  MESSAGE
+  MEDIA
+  CHECK_IN
+  MEETING
+  TASK
+  ANNOUNCEMENT
+  QR
+  LESSON
+  PAYMENT
+  CUSTOM
+}
+
+enum EventStepStatus {
+  PENDING
+  READY
+  ACTIVE
+  DONE
+  SKIPPED
 }
 
 model User {
@@ -62,7 +87,7 @@ model User {
 model Workspace {
   id        String            @id @default(cuid())
   name      String
-  mode      WorkspaceMode     @default(PERSONAL)
+  mode      WorkspaceMode     @default(FAMILY)
   members   WorkspaceMember[]
   families  Family[]
   people    Person[]
@@ -72,15 +97,14 @@ model Workspace {
 }
 
 model WorkspaceMember {
-  id               String         @id @default(cuid())
-  workspaceId      String
-  userId           String
-  role             MembershipRole @default(CONTRIBUTOR)
-  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  groupMemberships GroupMember[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  id          String         @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        MembershipRole @default(CONTRIBUTOR)
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@unique([workspaceId, userId])
   @@index([userId])
@@ -119,25 +143,26 @@ model Membership {
 }
 
 model Person {
-  id          String         @id @default(cuid())
-  familyId    String
-  family      Family         @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  firstName   String
-  middleName  String?
-  lastName    String?
-  nickname    String?
-  birthDate   DateTime?
-  deathDate   DateTime?
-  birthPlace  String?
-  summary     String?
-  portraitUrl String?
-  assetLinks  AssetPerson[]
-  relationsA  Relationship[] @relation("PersonA")
-  relationsB  Relationship[] @relation("PersonB")
-  workspaceId String?
-  workspace   Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id               String          @id @default(cuid())
+  familyId         String
+  family           Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  firstName        String
+  middleName       String?
+  lastName         String?
+  nickname         String?
+  birthDate        DateTime?
+  deathDate        DateTime?
+  birthPlace       String?
+  summary          String?
+  portraitUrl      String?
+  assetLinks       AssetPerson[]
+  relationsA       Relationship[]  @relation("PersonA")
+  relationsB       Relationship[]  @relation("PersonB")
+  groupMemberships GroupMember[]
+  workspaceId      String?
+  workspace        Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@index([workspaceId])
 }
@@ -206,19 +231,19 @@ model Event {
 }
 
 model EventStep {
-  id          String         @id @default(cuid())
+  id          String          @id @default(cuid())
   eventId     String
-  event       Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event       Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
   phase       EventStepPhase
-  type        String
-  status      String         @default("PENDING")
+  type        EventStepType
+  status      EventStepStatus @default(PENDING)
   title       String
   description String?
   scheduledAt DateTime?
-  sortOrder   Int            @default(0)
+  sortOrder   Int             @default(0)
   payload     Json?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@index([eventId, phase, sortOrder])
   @@index([scheduledAt])
@@ -238,15 +263,15 @@ model Group {
 }
 
 model GroupMember {
-  id                String          @id @default(cuid())
-  groupId           String
-  workspaceMemberId String
-  group             Group           @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  workspaceMember   WorkspaceMember @relation(fields: [workspaceMemberId], references: [id], onDelete: Cascade)
-  createdAt         DateTime        @default(now())
+  id        String   @id @default(cuid())
+  groupId   String
+  personId  String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
-  @@unique([groupId, workspaceMemberId])
-  @@index([workspaceMemberId])
+  @@unique([groupId, personId])
+  @@index([personId])
 }
 
 model Place {
