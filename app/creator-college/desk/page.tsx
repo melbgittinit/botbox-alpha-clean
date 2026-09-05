@@ -32,10 +32,10 @@ export default function CreatorDeskPage(){
     </section>
 
     <section className="cc4-section"><div className="cc4-section-head"><div><span className="cc4-eyebrow">QUICK ACTIONS</span><h2>WHAT DO YOU WANT TO DO?</h2></div></div><div className="cc4-grid cc4-actions-grid">
-      <a href="/creator-college">＋<b>START SOMETHING NEW</b><small>Use Campus or Creator Compass</small></a>
+      <a href="/creator-college/start">⚡<b>SMART START</b><small>Use my saved audience, goals and brand</small></a>
       <a href={templateCandidate?`/creator-college/locker?template=${templateCandidate.id}`:"/creator-college/locker"}>⧉<b>MAKE ANOTHER LIKE THIS</b><small>Reuse a successful structure</small></a>
       <a href="/creator-college/locker">✹<b>EXPLODE SOMETHING</b><small>Turn one creation into several</small></a>
-      <a href="/creator-college/locker#templates">▤<b>USE A TEMPLATE</b><small>Start faster next time</small></a>
+      <a href="/creator-college/profile">◎<b>MY CREATOR PROFILE</b><small>Update voice, look, audience and brands</small></a>
     </div></section>
 
     <section className="cc4-section"><div className="cc4-section-head"><div><span className="cc4-eyebrow">RECENT WORK</span><h2>YOUR LATEST CREATIONS</h2></div><a href="/creator-college/locker">OPEN LOCKER</a></div>{creations.length===0?<div className="cc4-empty">Nothing here yet. Your first finished creation will change this page completely.</div>:<div className="cc4-grid cc4-card-grid">{creations.slice(0,6).map(item=><article className="cc4-card" key={item.id}><small>{item.status}{item.parentId?" · FAMILY MEMBER":""}</small><h3>{item.title}</h3><p>{item.format}</p><div className="cc4-meter"><span style={{width:`${item.progress}%`}}/></div><b>{item.progress}%</b><a href="/creator-college">{item.status==="BUILDING"?"CONTINUE":"OPEN"}</a></article>)}</div>}</section>
