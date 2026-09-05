@@ -30,6 +30,19 @@ The permanent interaction rule is:
 - FAST PAY itself never stores raw card numbers.
 - Provider webhooks are authoritative for paid/refunded/disputed state.
 
+## Verified Shopify baseline — Urban Spirit / HUB
+
+Verified against the connected store on 2026-09-05:
+
+- Customer accounts setting: `OPTIONAL`
+- Customer account version: `NEW_CUSTOMER_ACCOUNTS`
+- Login links visible on storefront and checkout: `true`
+- Login required at checkout: `false`
+- Customer account root: `https://account.urbanspirit.biz`
+- Supported digital wallets reported by Shopify: `SHOPIFY_PAY`, `APPLE_PAY`, `GOOGLE_PAY`
+
+Operating implication: preserve guest checkout for conversion while offering account sign-in for persistent HUB identity, purchases, entitlements, and remaining-action counts. Do not rebuild Shopify checkout merely to reproduce capabilities Shopify already provides.
+
 ## Security gates
 
 FAST PAY must not be enabled live until all are true:
@@ -37,9 +50,14 @@ FAST PAY must not be enabled live until all are true:
 - `FAST_PAY_ENABLED=true`
 - `STRIPE_SECRET_KEY` configured server-side
 - `STRIPE_WEBHOOK_SECRET` configured server-side
-- `FAST_PAY_INTERNAL_TOKEN` configured server-side for staging/internal calls
 - `FAST_PAY_APP_ORIGIN` set to the exact allowed app origin
-- real HUB authentication/session layer replaces the temporary internal email bridge for consumer traffic
+- `SHOPIFY_STORE_DOMAIN` configured
+- `SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID` configured
+- `HUB_AUTH_ORIGIN` configured
+- `HUB_SESSION_SECRET` configured server-side with at least 32 characters
+- Shopify Customer Account OAuth/PKCE callback registered and tested
+- signed HUB session resolves the consumer account; browser-supplied user/email identifiers are never authoritative
+- `FAST_PAY_INTERNAL_TOKEN` may be configured for staging/maintenance calls but is not the consumer identity gate
 - webhook signature tests pass
 - duplicate webhook/idempotency tests pass
 - reserve/commit/release and reservation-expiry tests pass
@@ -47,6 +65,18 @@ FAST PAY must not be enabled live until all are true:
 - partial-refund policy is explicitly reviewed before any partial-refund automation is added
 
 The `/api/fast-pay/status` endpoint stays non-ready until the required runtime gates are present.
+
+## Identity architecture
+
+1. Customer signs in through Shopify Customer Accounts.
+2. HUB uses OAuth 2.0 Authorization Code + PKCE and verifies OAuth state.
+3. HUB retrieves the authenticated Shopify customer identity through the Customer Account API.
+4. HUB maps that verified identity to the shared HUB `User` record.
+5. HUB issues its own HMAC-signed, `HttpOnly`, `Secure`, `SameSite=Lax` session cookie.
+6. FAST PAY resolves the user only from the valid HUB session.
+7. The Shopify access token is used server-side for the identity exchange and is not stored in browser-accessible state.
+
+This creates one HUB identity capable of following the customer across eligible lanes while leaving Shopify as the commerce/customer-account authority for the storefront.
 
 ## Data model
 
@@ -91,16 +121,18 @@ All seeded offers remain `active=false` until pricing and product ownership are 
 
 ## Deployment sequence
 
-1. Merge code into HUB Core staging only after build validation.
-2. Apply Prisma schema to the staging database.
-3. Seed the inactive pilot catalog.
-4. Configure Stripe test-mode secret + webhook secret.
-5. Keep `FAST_PAY_ENABLED=false` while testing readiness and webhook signatures.
-6. Add real HUB authentication/session layer; do not expose the internal token to browsers.
-7. Turn FAST PAY on in staging.
-8. Run a zero-risk/test-mode pilot through quote -> reserve -> action -> commit/release -> checkout -> webhook -> entitlement.
-9. Connect one real product only after staging passes.
-10. Replicate the shared component; do not fork payment logic per product.
+1. Isolated feature-branch build validation — PASSED on Render with FAST PAY disabled and no live payment credentials.
+2. Merge code into HUB Core staging only after reviewing the staging schema push impact.
+3. Apply Prisma schema to the staging database.
+4. Seed the inactive pilot catalog.
+5. Configure Shopify Customer Account public-client ID and exact staging OAuth callback/origin.
+6. Generate/configure a strong HUB session secret and test account sign-in/session/logout.
+7. Configure Stripe test-mode secret + webhook secret.
+8. Keep all pilot offers inactive until product/pricing approval; keep production charging off.
+9. Turn FAST PAY on in staging only.
+10. Run test-mode flows: quote -> reserve -> action -> commit/release -> checkout -> webhook -> entitlement; duplicate webhook; simultaneous spend; expired reservation; canceled checkout; full refund; dispute.
+11. Connect Creator College Product Export as the first controlled pilot after staging passes.
+12. Replicate the shared component; do not fork payment logic per product.
 
 ## System placement
 
