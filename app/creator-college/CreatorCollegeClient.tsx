@@ -78,7 +78,10 @@ export default function CreatorCollegeClient() {
     return () => clearTimeout(timer);
   }, [creation]);
 
-  const activeCreation = useMemo(() => creations.find((item) => item.status === "BUILDING") || creation?.status === "BUILDING" ? creation : null, [creations, creation]);
+  const activeCreation = useMemo(() => {
+    if (creation?.status === "BUILDING") return creation;
+    return creations.find((item) => item.status === "BUILDING") ?? null;
+  }, [creations, creation]);
 
   function patch(patchValue: Partial<Creation>) {
     setCreation((current) => current ? { ...current, ...patchValue, updatedAt: new Date().toISOString() } : current);
