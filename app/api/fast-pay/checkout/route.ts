@@ -1,8 +1,9 @@
-import { createCheckout, errorResponse, resolveInternalAccount } from "../../../../lib/fast-pay/core";
+import { createCheckout, errorResponse } from "../../../../lib/fast-pay/core";
+import { resolveFastPayAccount } from "../../../../lib/fast-pay/session-account";
 
 export async function POST(request: Request) {
   try {
-    const { user, account } = await resolveInternalAccount(request);
+    const { user, account } = await resolveFastPayAccount(request);
     const body = await request.json();
     const result = await createCheckout(
       account.id,
