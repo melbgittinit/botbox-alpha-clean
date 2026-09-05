@@ -1,11 +1,12 @@
 export type UnifiedCreation={
- id:string; title:string; kind:"digital_product"|"video_series"|"event_kit"; format:string; progress:number;
+ id:string; title:string; kind:"digital_product"|"video_series"|"event_kit"|"service_offer"; format:string; progress:number;
  status:"BUILDING"|"COMPLETE"; updatedAt:string; familyId?:string; parentId?:string; style?:string; route:string; raw:unknown;
 };
 
 const DIGITAL_KEY="creator-college-v1-creations";
 const VIDEO_KEY="creator-college-v1-video-projects";
 const EVENT_KEY="creator-college-v1-event-projects";
+const SERVICE_KEY="creator-college-v1-service-projects";
 
 function read(key:string){if(typeof window==="undefined")return[];try{return JSON.parse(localStorage.getItem(key)||"[]")}catch{return[]}}
 
@@ -13,7 +14,8 @@ export function readUnifiedCreations():UnifiedCreation[]{
  const digital=read(DIGITAL_KEY).map((x:any)=>({id:x.id,title:x.title,kind:"digital_product" as const,format:x.format||"Digital Product",progress:x.progress||0,status:x.status||"BUILDING",updatedAt:x.updatedAt||"",familyId:x.familyId,parentId:x.parentId,style:x.style,route:"/creator-college",raw:x}));
  const video=read(VIDEO_KEY).map((x:any)=>({id:x.id,title:x.title,kind:"video_series" as const,format:x.format||"Video Series",progress:x.progress||0,status:x.status||"BUILDING",updatedAt:x.updatedAt||"",familyId:x.familyId,parentId:x.parentId,style:x.style,route:"/creator-college/video",raw:x}));
  const events=read(EVENT_KEY).map((x:any)=>({id:x.id,title:x.title,kind:"event_kit" as const,format:x.eventType||"Event Kit",progress:x.progress||0,status:x.status||"BUILDING",updatedAt:x.updatedAt||"",familyId:x.familyId,parentId:x.parentId,style:x.style,route:"/creator-college/event",raw:x}));
- return [...digital,...video,...events].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+ const services=read(SERVICE_KEY).map((x:any)=>({id:x.id,title:x.offer||x.skill||"Simple Service Offer",kind:"service_offer" as const,format:"Simple Service Offer",progress:x.progress||0,status:x.status||"BUILDING",updatedAt:x.updatedAt||"",familyId:x.familyId,parentId:x.parentId,style:"Business",route:"/creator-college/service",raw:x}));
+ return [...digital,...video,...events,...services].sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
 }
 
 export function familyGroups(items:UnifiedCreation[]){
