@@ -74,12 +74,41 @@ enum EventStepStatus {
   SKIPPED
 }
 
+enum FastPayProvider {
+  STRIPE
+  SHOPIFY
+  INTERNAL
+}
+
+enum FastPayTransactionStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+  DISPUTED
+  FAILED
+}
+
+enum FastPayEntitlementStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum FastPayReservationStatus {
+  RESERVED
+  COMMITTED
+  RELEASED
+  EXPIRED
+}
+
 model User {
   id                   String            @id @default(cuid())
   email                String            @unique
   displayName          String?
   memberships          Membership[]
   workspaceMemberships WorkspaceMember[]
+  fastPayAccount       FastPayAccount?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 }
@@ -319,4 +348,151 @@ model Task {
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model FastPayAccount {
+  id               String                    @id @default(cuid())
+  userId           String                    @unique
+  user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String?                   @unique
+  entitlements     FastPayEntitlement[]
+  transactions     FastPayTransaction[]
+  ledgerEntries    FastPayLedgerEntry[]
+  reservations     FastPayUsageReservation[]
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+}
+
+model FastPayActionDefinition {
+  id            String                    @id @default(cuid())
+  key           String                    @unique
+  singularLabel String
+  pluralLabel   String
+  defaultCost   Int                       @default(1)
+  active        Boolean                   @default(true)
+  entitlements  FastPayEntitlement[]
+  offers        FastPayOffer[]
+  reservations  FastPayUsageReservation[]
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+}
+
+model FastPayOffer {
+  id              String               @id @default(cuid())
+  key             String               @unique
+  name            String
+  description     String?
+  provider        FastPayProvider      @default(STRIPE)
+  providerPriceId String?
+  amountCents     Int
+  currency        String               @default("usd")
+  actionKey       String?
+  action          FastPayActionDefinition? @relation(fields: [actionKey], references: [key], onDelete: SetNull)
+  grantUnits      Int                  @default(0)
+  grantsUnlimited Boolean              @default(false)
+  offerStyle      String               @default("BUY")
+  active          Boolean              @default(false)
+  transactions    FastPayTransaction[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([actionKey, active])
+}
+
+model FastPayTransaction {
+  id                 String                   @id @default(cuid())
+  accountId          String
+  account            FastPayAccount           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  offerId            String
+  offer              FastPayOffer             @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  provider           FastPayProvider
+  status             FastPayTransactionStatus @default(PENDING)
+  amountCents        Int
+  currency           String
+  idempotencyKey     String                   @unique
+  externalCheckoutId String?                  @unique
+  externalPaymentId  String?                  @unique
+  paidAt             DateTime?
+  entitlements       FastPayEntitlement[]
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  @@index([accountId, createdAt])
+  @@index([status, createdAt])
+}
+
+model FastPayEntitlement {
+  id                  String                   @id @default(cuid())
+  accountId           String
+  account             FastPayAccount           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  actionKey           String
+  action              FastPayActionDefinition  @relation(fields: [actionKey], references: [key], onDelete: Restrict)
+  sourceTransactionId String?
+  sourceTransaction   FastPayTransaction?      @relation(fields: [sourceTransactionId], references: [id], onDelete: SetNull)
+  unitsGranted        Int                      @default(0)
+  unitsRemaining      Int                      @default(0)
+  unlimited           Boolean                  @default(false)
+  status              FastPayEntitlementStatus @default(ACTIVE)
+  expiresAt           DateTime?
+  version             Int                      @default(0)
+  ledgerEntries       FastPayLedgerEntry[]
+  reservations        FastPayUsageReservation[]
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  @@index([accountId, actionKey, status])
+  @@index([sourceTransactionId])
+}
+
+model FastPayLedgerEntry {
+  id             String             @id @default(cuid())
+  accountId      String
+  account        FastPayAccount     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  entitlementId  String?
+  entitlement    FastPayEntitlement? @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
+  deltaUnits     Int
+  balanceAfter   Int
+  reason         String
+  referenceType  String?
+  referenceId    String?
+  idempotencyKey String             @unique
+  createdAt      DateTime           @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([entitlementId, createdAt])
+}
+
+model FastPayUsageReservation {
+  id             String                    @id @default(cuid())
+  accountId      String
+  account        FastPayAccount            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  entitlementId  String
+  entitlement    FastPayEntitlement        @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  actionKey      String
+  action         FastPayActionDefinition   @relation(fields: [actionKey], references: [key], onDelete: Restrict)
+  units          Int
+  status         FastPayReservationStatus  @default(RESERVED)
+  idempotencyKey String                    @unique
+  expiresAt      DateTime
+  committedAt    DateTime?
+  releasedAt     DateTime?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@index([accountId, actionKey, status])
+  @@index([status, expiresAt])
+}
+
+model FastPayProcessedEvent {
+  id              String   @id @default(cuid())
+  provider        FastPayProvider
+  externalEventId String
+  eventType       String
+  status          String
+  errorCode       String?
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  @@unique([provider, externalEventId])
+  @@index([status, createdAt])
 }

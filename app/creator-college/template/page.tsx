@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { STORAGE_BY_KIND, type CreationKind } from "../lib/creatorCollegeStore";
 
 type Template={id:string;title:string;format:string;style:string;sourceId:string;kind:CreationKind;seed:any};
@@ -16,4 +15,4 @@ function buildDraft(t:Template){const now=new Date().toISOString();const id=`${t
  return{id,name:"Untitled Business",businessType:s.businessType||"Solo / Small Business",customer:"",offer:"",delivery:s.delivery||"Simple delivery",pricePosition:"",salesMessage:"",operations:[],growthFocus:s.growthFocus||"Get first customers",step:0,progress:5,status:"BUILDING",updatedAt:now};
 }
 
-export default function TemplateUsePage(){const params=useSearchParams();const[message,setMessage]=useState("Building a fresh draft from your template…");useEffect(()=>{const id=params.get("id");const list=JSON.parse(localStorage.getItem(TEMPLATE_KEY)||"[]") as Template[];const t=list.find(x=>x.id===id);if(!t){setMessage("Template not found on this device.");return}const cfg=STORAGE_BY_KIND[t.kind];const draft=buildDraft(t);const existing=JSON.parse(localStorage.getItem(cfg.key)||"[]");localStorage.setItem(cfg.key,JSON.stringify([draft,...existing]));localStorage.setItem(cfg.activeKey,draft.id);window.location.href=cfg.builderRoute},[params]);return <main className="cc4-shell"><section className="cc4-hero"><span className="cc4-eyebrow">MY TEMPLATE</span><h1>{message}</h1><p>The reusable structure stays. The old project-specific content does not.</p></section></main>}
+export default function TemplateUsePage(){const[message,setMessage]=useState("Building a fresh draft from your template…");useEffect(()=>{const params=new URLSearchParams(window.location.search);const id=params.get("id");const list=JSON.parse(localStorage.getItem(TEMPLATE_KEY)||"[]") as Template[];const t=list.find(x=>x.id===id);if(!t){setMessage("Template not found on this device.");return}const cfg=STORAGE_BY_KIND[t.kind];const draft=buildDraft(t);const existing=JSON.parse(localStorage.getItem(cfg.key)||"[]");localStorage.setItem(cfg.key,JSON.stringify([draft,...existing]));localStorage.setItem(cfg.activeKey,draft.id);window.location.href=cfg.builderRoute},[]);return <main className="cc4-shell"><section className="cc4-hero"><span className="cc4-eyebrow">MY TEMPLATE</span><h1>{message}</h1><p>The reusable structure stays. The old project-specific content does not.</p></section></main>}
