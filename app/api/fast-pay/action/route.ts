@@ -4,12 +4,12 @@ import {
   quoteAction,
   releaseReservation,
   reserveAction,
-  resolveInternalAccount,
 } from "../../../../lib/fast-pay/core";
+import { resolveFastPayAccount } from "../../../../lib/fast-pay/session-account";
 
 export async function GET(request: Request) {
   try {
-    const { account } = await resolveInternalAccount(request);
+    const { account } = await resolveFastPayAccount(request);
     const url = new URL(request.url);
     const actionKey = url.searchParams.get("actionKey") || "";
     const quote = await quoteAction(account.id, actionKey);
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { account } = await resolveInternalAccount(request);
+    const { account } = await resolveFastPayAccount(request);
     const body = await request.json();
     const command = body?.command;
 
