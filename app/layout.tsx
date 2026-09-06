@@ -2,8 +2,8 @@ import "./globals.css";
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "BOTBOX Family Edition",
-  description: "Preserve it. Connect it. Complete it. Pass it down.",
+  title: "THE BOT FACTORY",
+  description: "Build one. Pick one. Put it to work.",
 };
 
 export default function RootLayout({
