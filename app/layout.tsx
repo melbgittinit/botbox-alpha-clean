@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { ReactNode } from "react";
+import FactoryNav from "../components/FactoryNav";
 
 export const metadata = {
   title: "THE BOT FACTORY",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <FactoryNav />
+        {children}
+      </body>
     </html>
   );
 }
