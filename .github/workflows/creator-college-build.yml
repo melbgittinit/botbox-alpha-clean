@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -31,6 +33,14 @@ jobs:
 
       - name: Generate Prisma client
         run: npm run prisma:generate
+
+      - name: Generate Creator College migration SQL review only
+        run: |
+          git show 0a3f0a2d19ff62885660b8225b943f66c28e5e2f:prisma/schema.prisma > /tmp/creator-college-before.prisma
+          npx prisma migrate diff --from-schema=/tmp/creator-college-before.prisma --to-schema=prisma/schema.prisma --script > /tmp/creator-college-migration-review.sql
+          echo '===== CREATOR COLLEGE MIGRATION SQL REVIEW — NOT APPLIED ====='
+          cat /tmp/creator-college-migration-review.sql
+          echo '===== END CREATOR COLLEGE MIGRATION SQL REVIEW ====='
 
       - name: Build Next.js app
         run: npm run build
