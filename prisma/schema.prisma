@@ -361,6 +361,7 @@ model CreatorProfile {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
+  @@unique([userId, workspaceId])
   @@index([userId])
   @@index([workspaceId])
 }
@@ -387,38 +388,39 @@ model CreatorBrandKit {
 }
 
 model CreatorCreation {
-  id            String                @id @default(cuid())
-  userId        String
-  workspaceId   String?
-  kind          CreatorCreationKind
-  status        CreatorCreationStatus @default(BUILDING)
-  title         String
-  format        String?
-  style         String?
-  currentStep   String?
-  progress      Int                   @default(0)
-  schemaVersion Int                   @default(1)
-  revision      Int                   @default(1)
-  payload       Json
-  parentId      String?
-  familyId      String?
-  sourceId      String?
-  brandKitId    String?
-  completedAt   DateTime?
-  archivedAt    DateTime?
-  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace     Workspace?            @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  parent        CreatorCreation?      @relation("CreatorParent", fields: [parentId], references: [id], onDelete: SetNull)
-  children      CreatorCreation[]     @relation("CreatorParent")
-  family        CreatorFamily?        @relation(fields: [familyId], references: [id], onDelete: SetNull)
-  source        CreatorCreation?      @relation("CreatorSource", fields: [sourceId], references: [id], onDelete: SetNull)
-  derivatives   CreatorCreation[]     @relation("CreatorSource")
-  brandKit      CreatorBrandKit?      @relation(fields: [brandKitId], references: [id], onDelete: SetNull)
-  linksFrom     CreatorCreationLink[] @relation("LinkFrom")
-  linksTo       CreatorCreationLink[] @relation("LinkTo")
-  templates     CreatorTemplate[]
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
+  id              String                @id @default(cuid())
+  userId          String
+  workspaceId     String?
+  kind            CreatorCreationKind
+  status          CreatorCreationStatus @default(BUILDING)
+  title           String
+  format          String?
+  style           String?
+  currentStep     String?
+  progress        Int                   @default(0)
+  schemaVersion   Int                   @default(1)
+  revision        Int                   @default(1)
+  payload         Json
+  parentId        String?
+  familyId        String?
+  sourceId        String?
+  brandKitId      String?
+  completedAt     DateTime?
+  archivedAt      DateTime?
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace       Workspace?            @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  parent          CreatorCreation?      @relation("CreatorParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children        CreatorCreation[]     @relation("CreatorParent")
+  family          CreatorFamily?        @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  rootForFamilies CreatorFamily[]       @relation("CreatorFamilyRoot")
+  source          CreatorCreation?      @relation("CreatorSource", fields: [sourceId], references: [id], onDelete: SetNull)
+  derivatives     CreatorCreation[]     @relation("CreatorSource")
+  brandKit        CreatorBrandKit?      @relation(fields: [brandKitId], references: [id], onDelete: SetNull)
+  linksFrom       CreatorCreationLink[] @relation("LinkFrom")
+  linksTo         CreatorCreationLink[] @relation("LinkTo")
+  templates       CreatorTemplate[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 
   @@index([userId, status, updatedAt])
   @@index([workspaceId, status, updatedAt])
@@ -436,6 +438,7 @@ model CreatorFamily {
   rootId      String?
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  root        CreatorCreation?  @relation("CreatorFamilyRoot", fields: [rootId], references: [id], onDelete: SetNull)
   creations   CreatorCreation[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
