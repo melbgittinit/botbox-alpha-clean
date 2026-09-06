@@ -41,11 +41,12 @@ export default function ParentDashboard(){
 
     const ids=safeCreators.map((c)=>c.id);
     if(ids.length){
-      const [{data:projectRows},{data:badgeRows},{data:entitlementRows}]=await Promise.all([
-        supabase.from('projects').select('id,creator_id,title,project_type,mission_slug,created_at,updated_at').in('creator_id',ids).order('created_at',{ascending:false}),
-        supabase.from('creator_badges').select('id,creator_id,badge_key,badge_name,earned_at').in('creator_id',ids).order('earned_at',{ascending:false}),
-        supabase.from('entitlements').select('id,creator_id,product_key,status,source,granted_at,revoked_at').in('creator_id',ids)
+      const [{data:projectRows,error:projectError},{data:badgeRows,error:badgeError},{data:entitlementRows,error:entitlementError}]=await Promise.all([
+        supabase.from('projects').select('id,creator_id,title,project_type,created_at,updated_at').in('creator_id',ids).order('created_at',{ascending:false}),
+        supabase.from('creator_badges').select('id,creator_id,badge_slug,earned_at').in('creator_id',ids).order('earned_at',{ascending:false}),
+        supabase.from('entitlements').select('id,creator_id,program_slug,status,source,starts_at,expires_at,created_at').in('creator_id',ids)
       ]);
+      if(projectError||badgeError||entitlementError){setError(projectError?.message||badgeError?.message||entitlementError?.message||'Could not load Creator records.');setLoading(false);return;}
       setProjects(projectRows||[]);
       setBadges(badgeRows||[]);
       setEntitlements(entitlementRows||[]);
@@ -86,7 +87,7 @@ export default function ParentDashboard(){
           {creators.map((creator)=>{
             const creatorProjects=projects.filter((p)=>p.creator_id===creator.id);
             const creatorBadges=badges.filter((b)=>b.creator_id===creator.id);
-            const activeSemester=entitlements.some((e)=>e.creator_id===creator.id&&e.product_key==='semester-one'&&e.status==='active');
+            const activeSemester=entitlements.some((e)=>e.creator_id===creator.id&&e.program_slug==='semester-one'&&e.status==='active');
             return <a className="tile tileLink" href={`/parent/creator/${creator.id}`} key={creator.id}>
               <small>{activeSemester?'SEMESTER ONE ACTIVE':'VISITING CREATOR'}</small>
               <div className="avatar" style={{fontSize:42,margin:'10px 0'}}>{creator.avatar_key||'💡'}</div>
