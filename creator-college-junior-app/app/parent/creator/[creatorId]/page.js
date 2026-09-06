@@ -31,20 +31,23 @@ export default function CreatorLockerPage(){
     if(creatorError||!creatorRow){setError(creatorError?.message||'Creator not found or not available to this account.');setLoading(false);return;}
     setCreator(creatorRow);
 
-    const [{data:projectRows},{data:badgeRows},{data:completionRows},{data:entitlementRows}]=await Promise.all([
-      supabase.from('projects').select('id,title,project_type,mission_slug,content,created_at,updated_at').eq('creator_id',creatorId).order('created_at',{ascending:false}),
-      supabase.from('creator_badges').select('id,badge_key,badge_name,earned_at').eq('creator_id',creatorId).order('earned_at',{ascending:false}),
-      supabase.from('mission_completions').select('id,mission_slug,credits_awarded,completed_at').eq('creator_id',creatorId).order('completed_at',{ascending:false}),
-      supabase.from('entitlements').select('id,product_key,status,source,granted_at,revoked_at').eq('creator_id',creatorId)
+    const [projectResult,badgeResult,completionResult,entitlementResult]=await Promise.all([
+      supabase.from('projects').select('id,title,project_type,content_json,created_at,updated_at').eq('creator_id',creatorId).order('created_at',{ascending:false}),
+      supabase.from('creator_badges').select('id,badge_slug,earned_at').eq('creator_id',creatorId).order('earned_at',{ascending:false}),
+      supabase.from('mission_completions').select('id,mission_slug,completed_at').eq('creator_id',creatorId).order('completed_at',{ascending:false}),
+      supabase.from('entitlements').select('id,program_slug,status,source,starts_at,expires_at,created_at').eq('creator_id',creatorId)
     ]);
-    setProjects(projectRows||[]);
-    setBadges(badgeRows||[]);
-    setCompletions(completionRows||[]);
-    setEntitlements(entitlementRows||[]);
+
+    const firstError=projectResult.error||badgeResult.error||completionResult.error||entitlementResult.error;
+    if(firstError){setError(firstError.message);setLoading(false);return;}
+    setProjects(projectResult.data||[]);
+    setBadges(badgeResult.data||[]);
+    setCompletions(completionResult.data||[]);
+    setEntitlements(entitlementResult.data||[]);
     setLoading(false);
   }
 
-  const activeSemester=useMemo(()=>entitlements.some((e)=>e.product_key==='semester-one'&&e.status==='active'),[entitlements]);
+  const activeSemester=useMemo(()=>entitlements.some((e)=>e.program_slug==='semester-one'&&e.status==='active'),[entitlements]);
   const mix=Array.isArray(creator?.creator_mix)?creator.creator_mix:[];
   const styles=Array.isArray(creator?.creator_style)?creator.creator_style:[];
 
@@ -70,7 +73,7 @@ export default function CreatorLockerPage(){
         <div className="campus">
           {projects.length===0&&<div className="tile"><small>EMPTY</small><b>No saved creations yet.</b></div>}
           {projects.map((project)=>{
-            const content=project.content||{};
+            const content=project.content_json||{};
             return <div className="tile" key={project.id}>
               <small>{(project.project_type||'creation').replaceAll('_',' ').toUpperCase()}</small>
               <h2 style={{margin:'8px 0'}}>{project.title}</h2>
@@ -84,8 +87,8 @@ export default function CreatorLockerPage(){
 
         <div className="eye" style={{marginTop:28}}>BADGES & PROGRESS</div>
         <div className="campus">
-          {badges.map((badge)=><div className="tile" key={badge.id}><small>BADGE EARNED</small><h2 style={{margin:'8px 0'}}>🏅 {badge.badge_name}</h2><p className="muted">{new Date(badge.earned_at).toLocaleDateString()}</p></div>)}
-          {completions.map((item)=><div className="tile" key={item.id}><small>MISSION COMPLETE</small><b>{item.mission_slug.replaceAll('-',' ')}</b><p className="muted">+{item.credits_awarded||0} credits</p></div>)}
+          {badges.map((badge)=><div className="tile" key={badge.id}><small>BADGE EARNED</small><h2 style={{margin:'8px 0'}}>🏅 {badge.badge_slug.replaceAll('-',' ')}</h2><p className="muted">{new Date(badge.earned_at).toLocaleDateString()}</p></div>)}
+          {completions.map((item)=><div className="tile" key={item.id}><small>MISSION COMPLETE</small><b>{item.mission_slug.replaceAll('-',' ')}</b><p className="muted">Completed {new Date(item.completed_at).toLocaleDateString()}</p></div>)}
         </div>
 
         <div className="reward">
