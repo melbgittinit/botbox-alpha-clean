@@ -37,7 +37,7 @@ jobs:
       - name: Generate Creator College migration SQL review only
         run: |
           git show 0a3f0a2d19ff62885660b8225b943f66c28e5e2f:prisma/schema.prisma > /tmp/creator-college-before.prisma
-          npx prisma migrate diff --from-schema=/tmp/creator-college-before.prisma --to-schema=prisma/schema.prisma --script > /tmp/creator-college-migration-review.sql
+          npx prisma migrate diff --from-schema-datamodel=/tmp/creator-college-before.prisma --to-schema-datamodel=prisma/schema.prisma --script > /tmp/creator-college-migration-review.sql
           echo '===== CREATOR COLLEGE MIGRATION SQL REVIEW — NOT APPLIED ====='
           cat /tmp/creator-college-migration-review.sql
           echo '===== END CREATOR COLLEGE MIGRATION SQL REVIEW ====='
