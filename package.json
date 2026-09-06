@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm audit --audit-level=moderate || true; next build",
+    "build": "npm audit --audit-level=moderate && next build",
     "start": "next start",
     "prisma:generate": "prisma generate"
   },
