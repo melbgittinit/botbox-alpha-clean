@@ -5,6 +5,11 @@ import FactoryNav from "../components/FactoryNav";
 export const metadata = {
   title: "THE BOT FACTORY",
   description: "Build one. Pick one. Put it to work.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
 };
 
 export default function RootLayout({
