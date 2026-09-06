@@ -74,28 +74,52 @@ enum EventStepStatus {
   SKIPPED
 }
 
+enum CreatorCreationKind {
+  DIGITAL_PRODUCT
+  VIDEO_SERIES
+  EVENT_KIT
+  SERVICE_OFFER
+  BRAND
+  BUSINESS
+}
+
+enum CreatorCreationStatus {
+  DRAFT
+  BUILDING
+  COMPLETE
+  ARCHIVED
+}
+
 model User {
   id                   String            @id @default(cuid())
   email                String            @unique
   displayName          String?
   memberships          Membership[]
   workspaceMemberships WorkspaceMember[]
+  creatorProfiles      CreatorProfile[]
+  creatorCreations     CreatorCreation[]
+  creatorFamilies      CreatorFamily[]
+  creatorTemplates     CreatorTemplate[]
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 }
 
 model Workspace {
-  id        String            @id @default(cuid())
-  name      String
-  tagline   String?
-  mode      WorkspaceMode     @default(FAMILY)
-  members   WorkspaceMember[]
-  families  Family[]
-  people    Person[]
-  groups    Group[]
-  events    Event[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id               String            @id @default(cuid())
+  name             String
+  tagline          String?
+  mode             WorkspaceMode     @default(FAMILY)
+  members          WorkspaceMember[]
+  families         Family[]
+  people           Person[]
+  groups           Group[]
+  events           Event[]
+  creatorProfiles  CreatorProfile[]
+  creatorCreations CreatorCreation[]
+  creatorFamilies  CreatorFamily[]
+  creatorTemplates CreatorTemplate[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model WorkspaceMember {
@@ -319,4 +343,140 @@ model Task {
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model CreatorProfile {
+  id              String            @id @default(cuid())
+  userId          String
+  workspaceId     String?
+  defaultAudience String?
+  defaultVoice    String?
+  defaultLook     String?
+  goals           Json?
+  creationTypes   Json?
+  preferences     Json?
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace       Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  brandKits       CreatorBrandKit[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model CreatorBrandKit {
+  id        String            @id @default(cuid())
+  profileId String
+  name      String
+  type      String?
+  audience  String?
+  voice     String?
+  look      String?
+  colors    Json?
+  assets    Json?
+  avoid     Json?
+  footer    String?
+  notes     String?
+  profile   CreatorProfile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  creations CreatorCreation[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([profileId])
+}
+
+model CreatorCreation {
+  id            String                @id @default(cuid())
+  userId        String
+  workspaceId   String?
+  kind          CreatorCreationKind
+  status        CreatorCreationStatus @default(BUILDING)
+  title         String
+  format        String?
+  style         String?
+  currentStep   String?
+  progress      Int                   @default(0)
+  schemaVersion Int                   @default(1)
+  revision      Int                   @default(1)
+  payload       Json
+  parentId      String?
+  familyId      String?
+  sourceId      String?
+  brandKitId    String?
+  completedAt   DateTime?
+  archivedAt    DateTime?
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace?            @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  parent        CreatorCreation?      @relation("CreatorParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children      CreatorCreation[]     @relation("CreatorParent")
+  family        CreatorFamily?        @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  source        CreatorCreation?      @relation("CreatorSource", fields: [sourceId], references: [id], onDelete: SetNull)
+  derivatives   CreatorCreation[]     @relation("CreatorSource")
+  brandKit      CreatorBrandKit?      @relation(fields: [brandKitId], references: [id], onDelete: SetNull)
+  linksFrom     CreatorCreationLink[] @relation("LinkFrom")
+  linksTo       CreatorCreationLink[] @relation("LinkTo")
+  templates     CreatorTemplate[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([userId, status, updatedAt])
+  @@index([workspaceId, status, updatedAt])
+  @@index([kind, status])
+  @@index([familyId])
+  @@index([parentId])
+  @@index([sourceId])
+}
+
+model CreatorFamily {
+  id          String            @id @default(cuid())
+  userId      String
+  workspaceId String?
+  title       String
+  rootId      String?
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  creations   CreatorCreation[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([rootId])
+}
+
+model CreatorCreationLink {
+  id        String          @id @default(cuid())
+  fromId    String
+  toId      String
+  relation  String
+  sortOrder Int             @default(0)
+  from      CreatorCreation @relation("LinkFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to        CreatorCreation @relation("LinkTo", fields: [toId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+
+  @@unique([fromId, toId, relation])
+  @@index([toId])
+}
+
+model CreatorTemplate {
+  id            String              @id @default(cuid())
+  userId        String
+  workspaceId   String?
+  sourceId      String?
+  kind          CreatorCreationKind
+  title         String
+  format        String?
+  style         String?
+  schemaVersion Int                 @default(1)
+  seed          Json
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  source        CreatorCreation?    @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([userId, kind])
+  @@index([workspaceId, kind])
+  @@index([sourceId])
 }
