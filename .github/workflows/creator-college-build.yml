@@ -1,0 +1,33 @@
+name: Creator College Build Validation
+
+on:
+  push:
+    branches:
+      - hub-core-alpha
+  pull_request:
+    branches:
+      - hub-core-alpha
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/botbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Build Next.js app
+        run: npm run build
