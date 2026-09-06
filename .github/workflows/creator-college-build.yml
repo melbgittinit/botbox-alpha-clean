@@ -25,6 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Dependency audit (diagnostic)
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
       - name: Generate Prisma client
         run: npm run prisma:generate
 
