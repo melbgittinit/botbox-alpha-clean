@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { issueCoreAccessToken } from "../../../../lib/core-access";
 
 const ALLOWED_BOTS = new Set([
   "mebot","fam","coffee","wbells","mtc","pop","zipper","impostr","tvme",
@@ -63,12 +64,15 @@ export async function POST(request:Request){
     await prisma.revenueEvent.create({data:{externalEventId:purchaseEventId,prospectId:prospect.id,type:"PURCHASE",botId,source:`commerce:${provider}`,metadata:{orderRef,paymentStatus}}});
   }
 
+  const coreToken=issueCoreAccessToken(entitlement.id,86400);
   return NextResponse.json({
     ok:true,
     entitlementId:entitlement.id,
     botId,
     status:"CORE_PENDING",
     next:"BOT_CORE_LAUNCH",
+    coreToken,
+    coreUrl:`/core?token=${encodeURIComponent(coreToken)}`,
     message:"Payment verified. Your bot is heading to the Core."
   },{status:201,headers:{"Cache-Control":"no-store"}});
 }
