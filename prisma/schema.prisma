@@ -309,19 +309,21 @@ model ConsentRecord {
 }
 
 model RevenueEvent {
-  id         String           @id @default(cuid())
-  prospectId String?
-  prospect   Prospect?        @relation(fields: [prospectId], references: [id], onDelete: SetNull)
-  sessionId  String?
-  type       RevenueEventType
-  botId      String?
-  agentRole  RevenueAgentRole?
-  source     String?
-  campaign   String?
-  metadata   Json?
-  occurredAt DateTime         @default(now())
+  id              String           @id @default(cuid())
+  externalEventId String?          @unique
+  prospectId      String?
+  prospect        Prospect?        @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+  sessionId       String?
+  type            RevenueEventType
+  botId           String?
+  agentRole       RevenueAgentRole?
+  source          String?
+  campaign        String?
+  metadata        Json?
+  occurredAt      DateTime         @default(now())
 
   @@index([prospectId, occurredAt])
+  @@index([sessionId, occurredAt])
   @@index([type, occurredAt])
   @@index([campaign])
 }
@@ -383,19 +385,19 @@ model EarnEnrollment {
 }
 
 model VoiceInteraction {
-  id                 String           @id @default(cuid())
-  prospectId         String
-  prospect           Prospect         @relation(fields: [prospectId], references: [id], onDelete: Cascade)
-  direction          String
-  agentRole          RevenueAgentRole @default(VOICE_AGENT)
-  consentVerified    Boolean          @default(false)
-  recordingAllowed   Boolean          @default(false)
-  disposition        String?
+  id                  String           @id @default(cuid())
+  prospectId          String
+  prospect            Prospect         @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  direction           String
+  agentRole           RevenueAgentRole @default(VOICE_AGENT)
+  consentVerified     Boolean          @default(false)
+  recordingAllowed    Boolean          @default(false)
+  disposition         String?
   conversationSummary String?
-  recommendedBotIds  String[]
-  nextAction         String?
-  startedAt          DateTime         @default(now())
-  endedAt            DateTime?
+  recommendedBotIds   String[]
+  nextAction          String?
+  startedAt           DateTime         @default(now())
+  endedAt             DateTime?
 
   @@index([prospectId, startedAt])
   @@index([disposition])
