@@ -40,6 +40,10 @@ const cleanMetadata = (value: unknown) => {
   return Object.keys(result).length ? result : undefined;
 };
 
+function persistenceAllowed() {
+  return Boolean(process.env.DATABASE_URL) && process.env.BOT_FACTORY_DB_IDENTITY === "bot-factory-revenue";
+}
+
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
   try {
@@ -67,10 +71,16 @@ export async function POST(request: Request) {
     source: "bot-factory-alpha",
   };
 
-  if (!process.env.DATABASE_URL) {
+  if (!persistenceAllowed()) {
     console.info("BOT_FACTORY_REVENUE_EVENT", JSON.stringify({ ...event, occurredAt: event.occurredAt.toISOString() }));
     return NextResponse.json(
-      { ok: true, accepted: true, persistedToCrm: false, mode: "STAGING_EVENT_STREAM" },
+      {
+        ok: true,
+        accepted: true,
+        persistedToCrm: false,
+        mode: "STAGING_EVENT_STREAM",
+        persistenceBlocked: Boolean(process.env.DATABASE_URL),
+      },
       { status: 202, headers: { "Cache-Control": "no-store" } },
     );
   }
