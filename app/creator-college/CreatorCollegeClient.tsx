@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getCreatorPersistence } from "./lib/persistenceAdapter";
 
 type Step = "campus"|"compass"|"idea"|"audience"|"result"|"format"|"name"|"outline"|"content"|"design"|"review"|"use_mode"|"complete"|"receipt"|"explode"|"locker";
 type ProductSection = { title:string; body:string };
@@ -10,8 +11,6 @@ type Creation = {
   status:"BUILDING"|"COMPLETE"; updatedAt:string; completedAt?:string; parentId?:string; familyId?:string; derivedType?:string;
 };
 
-const STORAGE_KEY="creator-college-v1-creations";
-const ACTIVE_KEY="creator-college-v1-active";
 const compassQuestions=[
   {key:"intent",title:"WHAT BRINGS YOU TO CREATOR COLLEGE?",options:["I HAVE AN IDEA","I HAVE A SKILL","I WANT TO MAKE SOMETHING I CAN SELL","I WANT TO MAKE SOMETHING FOR ME","I'M JUST EXPLORING","I HAVE NO IDEA YET"]},
   {key:"audience",title:"WHO WOULD YOU LIKE TO CREATE FOR?",options:["MYSELF","FAMILY","CHURCH / GROUP","CUSTOMERS","CLIENTS","SMALL BUSINESSES","EVERYBODY"]},
@@ -36,8 +35,8 @@ export default function CreatorCollegeClient(){
   const[saved,setSaved]=useState(true);
   const[activeSection,setActiveSection]=useState(0);
 
-  useEffect(()=>{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]") as Partial<Creation>[];const list=raw.map(normalizeCreation);const activeId=localStorage.getItem(ACTIVE_KEY);setCreations(list);const active=list.find(i=>i.id===activeId&&i.status==="BUILDING");if(active)setCreation(active)},[]);
-  useEffect(()=>{if(!creation)return;setSaved(false);const timer=setTimeout(()=>{const next=[creation,...creations.filter(i=>i.id!==creation.id)];localStorage.setItem(STORAGE_KEY,JSON.stringify(next));localStorage.setItem(ACTIVE_KEY,creation.status==="BUILDING"?creation.id:"");setCreations(next);setSaved(true)},350);return()=>clearTimeout(timer)},[creation]);
+  useEffect(()=>{let cancelled=false;(async()=>{const persistence=getCreatorPersistence();const records=await persistence.list("digital_product");const list=records.map(record=>normalizeCreation(record.raw as Partial<Creation>));const activeId=await persistence.getActive("digital_product");if(cancelled)return;setCreations(list);const active=list.find(i=>i.id===activeId&&i.status==="BUILDING");if(active)setCreation(active)})();return()=>{cancelled=true}},[]);
+  useEffect(()=>{if(!creation)return;setSaved(false);const timer=setTimeout(()=>{void (async()=>{const persistence=getCreatorPersistence();await persistence.save<Creation>({id:creation.id,kind:"digital_product",status:creation.status,title:creation.title,progress:creation.progress,updatedAt:creation.updatedAt,raw:creation});await persistence.setActive("digital_product",creation.status==="BUILDING"?creation.id:null);setCreations(current=>[creation,...current.filter(i=>i.id!==creation.id)]);setSaved(true)})()},350);return()=>clearTimeout(timer)},[creation]);
   const activeCreation=useMemo(()=>creation?.status==="BUILDING"?creation:creations.find(i=>i.status==="BUILDING")??null,[creations,creation]);
   const familyMembers=useMemo(()=>{if(!creation?.familyId)return creation?[creation]:[];return [creation,...creations.filter(i=>i.id!==creation.id&&i.familyId===creation.familyId)]},[creation,creations]);
   const completedCount=creations.filter(i=>i.status==="COMPLETE").length+(creation?.status==="COMPLETE"&&!creations.some(i=>i.id===creation.id)?1:0);
