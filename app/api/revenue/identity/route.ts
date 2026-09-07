@@ -7,6 +7,10 @@ const phoneRx = /^[+()\-\s0-9.]{7,24}$/;
 const trim = (value: unknown, max: number) =>
   typeof value === "string" ? value.trim().slice(0, max) : "";
 
+function persistenceAllowed() {
+  return Boolean(process.env.DATABASE_URL) && process.env.BOT_FACTORY_DB_IDENTITY === "bot-factory-revenue";
+}
+
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
   try {
@@ -35,13 +39,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "phone_required_for_selected_channel" }, { status: 400 });
   }
 
-  if (!process.env.DATABASE_URL) {
+  if (!persistenceAllowed()) {
     return NextResponse.json(
       {
         ok: true,
         persisted: false,
         mode: "STAGING_IDENTITY_BRIDGE",
-        message: "Identity/consent contract validated; secure CRM persistence is not enabled yet.",
+        persistenceBlocked: Boolean(process.env.DATABASE_URL),
+        message: "Identity/consent contract validated; dedicated Factory CRM persistence is not enabled yet.",
       },
       { status: 202, headers: { "Cache-Control": "no-store" } },
     );
@@ -123,8 +128,6 @@ export async function POST(request: Request) {
     });
   }
 
-  // Join the pre-identity anonymous journey to this known prospect using the
-  // browser session. This preserves context without guessing identity across sessions.
   let linkedAnonymousEvents = 0;
   if (sessionId) {
     const linked = await prisma.revenueEvent.updateMany({
