@@ -35,6 +35,77 @@ enum ConfidenceLevel {
   CONFIRMED
 }
 
+enum ContactChannel {
+  EMAIL
+  SMS
+  VOICE
+  SOCIAL
+  OTHER
+}
+
+enum ConsentStatus {
+  UNKNOWN
+  OPTED_IN
+  OPTED_OUT
+  NOT_REQUIRED
+}
+
+enum LeadStage {
+  NEW
+  ENGAGED
+  QUALIFIED
+  PROPOSAL
+  CUSTOMER
+  REPEAT_CUSTOMER
+  EARN_CANDIDATE
+  EARN_ACTIVE
+  CLOSED_LOST
+}
+
+enum RevenueAgentRole {
+  MARKETING_DIRECTOR
+  SALES_DIRECTOR
+  SALES_SPECIALIST
+  SOCIAL_SPECIALIST
+  OUTBOUND_SPECIALIST
+  VOICE_AGENT
+  EARN_COACH
+  CUSTOMER_SUCCESS
+}
+
+enum RevenueEventType {
+  VISIT
+  TRY_STARTED
+  TRY_COMPLETED
+  BLUEPRINT_CREATED
+  BLUEPRINT_SAVED
+  LEAD_CAPTURED
+  CONSENT_CHANGED
+  SALES_TOUCH
+  VOICE_INTERACTION
+  SOCIAL_ENGAGEMENT
+  CHECKOUT_STARTED
+  PURCHASE
+  BOT_LAUNCHED
+  FIRST_MISSION
+  GIFT
+  SECOND_BOT
+  EARN_INTEREST
+  EARN_QUALIFIED
+  REFERRAL_SALE
+  OPT_OUT
+}
+
+enum EarnStatus {
+  NOT_APPLIED
+  INTERESTED
+  REVIEWING
+  QUALIFIED
+  ACTIVE
+  PAUSED
+  DISQUALIFIED
+}
+
 model User {
   id          String       @id @default(cuid())
   email       String       @unique
@@ -188,4 +259,144 @@ model Task {
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// BOT FACTORY REVENUE SPINE
+// Internal operating data for marketing, sales, voice, customer success and
+// Earn Mode. These models do not create new public Factory districts or bots.
+// -----------------------------------------------------------------------------
+
+model Prospect {
+  id            String          @id @default(cuid())
+  displayName   String?
+  email         String?
+  phone         String?
+  companyName   String?
+  source        String?
+  stage         LeadStage       @default(NEW)
+  preferredBot  String?
+  lastTouchAt   DateTime?
+  nextActionAt  DateTime?
+  consent       ConsentRecord[]
+  events        RevenueEvent[]
+  opportunities SalesOpportunity[]
+  entitlements  BotEntitlement[]
+  earn          EarnEnrollment?
+  voiceCalls    VoiceInteraction[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([stage])
+  @@index([email])
+  @@index([phone])
+}
+
+model ConsentRecord {
+  id          String        @id @default(cuid())
+  prospectId  String
+  prospect    Prospect      @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  channel     ContactChannel
+  status      ConsentStatus @default(UNKNOWN)
+  scope       String?
+  source      String?
+  evidenceRef String?
+  capturedAt  DateTime      @default(now())
+  expiresAt   DateTime?
+  updatedAt   DateTime      @updatedAt
+
+  @@index([prospectId, channel])
+}
+
+model RevenueEvent {
+  id         String           @id @default(cuid())
+  prospectId String?
+  prospect   Prospect?        @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+  sessionId  String?
+  type       RevenueEventType
+  botId      String?
+  agentRole  RevenueAgentRole?
+  source     String?
+  campaign   String?
+  metadata   Json?
+  occurredAt DateTime         @default(now())
+
+  @@index([prospectId, occurredAt])
+  @@index([type, occurredAt])
+  @@index([campaign])
+}
+
+model SalesOpportunity {
+  id              String    @id @default(cuid())
+  prospectId      String
+  prospect        Prospect  @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  title           String
+  stage           LeadStage @default(QUALIFIED)
+  botIds          String[]
+  estimatedCents  Int?
+  probabilityPct  Int?
+  assignedRole    RevenueAgentRole?
+  nextAction      String?
+  nextActionAt    DateTime?
+  wonAt           DateTime?
+  lostAt          DateTime?
+  lossReason      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([stage, nextActionAt])
+  @@index([prospectId])
+}
+
+model BotEntitlement {
+  id          String    @id @default(cuid())
+  prospectId  String
+  prospect    Prospect  @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  botId       String
+  orderRef    String?
+  status      String    @default("PENDING")
+  activatedAt DateTime?
+  firstUseAt  DateTime?
+  lastUseAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([prospectId, botId])
+  @@index([status])
+}
+
+model EarnEnrollment {
+  id               String      @id @default(cuid())
+  prospectId       String      @unique
+  prospect         Prospect    @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  status           EarnStatus  @default(NOT_APPLIED)
+  referralCode     String?     @unique
+  commissionTier   String?
+  qualifiedAt      DateTime?
+  activatedAt      DateTime?
+  pausedAt         DateTime?
+  qualificationRef String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([status])
+}
+
+model VoiceInteraction {
+  id                 String           @id @default(cuid())
+  prospectId         String
+  prospect           Prospect         @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  direction          String
+  agentRole          RevenueAgentRole @default(VOICE_AGENT)
+  consentVerified    Boolean          @default(false)
+  recordingAllowed   Boolean          @default(false)
+  disposition        String?
+  conversationSummary String?
+  recommendedBotIds  String[]
+  nextAction         String?
+  startedAt          DateTime         @default(now())
+  endedAt            DateTime?
+
+  @@index([prospectId, startedAt])
+  @@index([disposition])
 }
