@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "../../../../lib/prisma";
 
 const ALLOWED_EVENTS = new Set([
   "VISIT",
@@ -62,17 +63,47 @@ export async function POST(request: Request) {
     botId: trim(body.botId, 60),
     path: trim(body.path, 180),
     metadata: cleanMetadata(body.metadata),
-    occurredAt: new Date().toISOString(),
+    occurredAt: new Date(),
     source: "bot-factory-alpha",
   };
 
-  // STAGING GATE: this is intentionally an anonymous, no-PII event stream.
-  // Render captures structured application logs; persistent CRM ingestion is the
-  // next gate and will forward this exact contract into Revenue Brain.
-  console.info("BOT_FACTORY_REVENUE_EVENT", JSON.stringify(event));
+  if (!process.env.DATABASE_URL) {
+    console.info("BOT_FACTORY_REVENUE_EVENT", JSON.stringify({ ...event, occurredAt: event.occurredAt.toISOString() }));
+    return NextResponse.json(
+      { ok: true, accepted: true, persistedToCrm: false, mode: "STAGING_EVENT_STREAM" },
+      { status: 202, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
+  try {
+    await prisma.revenueEvent.create({
+      data: {
+        externalEventId: event.eventId,
+        sessionId: event.sessionId,
+        type: event.type as any,
+        botId: event.botId,
+        source: event.source,
+        campaign: typeof event.metadata?.utm_campaign === "string" ? event.metadata.utm_campaign : undefined,
+        metadata: {
+          ...(event.metadata || {}),
+          visitorId: event.visitorId,
+          path: event.path,
+        },
+        occurredAt: event.occurredAt,
+      },
+    });
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return NextResponse.json(
+        { ok: true, accepted: true, duplicate: true, persistedToCrm: true, mode: "CRM_EVENT_STREAM" },
+        { status: 200, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+    throw error;
+  }
 
   return NextResponse.json(
-    { ok: true, accepted: true, persistedToCrm: false, mode: "STAGING_EVENT_STREAM" },
-    { status: 202, headers: { "Cache-Control": "no-store" } },
+    { ok: true, accepted: true, persistedToCrm: true, mode: "CRM_EVENT_STREAM" },
+    { status: 201, headers: { "Cache-Control": "no-store" } },
   );
 }
