@@ -10,11 +10,13 @@ function FirstMissionExperience(){
   const [mission,setMission]=useState("");
   const [result,setResult]=useState("");
   const [notice,setNotice]=useState("");
+  const [feedbackNotice,setFeedbackNotice]=useState("");
   const [loading,setLoading]=useState(false);
+  const [feedbackLoading,setFeedbackLoading]=useState(false);
 
   async function run(){
     if(!token){setNotice("Secure Core access token is missing.");return;}
-    setLoading(true); setResult(""); setNotice("");
+    setLoading(true); setResult(""); setNotice(""); setFeedbackNotice("");
     try{
       const response=await fetch("/api/core/mission",{
         method:"POST",
@@ -30,6 +32,22 @@ function FirstMissionExperience(){
     }finally{setLoading(false);}
   }
 
+  async function sendFeedback(feedback:"HELPED"|"NEEDS_HELP"|"NOT_SURE"){
+    setFeedbackLoading(true); setFeedbackNotice("");
+    try{
+      const response=await fetch("/api/core/mission-feedback",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token,feedback}),
+      });
+      const data=await response.json();
+      if(!response.ok) throw new Error(data?.error||"Feedback could not be saved");
+      setFeedbackNotice(data.message||"Feedback saved.");
+    }catch(error){
+      setFeedbackNotice(error instanceof Error?error.message:"Feedback could not be saved.");
+    }finally{setFeedbackLoading(false);}
+  }
+
   return <main style={{minHeight:"100vh",background:"radial-gradient(circle at 50% 15%,#173057,#05070b 60%)",color:"white",padding:"48px 20px 90px",fontFamily:"Arial,sans-serif"}}>
     <div style={{maxWidth:860,margin:"0 auto"}}>
       <p style={{letterSpacing:3,fontSize:13,color:"#81b7ff",fontWeight:700}}>BOT CORE • FIRST MISSION</p>
@@ -42,7 +60,18 @@ function FirstMissionExperience(){
         <button disabled={loading} onClick={run} style={{marginTop:14,border:0,borderRadius:999,padding:"13px 20px",fontWeight:900,cursor:"pointer",background:"white",color:"#07101d"}}>{loading?"RUNNING FIRST MISSION…":"START FIRST MISSION"}</button>
       </div>
 
-      {result&&<div style={{marginTop:22,whiteSpace:"pre-wrap",padding:22,borderRadius:16,border:"1px solid #31527a",background:"#08111e",lineHeight:1.65}}>{result}</div>}
+      {result&&<>
+        <div style={{marginTop:22,whiteSpace:"pre-wrap",padding:22,borderRadius:16,border:"1px solid #31527a",background:"#08111e",lineHeight:1.65}}>{result}</div>
+        <div style={{marginTop:18,padding:20,borderRadius:16,border:"1px solid #2d455f",background:"rgba(255,255,255,.04)"}}>
+          <strong style={{display:"block",marginBottom:12}}>Did this first mission help?</strong>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            <button disabled={feedbackLoading} onClick={()=>sendFeedback("HELPED")} style={{border:0,borderRadius:999,padding:"11px 16px",fontWeight:800,cursor:"pointer"}}>YES — THIS HELPED</button>
+            <button disabled={feedbackLoading} onClick={()=>sendFeedback("NOT_SURE")} style={{border:"1px solid #4b607c",borderRadius:999,padding:"11px 16px",fontWeight:800,cursor:"pointer",background:"transparent",color:"white"}}>NOT SURE YET</button>
+            <button disabled={feedbackLoading} onClick={()=>sendFeedback("NEEDS_HELP")} style={{border:"1px solid #4b607c",borderRadius:999,padding:"11px 16px",fontWeight:800,cursor:"pointer",background:"transparent",color:"white"}}>I NEED HELP</button>
+          </div>
+          {feedbackNotice&&<p style={{marginTop:14,color:"#b9c8da",lineHeight:1.55}}>{feedbackNotice}</p>}
+        </div>
+      </>}
       {notice&&<p style={{marginTop:14,color:"#aeb9c8",lineHeight:1.6}}>{notice}</p>}
       <div style={{marginTop:30}}><Link href={`/core?token=${encodeURIComponent(token)}`} style={{color:"#9bc4ff",fontWeight:800}}>← RETURN TO BOT CORE STATUS</Link></div>
     </div>
