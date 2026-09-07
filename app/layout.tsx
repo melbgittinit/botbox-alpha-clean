@@ -4,6 +4,7 @@ import FactoryNav from "../components/FactoryNav";
 import FacePass from "../components/FacePass";
 import ShowroomHero from "../components/ShowroomHero";
 import RevenueTracker from "../components/RevenueTracker";
+import IdentityBridge from "../components/IdentityBridge";
 
 export const metadata = {
   title: "THE BOT FACTORY",
@@ -28,6 +29,7 @@ export default function RootLayout({
         <FacePass />
         <ShowroomHero />
         {children}
+        <IdentityBridge />
       </body>
     </html>
   );
