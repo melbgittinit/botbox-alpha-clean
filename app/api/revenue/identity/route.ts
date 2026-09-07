@@ -35,8 +35,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "phone_required_for_selected_channel" }, { status: 400 });
   }
 
-  // Alpha safety gate: the form can be QA'd before the production CRM database
-  // is attached. Do not log or retain submitted PII when DATABASE_URL is absent.
   if (!process.env.DATABASE_URL) {
     return NextResponse.json(
       {
@@ -75,7 +73,6 @@ export async function POST(request: Request) {
         },
       });
 
-  // Requested delivery is transactional/operational, not blanket marketing consent.
   await prisma.consentRecord.create({
     data: {
       prospectId: prospect.id,
@@ -126,6 +123,17 @@ export async function POST(request: Request) {
     });
   }
 
+  // Join the pre-identity anonymous journey to this known prospect using the
+  // browser session. This preserves context without guessing identity across sessions.
+  let linkedAnonymousEvents = 0;
+  if (sessionId) {
+    const linked = await prisma.revenueEvent.updateMany({
+      where: { sessionId, prospectId: null },
+      data: { prospectId: prospect.id },
+    });
+    linkedAnonymousEvents = linked.count;
+  }
+
   await prisma.revenueEvent.create({
     data: {
       prospectId: prospect.id,
@@ -139,12 +147,19 @@ export async function POST(request: Request) {
         emailMarketing,
         smsOptIn,
         voiceCallback,
+        linkedAnonymousEvents,
       },
     },
   });
 
   return NextResponse.json(
-    { ok: true, persisted: true, prospectId: prospect.id, mode: "CRM_CONNECTED" },
+    {
+      ok: true,
+      persisted: true,
+      prospectId: prospect.id,
+      linkedAnonymousEvents,
+      mode: "CRM_CONNECTED",
+    },
     { status: 201, headers: { "Cache-Control": "no-store" } },
   );
 }
