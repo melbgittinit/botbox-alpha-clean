@@ -1,10 +1,10 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 import Link from "next/link";
 
-export default function PurchasedCoreTestPage(){
+function PurchasedCoreTestExperience(){
   const params=useSearchParams();
   const token=params.get("token")||"";
   const [prompt,setPrompt]=useState("");
@@ -50,4 +50,12 @@ export default function PurchasedCoreTestPage(){
       <div style={{marginTop:30}}><Link href={`/core?token=${encodeURIComponent(token)}`} style={{color:"#9bc4ff",fontWeight:800}}>← RETURN TO BOT CORE STATUS</Link></div>
     </div>
   </main>;
+}
+
+function LoadingCoreTest(){
+  return <main style={{minHeight:"100vh",background:"#05070b",color:"white",padding:"64px 24px",fontFamily:"Arial,sans-serif"}}><div style={{maxWidth:760,margin:"0 auto"}}><p style={{letterSpacing:2,color:"#7fb7ff"}}>BOT CORE</p><h1>Preparing your purchased Test Track…</h1></div></main>;
+}
+
+export default function PurchasedCoreTestPage(){
+  return <Suspense fallback={<LoadingCoreTest/>}><PurchasedCoreTestExperience/></Suspense>;
 }
