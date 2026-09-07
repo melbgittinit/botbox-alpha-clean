@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../../../lib/prisma";
+import { prisma } from "../../../../../lib/prisma";
 
 function authorized(request:Request){
   const secret=process.env.BOT_FACTORY_INTERNAL_SECRET;
