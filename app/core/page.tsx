@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import { verifyCoreAccessToken } from "../../lib/core-access";
 
@@ -31,6 +32,7 @@ export default async function CorePage({searchParams}:{searchParams:Promise<{tok
 
   const name=BOT_NAMES[entitlement.botId]||entitlement.botId;
   const items=coreState(entitlement.status);
+  const canTest=["CONFIGURING","TEST_REQUIRED"].includes(entitlement.status);
   return <main style={{minHeight:"100vh",background:"radial-gradient(circle at 50% 20%,#10233f,#05070b 55%)",color:"white",padding:"54px 22px 90px",fontFamily:"Arial,sans-serif"}}>
     <div style={{maxWidth:860,margin:"0 auto"}}>
       <p style={{letterSpacing:3,fontSize:13,color:"#81b7ff",fontWeight:700}}>THE BOT FACTORY • BOT CORE</p>
@@ -42,7 +44,8 @@ export default async function CorePage({searchParams}:{searchParams:Promise<{tok
       <div style={{marginTop:26,padding:"22px",borderRadius:16,background:"rgba(255,255,255,.05)",border:"1px solid #283a55"}}>
         <div style={{fontSize:12,letterSpacing:2,color:"#8ca2bf"}}>CURRENT CORE STATUS</div>
         <div style={{fontSize:28,fontWeight:800,marginTop:6}}>{entitlement.status.replaceAll("_"," ")}</div>
-        <p style={{color:"#b6c0cf",lineHeight:1.6,marginBottom:0}}>{entitlement.status==="CORE_PENDING"?"Payment is verified. Your bot is waiting to enter configuration.":entitlement.status==="CONFIGURING"?"Identity, skills and personalization are being prepared before Test Track.":entitlement.status==="TEST_REQUIRED"?"Configuration is ready. Your bot must pass Test Track before certification.":entitlement.status==="CERTIFIED"?"Your bot is certified and ready for launch.":entitlement.status==="ACTIVE"?"Your bot is active. Start its first mission.":"The Factory is preparing the next Core step."}</p>
+        <p style={{color:"#b6c0cf",lineHeight:1.6,marginBottom:canTest?18:0}}>{entitlement.status==="CORE_PENDING"?"Payment is verified. Your bot is waiting to enter configuration.":entitlement.status==="CONFIGURING"?"Identity, skills and personalization are being prepared. You can now run the purchased Core Test Track.":entitlement.status==="TEST_REQUIRED"?"Configuration is ready. Your bot must pass Test Track before certification.":entitlement.status==="CERTIFIED"?"Your bot is certified and ready for launch.":entitlement.status==="ACTIVE"?"Your bot is active. Start its first mission.":"The Factory is preparing the next Core step."}</p>
+        {canTest&&<Link href={`/core/test?token=${encodeURIComponent(token)}`} style={{display:"inline-block",background:"white",color:"#07101d",padding:"12px 18px",borderRadius:999,fontWeight:900,textDecoration:"none"}}>ENTER PURCHASED TEST TRACK →</Link>}
       </div>
       <p style={{marginTop:28,color:"#748398",fontSize:13}}>Purchase does not bypass testing or certification. Launch unlocks only after the Core requirements are satisfied.</p>
     </div>
