@@ -1,8 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { h00 } from "../lib/hero-chunks/h00";
 import styles from "./showroom-hero.module.css";
+
+const HERO_URL = "https://cdn.shopify.com/s/files/1/1982/3607/files/bot-factory-glass-delivery-tower-hero.webp?v=1788752448";
 
 export default function ShowroomHero() {
   const pathname = usePathname();
@@ -10,19 +11,25 @@ export default function ShowroomHero() {
 
   return (
     <section className={styles.shell} aria-label="The Bot Factory showroom">
-      <div className={styles.frame}>
+      <figure className={styles.frame}>
         <img
           className={styles.image}
-          src={`data:image/webp;base64,${h00}`}
-          alt="The Bot Stores glass BOT FACTORY delivery-tower showroom with finished bot displays"
+          src={HERO_URL}
+          width={1672}
+          height={941}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          alt="The Bot Factory glass delivery-tower showroom with finished bot displays"
         />
-        <div className={styles.vignette} aria-hidden="true" />
-        <div className={styles.label}>
-          <span>THE BOT FACTORY</span>
-          <strong>THE SHOWROOM IS OPEN.</strong>
-          <p>Build one or pick one below. The interactive catalog is the authoritative current inventory.</p>
-        </div>
-      </div>
+        <figcaption className={styles.caption}>
+          <div>
+            <span>THE BOT FACTORY SHOWROOM</span>
+            <strong>Build one. Pick one. Put it to work.</strong>
+          </div>
+          <p>Showroom concept image. The interactive Prebuilt Lot below is the authoritative current bot catalog and naming source.</p>
+        </figcaption>
+      </figure>
     </section>
   );
 }
