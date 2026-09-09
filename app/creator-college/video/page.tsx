@@ -1,24 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getCreatorPersistence } from "../lib/persistenceAdapter";
 
 type Episode={title:string;hook:string;script:string;visual:string};
 type VideoProject={id:string;title:string;audience:string;goal:string;format:string;episodes:Episode[];style:string;posting:string;useMode:string;step:number;progress:number;status:"BUILDING"|"COMPLETE";updatedAt:string;familyId?:string;parentId?:string};
-const KEY="creator-college-v1-video-projects";
-const ACTIVE="creator-college-v1-video-active";
 const steps=["Idea","Audience","Goal","Format","Name","Episodes","Scripts","Visuals","Posting Plan","Review","Use Mode"];
 function blank():VideoProject{return{id:`video-${Date.now()}`,title:"Untitled Series",audience:"",goal:"Teach",format:"5 Short Videos",episodes:[],style:"Clean",posting:"3x a week",useMode:"Build my audience",step:0,progress:5,status:"BUILDING",updatedAt:new Date().toISOString()}}
 function episodeDraft(title:string,project:VideoProject,index:number){return{title,hook:`Here’s the one thing most people miss about ${title.toLowerCase()}.`,script:`Open with the problem. Explain one clear idea in plain language for ${project.audience||"your audience"}. Give one practical example. End with a simple next step.`,visual:index%2===0?"Talking head + on-screen text":"Voice-over + simple B-roll"}}
 export default function VideoBuilderPage(){
  const[project,setProject]=useState<VideoProject|null>(null);const[saved,setSaved]=useState(true);const[activeEpisode,setActiveEpisode]=useState(0);
- useEffect(()=>{const list=JSON.parse(localStorage.getItem(KEY)||"[]") as VideoProject[];const id=localStorage.getItem(ACTIVE);const active=list.find(x=>x.id===id&&x.status==="BUILDING");setProject(active||blank())},[]);
- useEffect(()=>{if(!project)return;setSaved(false);const t=setTimeout(()=>{const list=JSON.parse(localStorage.getItem(KEY)||"[]") as VideoProject[];const next=[project,...list.filter(x=>x.id!==project.id)];localStorage.setItem(KEY,JSON.stringify(next));localStorage.setItem(ACTIVE,project.status==="BUILDING"?project.id:"");setSaved(true)},350);return()=>clearTimeout(t)},[project]);
+ useEffect(()=>{let cancelled=false;(async()=>{const persistence=getCreatorPersistence();const records=await persistence.list("video_series");const id=await persistence.getActive("video_series");const active=records.find(record=>record.id===id&&record.status==="BUILDING");if(!cancelled)setProject(active?(active.raw as VideoProject):blank())})();return()=>{cancelled=true}},[]);
+ useEffect(()=>{if(!project)return;setSaved(false);const t=setTimeout(()=>{void (async()=>{const persistence=getCreatorPersistence();await persistence.save<VideoProject>({id:project.id,kind:"video_series",status:project.status,title:project.title,progress:project.progress,updatedAt:project.updatedAt,raw:project});await persistence.setActive("video_series",project.status==="BUILDING"?project.id:null);setSaved(true)})()},350);return()=>clearTimeout(t)},[project]);
  const current=project?.step??0;const pct=useMemo(()=>Math.round(((current+1)/steps.length)*100),[current]);
  function patch(v:Partial<VideoProject>){setProject(p=>p?{...p,...v,updatedAt:new Date().toISOString()}:p)}
  function next(){if(!project)return;patch({step:Math.min(project.step+1,steps.length-1),progress:pct})}
  function createEpisodes(){if(!project)return;const names=["The Big Idea","What Most People Get Wrong","The First Step","A Better Way","What To Do Next"];patch({episodes:names.map((n,i)=>episodeDraft(n,project,i))});next()}
  function updateEpisode(i:number,v:Partial<Episode>){if(!project)return;patch({episodes:project.episodes.map((e,idx)=>idx===i?{...e,...v}:e)})}
- function complete(){if(!project)return;patch({status:"COMPLETE",progress:100});setTimeout(()=>{localStorage.setItem(ACTIVE,"")},0)}
+ function complete(){if(!project)return;patch({status:"COMPLETE",progress:100})}
  if(!project)return null;
  return <main className="cc4-shell"><section className="cc4-hero"><span className="cc4-eyebrow">CREATOR LAB · VIDEO SERIES</span><h1>TURN ONE IDEA INTO A SERIES PEOPLE CAN WATCH.</h1><p>{saved?"Saved ✓":"Saving…"}</p></section><section className="cc5-smart-panel"><div><span className="cc4-eyebrow">{steps[current]} · STEP {current+1} OF {steps.length}</span><h2>{steps[current]}</h2><div className="cc4-meter"><span style={{width:`${pct}%`}}/></div></div></section>
  <section className="cc4-section">
