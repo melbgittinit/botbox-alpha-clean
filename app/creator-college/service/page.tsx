@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getCreatorPersistence } from "../lib/persistenceAdapter";
 
 type ServiceProject={id:string;skill:string;problem:string;customer:string;offer:string;delivery:string;scope:string[];priceTier:string;priceNote:string;promo:string;salesMessage:string;followup:string;step:number;progress:number;status:"BUILDING"|"COMPLETE";updatedAt:string;familyId?:string;parentId?:string};
-const KEY="creator-college-v1-service-projects";const ACTIVE="creator-college-v1-service-active";
 const steps=["Skill","Problem","Customer","Offer","Delivery","Price","Promotion","Sales Message","Review"];
 function blank():ServiceProject{return{id:`service-${Date.now()}`,skill:"",problem:"",customer:"",offer:"",delivery:"Done-for-you",scope:[],priceTier:"Starter",priceNote:"",promo:"",salesMessage:"",followup:"",step:0,progress:5,status:"BUILDING",updatedAt:new Date().toISOString()}}
 function coachOffer(p:ServiceProject){return `I help ${p.customer||"a specific customer"} ${p.problem?`solve ${p.problem.toLowerCase()}`:"get a clear result"} by providing ${p.skill||"a focused service"}.`}
 function promoDraft(p:ServiceProject){return `${p.offer}\n\nA simple service for ${p.customer}. Clear scope, clear next step, no unnecessary complexity.`}
 export default function ServiceOfferPage(){
  const[project,setProject]=useState<ServiceProject|null>(null);const[saved,setSaved]=useState(true);
- useEffect(()=>{const list=JSON.parse(localStorage.getItem(KEY)||"[]") as ServiceProject[];const id=localStorage.getItem(ACTIVE);setProject(list.find(x=>x.id===id&&x.status==="BUILDING")||blank())},[]);
- useEffect(()=>{if(!project)return;setSaved(false);const t=setTimeout(()=>{const list=JSON.parse(localStorage.getItem(KEY)||"[]") as ServiceProject[];const next=[project,...list.filter(x=>x.id!==project.id)];localStorage.setItem(KEY,JSON.stringify(next));localStorage.setItem(ACTIVE,project.status==="BUILDING"?project.id:"");setSaved(true)},350);return()=>clearTimeout(t)},[project]);
+ useEffect(()=>{let cancelled=false;(async()=>{const persistence=getCreatorPersistence();const records=await persistence.list("service_offer");const id=await persistence.getActive("service_offer");const active=records.find(record=>record.id===id&&record.status==="BUILDING");if(!cancelled)setProject(active?(active.raw as ServiceProject):blank())})();return()=>{cancelled=true}},[]);
+ useEffect(()=>{if(!project)return;setSaved(false);const t=setTimeout(()=>{void (async()=>{const persistence=getCreatorPersistence();await persistence.save<ServiceProject>({id:project.id,kind:"service_offer",status:project.status,title:project.offer||project.skill||"Simple Service Offer",progress:project.progress,updatedAt:project.updatedAt,raw:project});await persistence.setActive("service_offer",project.status==="BUILDING"?project.id:null);setSaved(true)})()},350);return()=>clearTimeout(t)},[project]);
  function patch(v:Partial<ServiceProject>){setProject(p=>p?{...p,...v,updatedAt:new Date().toISOString()}:p)}
  function next(){if(!project)return;const n=Math.min(project.step+1,steps.length-1);patch({step:n,progress:Math.round(((n+1)/steps.length)*100)})}
- function complete(){if(!project)return;patch({status:"COMPLETE",progress:100,familyId:project.familyId||`family-${project.id}`});setTimeout(()=>localStorage.setItem(ACTIVE,""),0)}
+ function complete(){if(!project)return;patch({status:"COMPLETE",progress:100,familyId:project.familyId||`family-${project.id}`})}
  if(!project)return null;const s=project.step;
  return <main className="cc4-shell"><section className="cc4-hero"><span className="cc4-eyebrow">CREATE TO EARN · SIMPLE SERVICE OFFER</span><h1>TURN WHAT YOU KNOW INTO SOMETHING PEOPLE CAN USE.</h1><p>{saved?"Saved ✓":"Saving…"}</p></section><section className="cc5-smart-panel"><div><span className="cc4-eyebrow">{steps[s]} · STEP {s+1} OF {steps.length}</span><h2>{steps[s]}</h2><div className="cc4-meter"><span style={{width:`${project.progress}%`}}/></div></div></section><section className="cc4-section">
  {s===0&&<article className="cc5-profile-card"><h2>What can you do well enough to help someone?</h2><div className="cc5-chips">{["Design","Social Media","Teaching","Writing","Organization","Photography","Video","Beauty","Cooking","Home Help","Business Help","Ministry Support"].map(x=><button key={x} className={project.skill===x?"selected":""} onClick={()=>patch({skill:x})}>{x}</button>)}</div><input value={project.skill} onChange={e=>patch({skill:e.target.value})} placeholder="Or describe your skill"/><button className="cc4-primary" disabled={!project.skill.trim()} onClick={next}>USE THIS SKILL</button></article>}
