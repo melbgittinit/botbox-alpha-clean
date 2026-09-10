@@ -47,9 +47,15 @@ function sourceOrderId(payload: any, topic: string) {
   return String(payload?.id ?? "");
 }
 
-function containsCreatorCollegeVariant(payload: any) {
+function creatorCollegeLine(payload: any) {
   const lines = Array.isArray(payload?.line_items) ? payload.line_items : [];
-  return lines.some((line: any) => String(line?.variant_id ?? "") === CCJ_VARIANT_ID);
+  return lines.find((line: any) => String(line?.variant_id ?? "") === CCJ_VARIANT_ID) || null;
+}
+
+function propertyValue(line: any, key: string) {
+  const properties = Array.isArray(line?.properties) ? line.properties : [];
+  const match = properties.find((property: any) => String(property?.name ?? property?.key ?? "") === key);
+  return String(match?.value ?? "").trim();
 }
 
 Deno.serve(async (req) => {
@@ -94,20 +100,30 @@ Deno.serve(async (req) => {
   });
 
   if (topic === "orders/paid") {
-    if (!containsCreatorCollegeVariant(payload)) {
-      return json(200, { status: "ignored", reason: "not_creator_college" });
+    const line = creatorCollegeLine(payload);
+    if (!line) return json(200, { status: "ignored", reason: "not_creator_college" });
+
+    const token = propertyValue(line, "_ccj_token");
+    if (!token) {
+      const { data, error } = await supabase.rpc("ccj_process_shopify_paid", {
+        p_webhook_id: webhookId,
+        p_event_id: eventId || null,
+        p_shop_domain: shop,
+        p_order_id: orderId,
+        p_parent_id: null,
+        p_creator_id: null,
+      });
+      if (error) return json(500, { error: "processor_failed" });
+      return json(200, { status: data?.status || "pending_association" });
     }
 
-    // Customer-editable order fields are deliberately NOT trusted for parent or
-    // Creator ownership. Until checkout carries a server-signed association,
-    // valid CCJ orders enter the pending-association queue instead of unlocking.
-    const { data, error } = await supabase.rpc("ccj_process_shopify_paid", {
+    const { data, error } = await supabase.rpc("ccj_resolve_shopify_paid", {
       p_webhook_id: webhookId,
       p_event_id: eventId || null,
       p_shop_domain: shop,
       p_order_id: orderId,
-      p_parent_id: null,
-      p_creator_id: null,
+      p_token: token,
+      p_variant_id: String(line?.variant_id ?? ""),
     });
     if (error) return json(500, { error: "processor_failed" });
     return json(200, { status: data?.status || "processed" });
