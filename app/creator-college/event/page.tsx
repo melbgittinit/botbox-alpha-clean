@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getCreatorPersistence } from "../lib/persistenceAdapter";
 
 type Asset={name:string;content:string};
 type EventProject={id:string;title:string;eventType:string;purpose:string;audience:string;feeling:string;tagline:string;style:string;timeline:string[];promo:Asset[];materials:Asset[];followup:string;step:number;progress:number;status:"BUILDING"|"COMPLETE";updatedAt:string;familyId?:string;parentId?:string};
-const KEY="creator-college-v1-event-projects";
-const ACTIVE="creator-college-v1-event-active";
 const steps=["Idea","Purpose","Audience","Event Identity","Plan","Promotion","Materials","Experience","Follow-Up","Review"];
 function blank():EventProject{return{id:`event-${Date.now()}`,title:"Untitled Event",eventType:"Church Event",purpose:"Bring people together",audience:"",feeling:"Connected",tagline:"",style:"Warm",timeline:[],promo:[],materials:[],followup:"",step:0,progress:5,status:"BUILDING",updatedAt:new Date().toISOString()}}
 function coachPlan(p:EventProject){return["BEFORE · Confirm purpose, date, place and team","BEFORE · Open registration / invitations","BEFORE · Send reminder and final details","DURING · Welcome + clear opening","DURING · Main experience + interaction","DURING · Closing action / next step","AFTER · Thank-you + follow-up","AFTER · Capture feedback / next gathering"]}
@@ -13,11 +12,11 @@ function promoPack(p:EventProject):Asset[]{return[{name:"Flyer Copy",content:`${
 function materialPack(p:EventProject):Asset[]{return[{name:"Welcome Message",content:`Welcome to ${p.title}. We’re glad you’re here.`},{name:"Simple Agenda",content:"Welcome\nOpening\nMain Experience\nInteraction\nClosing / Next Step"},{name:"Volunteer Checklist",content:"Arrive early\nConfirm setup\nWelcome guests\nSupport program flow\nHelp with follow-up"},{name:"Table / Discussion Prompt",content:`What would help you leave today feeling more ${p.feeling.toLowerCase()}?`} ]}
 export default function EventBuilderPage(){
  const[project,setProject]=useState<EventProject|null>(null);const[saved,setSaved]=useState(true);
- useEffect(()=>{const list=JSON.parse(localStorage.getItem(KEY)||"[]") as EventProject[];const id=localStorage.getItem(ACTIVE);setProject(list.find(x=>x.id===id&&x.status==="BUILDING")||blank())},[]);
- useEffect(()=>{if(!project)return;setSaved(false);const t=setTimeout(()=>{const list=JSON.parse(localStorage.getItem(KEY)||"[]") as EventProject[];const next=[project,...list.filter(x=>x.id!==project.id)];localStorage.setItem(KEY,JSON.stringify(next));localStorage.setItem(ACTIVE,project.status==="BUILDING"?project.id:"");setSaved(true)},350);return()=>clearTimeout(t)},[project]);
+ useEffect(()=>{let cancelled=false;(async()=>{const persistence=getCreatorPersistence();const records=await persistence.list("event_kit");const id=await persistence.getActive("event_kit");const active=records.find(record=>record.id===id&&record.status==="BUILDING");if(!cancelled)setProject(active?(active.raw as EventProject):blank())})();return()=>{cancelled=true}},[]);
+ useEffect(()=>{if(!project)return;setSaved(false);const t=setTimeout(()=>{void (async()=>{const persistence=getCreatorPersistence();await persistence.save<EventProject>({id:project.id,kind:"event_kit",status:project.status,title:project.title,progress:project.progress,updatedAt:project.updatedAt,raw:project});await persistence.setActive("event_kit",project.status==="BUILDING"?project.id:null);setSaved(true)})()},350);return()=>clearTimeout(t)},[project]);
  function patch(v:Partial<EventProject>){setProject(p=>p?{...p,...v,updatedAt:new Date().toISOString()}:p)}
  function next(){if(!project)return;const n=Math.min(project.step+1,steps.length-1);patch({step:n,progress:Math.round(((n+1)/steps.length)*100)})}
- function complete(){if(!project)return;patch({status:"COMPLETE",progress:100,familyId:project.familyId||`family-${project.id}`});setTimeout(()=>localStorage.setItem(ACTIVE,""),0)}
+ function complete(){if(!project)return;patch({status:"COMPLETE",progress:100,familyId:project.familyId||`family-${project.id}`})}
  if(!project)return null;const s=project.step;
  return <main className="cc4-shell"><section className="cc4-hero"><span className="cc4-eyebrow">CREATOR LAB · CHURCH / GROUP EVENT KIT</span><h1>TURN YOUR EVENT IDEA INTO A COMPLETE EVENT PACKAGE.</h1><p>{saved?"Saved ✓":"Saving…"}</p></section><section className="cc5-smart-panel"><div><span className="cc4-eyebrow">{steps[s]} · STEP {s+1} OF {steps.length}</span><h2>{steps[s]}</h2><div className="cc4-meter"><span style={{width:`${project.progress}%`}}/></div></div></section><section className="cc4-section">
  {s===0&&<article className="cc5-profile-card"><h2>What are you planning?</h2><div className="cc5-chips">{["Church Event","Group Gathering","Workshop","Celebration","Community Outreach","Family Event","Class","Other"].map(x=><button key={x} className={project.eventType===x?"selected":""} onClick={()=>patch({eventType:x})}>{x}</button>)}</div><input value={project.title==="Untitled Event"?"":project.title} onChange={e=>patch({title:e.target.value||"Untitled Event"})} placeholder="Event name or working idea"/><button className="cc4-primary" disabled={project.title==="Untitled Event"} onClick={next}>USE THIS EVENT</button></article>}
