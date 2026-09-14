@@ -11,16 +11,16 @@ const moves:Record<string,Move[]>={
   {label:"FASTEST TO MAKE",title:"Simple Service Offer",copy:"Turn the result into a small done-for-you service.",route:"/creator-college/service",reuse:"68% reused",kind:"service_offer"},
   {label:"BEST FOR REACH",title:"Church / Group Kit",copy:"Adapt the content into a group experience.",route:"/creator-college/event",reuse:"62% reused",kind:"event_kit"}],
  video_series:[
-  {label:"BEST NEXT MOVE",title:"Digital Guide",copy:"Turn the scripts into a readable guide or workbook.",route:"/creator-college",reuse:"82% reused",kind:"digital_product"},
+  {label:"BEST NEXT MOVE",title:"Digital Guide",copy:"Turn the scripts into a readable guide or workbook.",route:"/creator-college/digital",reuse:"82% reused",kind:"digital_product"},
   {label:"BEST TO EARN",title:"Simple Service Offer",copy:"Package the expertise behind the series into a service.",route:"/creator-college/service",reuse:"64% reused",kind:"service_offer"},
   {label:"BEST FOR SCALE",title:"Starter Brand",copy:"Give the series and its related work a recognizable identity.",route:"/creator-college/brand",reuse:"58% reused",kind:"brand"}],
  event_kit:[
   {label:"BEST NEXT MOVE",title:"Repeatable Event Brand",copy:"Turn the one-time event into a recognizable series.",route:"/creator-college/brand",reuse:"78% reused",kind:"brand"},
-  {label:"FASTEST TO MAKE",title:"Digital Resource Kit",copy:"Package the materials into a reusable guide or kit.",route:"/creator-college",reuse:"72% reused",kind:"digital_product"},
+  {label:"FASTEST TO MAKE",title:"Digital Resource Kit",copy:"Package the materials into a reusable guide or kit.",route:"/creator-college/digital",reuse:"72% reused",kind:"digital_product"},
   {label:"BEST TO EARN",title:"Event Planning Service",copy:"Offer the event system as a service to another group.",route:"/creator-college/service",reuse:"66% reused",kind:"service_offer"}],
  service_offer:[
   {label:"BEST NEXT MOVE",title:"Starter Brand",copy:"Give the offer a recognizable identity and message.",route:"/creator-college/brand",reuse:"76% reused",kind:"brand"},
-  {label:"FASTEST TO MAKE",title:"Client Guide",copy:"Turn the process into a simple client-facing guide.",route:"/creator-college",reuse:"70% reused",kind:"digital_product"},
+  {label:"FASTEST TO MAKE",title:"Client Guide",copy:"Turn the process into a simple client-facing guide.",route:"/creator-college/digital",reuse:"70% reused",kind:"digital_product"},
   {label:"BEST FOR SCALE",title:"Business Starter System",copy:"Turn the proven offer into a repeatable operating system.",route:"/creator-college/business",reuse:"84% reused",kind:"business"}],
  brand:[
   {label:"BEST NEXT MOVE",title:"Business Starter System",copy:"Turn the brand into a customer, offer, sales, and operations system.",route:"/creator-college/business",reuse:"86% reused",kind:"business"},
@@ -28,7 +28,7 @@ const moves:Record<string,Move[]>={
   {label:"BEST TO EARN",title:"Simple Service Offer",copy:"Give the brand a clear first commercial offer.",route:"/creator-college/service",reuse:"74% reused",kind:"service_offer"}],
  business:[
   {label:"BEST NEXT MOVE",title:"Launch Video Series",copy:"Turn the business message into a focused introduction campaign.",route:"/creator-college/video",reuse:"66% reused",kind:"video_series"},
-  {label:"FASTEST TO MAKE",title:"Customer Guide",copy:"Create a simple guide that supports sales or onboarding.",route:"/creator-college",reuse:"72% reused",kind:"digital_product"},
+  {label:"FASTEST TO MAKE",title:"Customer Guide",copy:"Create a simple guide that supports sales or onboarding.",route:"/creator-college/digital",reuse:"72% reused",kind:"digital_product"},
   {label:"BEST FOR GROWTH",title:"Event / Workshop Kit",copy:"Turn the business into a live group experience or workshop.",route:"/creator-college/event",reuse:"61% reused",kind:"event_kit"}],
 };
 
