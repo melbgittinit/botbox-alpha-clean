@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
-const CCJ_VARIANT_ID = "53746665226533";
+const CCJ_VARIANT_ID = "53819422146853";
 const EXPECTED_SHOP = "distributorsofurbanspiritbiblesbooks-gifts.myshopify.com";
 const ALLOWED_TOPICS = new Set(["orders/paid", "refunds/create", "orders/cancelled"]);
 
@@ -61,8 +61,6 @@ function propertyValue(line: any, key: string) {
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
 
-  // Fail closed until the private Shopify app webhook secret is configured as a
-  // Supabase Edge Function secret. Never hard-code or expose this value.
   const webhookSecret = Deno.env.get("SHOPIFY_WEBHOOK_SECRET")?.trim();
   if (!webhookSecret) return json(503, { error: "webhook_not_configured" });
 
