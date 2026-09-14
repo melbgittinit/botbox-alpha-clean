@@ -482,3 +482,22 @@ model CreatorTemplate {
   @@index([workspaceId, kind])
   @@index([sourceId])
 }
+
+model InstitutionalInquiry {
+  id               String   @id @default(cuid())
+  name             String
+  email            String
+  organization     String
+  role             String?
+  organizationType String
+  participantCount String?
+  goals            String
+  status           String   @default("NEW")
+  source           String   @default("creator-college-institutions")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email, createdAt])
+  @@index([organizationType, createdAt])
+  @@index([status, createdAt])
+}
