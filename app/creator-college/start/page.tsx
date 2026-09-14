@@ -40,7 +40,7 @@ export default function SmartStartPage(){
    const raw={id,title:"Untitled Creation",subtitle:"",idea:"",audience:audience||"",result:"",format:"Mini Guide",outline:[],sections:[],style:look,useMode:sell?"Sell it":"Keep it for me",step:"idea",progress:8,status:"BUILDING" as const,updatedAt:now,brandKitId:brand?.id,voiceProfile:voice};
    await persistence.save({id,kind,status:"BUILDING",title:raw.title,progress:raw.progress,updatedAt:now,raw});
    await persistence.setActive(kind,id);
-   window.location.href="/creator-college";
+   window.location.href="/creator-college/digital";
    return;
   }
 
