@@ -361,7 +361,6 @@ model CreatorProfile {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
-  @@unique([userId, workspaceId])
   @@index([userId])
   @@index([workspaceId])
 }
