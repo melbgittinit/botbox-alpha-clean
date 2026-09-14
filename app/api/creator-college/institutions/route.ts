@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "../../../lib/prisma";
+import prisma from "../../../../lib/prisma";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const allowedTypes = new Set(["School", "Church", "Business", "Community / Nonprofit", "Workforce Program", "Other"]);
@@ -12,7 +12,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Honeypot: real visitors never fill this field.
     if (clean(body.website, 200)) {
       return NextResponse.json({ ok: true });
     }
