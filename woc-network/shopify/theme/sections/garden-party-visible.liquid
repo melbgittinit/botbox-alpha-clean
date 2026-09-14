@@ -1,0 +1,87 @@
+{% assign sid = 'garden-visible-' | append: section.id %}
+<section id="{{ sid }}" class="garden-visible">
+  <div class="gv-shell">
+    <div class="gv-intro">
+      <p class="gv-kicker">FROM THE EVE REPORT</p>
+      <h2>GARDEN PARTY</h2>
+      <span class="gv-rule"></span>
+      <p class="gv-lede">Something worth talking about?<br><strong>Bring the women together.</strong></p>
+      <p class="gv-question">Who would you love to see?</p>
+      <p class="gv-copy">Start with one girlfriend—or bring your whole circle together.</p>
+      <button class="garden-cta gv-main-cta" type="button">Build My Garden Party <span>→</span></button>
+      <p class="gv-note">You do not need a garden.<br>You only need someone you would love to see.</p>
+    </div>
+
+    <div class="gv-choices" aria-label="Garden Party group ideas">
+      <button class="garden-cta gv-card gv-card--hero" type="button" data-gp-group="one_friend" aria-label="Start a Garden Party with one girlfriend">
+        <img src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/one_girlfriend.jpg?v=1788067243" alt="Two girlfriends spending time together" width="1086" height="1448">
+        <span class="gv-shade"></span><span class="gv-label"><small>START SMALL</small><b>One Girlfriend</b><em>Just the two of you.</em></span>
+      </button>
+      <button class="garden-cta gv-card" type="button" data-gp-group="close_friends" aria-label="Start a Garden Party with close friends">
+        <img src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/close_friends.jpg?v=1788067203" alt="Close friends gathering together" width="1086" height="1448">
+        <span class="gv-shade"></span><span class="gv-label"><b>Close Friends</b></span>
+      </button>
+      <button class="garden-cta gv-card" type="button" data-gp-group="church_women" aria-label="Start a Garden Party with church women">
+        <img src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/church_women.jpg?v=1788067203" alt="Church women gathering together" width="1086" height="1448">
+        <span class="gv-shade"></span><span class="gv-label"><b>Church Women</b></span>
+      </button>
+      <button class="garden-cta gv-card" type="button" data-gp-group="sorority_sisters" aria-label="Start a Garden Party with sorority sisters">
+        <img src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/close_friends.jpg?v=1788067203" alt="Women enjoying a sister circle gathering" width="1086" height="1448">
+        <span class="gv-shade"></span><span class="gv-label"><b>Sorority Sisters</b></span>
+      </button>
+      <button class="garden-cta gv-card" type="button" data-gp-group="neighbors" aria-label="Start a Garden Party with neighbors">
+        <img src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/neighbors.jpg?v=1788067235" alt="Neighbors gathering together" width="1086" height="1448">
+        <span class="gv-shade"></span><span class="gv-label"><b>Neighbors</b></span>
+      </button>
+      <button class="garden-cta gv-card" type="button" data-gp-group="family_women" aria-label="Start a Garden Party with family women">
+        <img src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/family_women.jpg?v=1788067223" alt="Women in a family spending time together" width="1086" height="1448">
+        <span class="gv-shade"></span><span class="gv-label"><b>Family Women</b></span>
+      </button>
+    </div>
+  </div>
+  <div class="gv-bottom"><span>GATHER</span><i></i><span>TALK</span><i></i><span>LAUGH</span><i></i><span>GROW</span></div>
+</section>
+<style>
+/* The EVE Report previously carried a placeholder Garden Party panel. On this staging build,
+   the dedicated visible Garden Party section below replaces only that panel. */
+.eve-report-v2 .garden-entry{display:none!important}
+#{{ sid }}{position:relative;overflow:hidden;background:radial-gradient(circle at 85% 15%,rgba(194,151,64,.13),transparent 25%),linear-gradient(145deg,#041f16 0%,#0a3827 56%,#06271d 100%);color:#fff6e8;padding:74px 28px 34px}
+#{{ sid }}:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(to right,#000,transparent 48%);pointer-events:none}
+#{{ sid }} .gv-shell{width:min(1400px,100%);margin:auto;display:grid;grid-template-columns:.72fr 1.28fr;gap:50px;align-items:center;position:relative;z-index:2}
+#{{ sid }} .gv-intro{padding:30px 10px 30px 20px}
+#{{ sid }} .gv-kicker{font:800 11px Arial,sans-serif;letter-spacing:.24em;color:#e3c16b;margin:0 0 20px}
+#{{ sid }} h2{font:clamp(72px,8vw,120px)/.78 Georgia,serif;letter-spacing:-.045em;color:#e2bd63;margin:0}
+#{{ sid }} .gv-rule{display:block;width:170px;height:1px;background:#d6ad52;margin:30px 0}
+#{{ sid }} .gv-lede{font:28px/1.32 Georgia,serif;margin:0 0 28px;color:#fff9ed}
+#{{ sid }} .gv-lede strong{color:#e5c16a;font-weight:normal;font-style:italic}
+#{{ sid }} .gv-question{font:40px/1.05 Georgia,serif;margin:0 0 8px}
+#{{ sid }} .gv-copy{font:17px/1.5 Georgia,serif;color:#d8d1c6;margin:0 0 28px;max-width:430px}
+#{{ sid }} .gv-main-cta{width:min(430px,100%);min-height:64px;border:1px solid rgba(232,195,107,.55);border-radius:10px;background:linear-gradient(135deg,#74164f,#561039);color:#fff6df;padding:0 24px;display:flex;justify-content:space-between;align-items:center;font:22px Georgia,serif;cursor:pointer;box-shadow:0 18px 38px rgba(0,0,0,.22)}
+#{{ sid }} .gv-note{font:italic 19px/1.45 Georgia,serif;color:#dfbd68;margin:24px 0 0}
+#{{ sid }} .gv-choices{display:grid;grid-template-columns:1.18fr .82fr .82fr;grid-template-rows:270px 270px;gap:12px}
+#{{ sid }} .gv-card{position:relative;overflow:hidden;border:1px solid rgba(224,189,99,.4);border-radius:23px;padding:0;background:#0d2f24;cursor:pointer;text-align:left;min-width:0;box-shadow:0 18px 32px rgba(0,0,0,.18);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+#{{ sid }} .gv-card--hero{grid-row:1/3}
+#{{ sid }} .gv-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s ease}
+#{{ sid }} .gv-card--hero img{object-position:center}
+#{{ sid }} .gv-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(3,20,14,.92) 0%,rgba(3,20,14,.12) 56%,rgba(3,20,14,.04) 100%)}
+#{{ sid }} .gv-label{position:absolute;left:20px;right:18px;bottom:18px;color:#fff8eb;z-index:2;display:block}
+#{{ sid }} .gv-label small{display:block;font:800 9px Arial,sans-serif;letter-spacing:.18em;color:#e2bd64;margin-bottom:6px}
+#{{ sid }} .gv-label b{display:block;font:26px/1.02 Georgia,serif;font-weight:normal}
+#{{ sid }} .gv-card--hero .gv-label b{font-size:37px}
+#{{ sid }} .gv-label em{display:block;font:italic 15px Georgia,serif;color:#e9ddca;margin-top:8px}
+#{{ sid }} .gv-card:hover,#{{ sid }} .gv-card:focus-visible{transform:translateY(-3px);border-color:#e0bc66;box-shadow:0 22px 42px rgba(0,0,0,.28);outline:none}
+#{{ sid }} .gv-card:hover img,#{{ sid }} .gv-card:focus-visible img{transform:scale(1.035)}
+#{{ sid }} .gv-bottom{width:min(1400px,100%);margin:34px auto 0;display:flex;align-items:center;justify-content:center;gap:14px;color:#daba67;font:800 9px Arial,sans-serif;letter-spacing:.24em;position:relative;z-index:2}
+#{{ sid }} .gv-bottom i{width:4px;height:4px;border-radius:50%;background:#daba67}
+@media(max-width:1050px){#{{ sid }} .gv-shell{grid-template-columns:1fr;gap:22px}#{{ sid }} .gv-intro{text-align:center;padding:10px 10px 28px}#{{ sid }} .gv-rule{margin:26px auto}#{{ sid }} .gv-copy{margin-left:auto;margin-right:auto}#{{ sid }} .gv-main-cta{margin:auto}#{{ sid }} .gv-choices{grid-template-columns:1.1fr 1fr 1fr}}
+@media(max-width:720px){#{{ sid }}{padding:54px 12px 28px}#{{ sid }} h2{font-size:76px}#{{ sid }} .gv-lede{font-size:23px}#{{ sid }} .gv-question{font-size:34px}#{{ sid }} .gv-choices{grid-template-columns:1fr 1fr;grid-template-rows:330px repeat(3,190px);gap:9px}#{{ sid }} .gv-card--hero{grid-column:1/3;grid-row:auto}#{{ sid }} .gv-card{border-radius:18px}#{{ sid }} .gv-label{left:14px;bottom:14px}#{{ sid }} .gv-label b{font-size:20px}#{{ sid }} .gv-card--hero .gv-label b{font-size:31px}#{{ sid }} .gv-bottom{gap:8px;letter-spacing:.12em;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){#{{ sid }} .gv-card,#{{ sid }} .gv-card img{transition:none}}
+</style>
+{% schema %}{"name":"Garden Party Visible","settings":[],"presets":[{"name":"Garden Party Visible"}]}{% endschema %}
+
+<style>
+
+#{{ sid }}{background:#000;padding:90px 24px 45px}#{{ sid }} .gv-shell{display:block;max-width:1360px;margin:auto}#{{ sid }} .gv-intro{text-align:center;padding:0 0 44px}#{{ sid }} h2{font-size:clamp(68px,10vw,130px);color:#fff}#{{ sid }} h2 br{display:none}#{{ sid }} .gv-rule,#{{ sid }} .gv-main-cta{margin-left:auto;margin-right:auto}#{{ sid }} .gv-copy{max-width:none}#{{ sid }} .gv-choices{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;gap:30px}#{{ sid }} .gv-card,#{{ sid }} .gv-card--hero{grid-column:auto;grid-row:auto;min-height:0;border-radius:12px;background:#0b0b0b;display:block}#{{ sid }} .gv-card img{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:auto;object-fit:contain;transform:none}#{{ sid }} .gv-shade{display:none}#{{ sid }} .gv-label{position:static;display:block;padding:22px 24px;color:#fff}#{{ sid }} .gv-label b,#{{ sid }} .gv-card--hero .gv-label b{font-size:32px}
+@media(max-width:720px){#{{ sid }}{padding:60px 16px 30px}#{{ sid }} .gv-choices{grid-template-columns:1fr;gap:22px}#{{ sid }} .gv-label{padding:18px}#{{ sid }} .gv-label b{font-size:28px}}
+
+</style>

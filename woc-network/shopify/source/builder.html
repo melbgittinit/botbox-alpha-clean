@@ -1,0 +1,45 @@
+<dialog class="gp-app" data-gp-app aria-labelledby="gp-title-{{ section.id }}">
+  <div class="gp-wrap">
+    <header class="gp-top"><span>WOMEN OF COLOR <small>THE NETWORK · GARDEN PARTY</small></span><button type="button" data-gp-close aria-label="Close Garden Party planner">×</button></header>
+    <p class="gp-progress" data-gp-progress>YOUR CIRCLE STARTS HERE</p>
+    <h2 id="gp-title-{{ section.id }}" tabindex="-1" data-gp-title>Who would you love to see?</h2>
+    <p class="gp-intro" data-gp-intro>A few easy choices. A lovely plan. About 90 seconds.</p>
+    <p class="gp-story" data-gp-story hidden></p>
+    <form data-gp-form>
+      <section data-gp-step="0"><fieldset><legend>Choose your circle</legend><div class="gp-options gp-photo-options" data-gp-options="groupType"></div></fieldset></section>
+      <section data-gp-step="1" hidden><fieldset><legend>What kind of gathering?</legend><div class="gp-options" data-gp-options="gatheringType"></div></fieldset></section>
+      <section data-gp-step="2" hidden><fieldset><legend>How would you like it to feel?</legend><div class="gp-options" data-gp-options="mood"></div></fieldset></section>
+      <section data-gp-step="3" hidden>
+        <div class="gp-fields">
+          <label>Women attending, including you<input name="guestCount" type="number" min="2" max="40" value="6" required></label>
+          <label>Total gathering budget<select name="budgetRange" data-gp-select="budgetRange"></select></label>
+          <label>Where will you gather?<select name="locationType" data-gp-select="locationType"></select></label>
+          <label>How will food work?<select name="foodMethod" data-gp-select="foodMethod"></select></label>
+          <label>Inside or outside?<select name="indoorOutdoor" data-gp-select="indoorOutdoor"></select></label>
+          <label>How long?<select name="duration" data-gp-select="duration"></select></label>
+          <label class="gp-check"><input type="checkbox" name="dateUndecided" checked>We’ll choose a date together</label>
+          <div></div><label>Preferred date<input type="date" name="preferredDate" disabled></label><label>Preferred time (local)<input type="time" name="preferredTime" disabled></label>
+        </div><p class="gp-help">The budget is a planning target for the whole gathering. You can change the plan before sharing.</p>
+      </section>
+      <section data-gp-step="4" hidden><fieldset><legend>What brings you together?</legend><div class="gp-options" data-gp-options="reason"></div></fieldset><label class="gp-note-label">Anything you’d like to add? <span>(optional)</span><textarea name="hostNote" rows="3" maxlength="600" placeholder="A birthday, a fresh start, or simply missing your sisters…"></textarea></label></section>
+      <footer class="gp-nav"><button type="button" class="gp-secondary" data-gp-back>Back</button><button type="submit" class="gp-primary" data-gp-next>Continue →</button></footer>
+    </form>
+    <section data-gp-result hidden>
+      <img class="gp-reveal-photo" src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/toast.jpg?v=1788067683" alt="Editorial image of women celebrating around a table" width="1254" height="1254" loading="lazy">
+      <label class="gp-edit-title">Your party title<input data-gp-edit="partyTitle" maxlength="180"></label>
+      <label>Your gathering<textarea data-gp-edit="description" rows="3" maxlength="800"></textarea></label>
+      <div class="gp-stats" data-gp-stats></div>
+      <details open><summary>Your budget</summary><div class="gp-fields"><label>Estimated total from ($)<input type="number" min="0" max="100000" data-gp-edit="estimatedBudgetLow"></label><label>Estimated total to ($)<input type="number" min="0" max="100000" data-gp-edit="estimatedBudgetHigh"></label></div><p class="gp-help" data-gp-budget-note></p></details>
+      <div data-gp-plan-details></div>
+      <details><summary>A good word to carry</summary><label>Scripture reference<input data-gp-scripture="reference" maxlength="200"></label><label>Passage or reflection<textarea data-gp-scripture="text" rows="3" maxlength="1000"></textarea></label><p class="gp-help">Share this only if it feels right for your circle.</p></details>
+      <p class="gp-help" data-gp-photo-note></p>
+      <button type="button" class="gp-primary gp-wide" data-gp-invite>Invite My Sisters →</button>
+      <div class="gp-nav"><button type="button" class="gp-secondary" data-gp-change>Change My Choices</button><button type="button" class="gp-secondary" data-gp-save>Save My Party</button></div>
+    </section>
+    <section data-gp-keep hidden><p>Keep a complete copy of your plan, including your edits.</p><button type="button" class="gp-primary gp-wide" data-gp-download>Download My Plan</button><p class="gp-help">Your download stays with you. Email delivery and private host access are coming next.</p><button type="button" class="gp-secondary" data-gp-return>Back to My Party</button></section>
+    <section data-gp-invitation hidden><p>A personal invitation, ready for you to share.</p><div class="gp-fields"><label>Your first name <span>(optional)</span><input name="hostFirstName" maxlength="80" autocomplete="given-name"></label><label>Invitation voice<select data-gp-voice><option value="warm">Warm & personal</option><option value="joyful">Joyful & playful</option><option value="elegant">Elegant & gracious</option></select></label></div><label>Your invitation<textarea data-gp-invitation-copy rows="12" maxlength="4000"></textarea></label><p class="gp-help">Guests can reply directly to you. Private RSVP links and email invitations are coming next.</p><div class="gp-nav"><button type="button" class="gp-secondary" data-gp-copy>Copy Invitation</button><button type="button" class="gp-primary" data-gp-share>Share Invitation</button></div><button type="button" class="gp-secondary" data-gp-return>Back to My Party</button></section>
+    <p class="gp-status" data-gp-status role="status" aria-live="polite"></p>
+    <p class="gp-signoff">You do not need a garden. You only need someone you would love to see.</p>
+  </div>
+</dialog>
+<noscript><p>Enable JavaScript to use the Garden Party planner.</p></noscript>

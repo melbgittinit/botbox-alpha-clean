@@ -1,0 +1,233 @@
+<dialog class="gp-app" data-gp-app aria-labelledby="gp-title-{{ section.id }}">
+  <div class="gp-wrap">
+    <header class="gp-top"><span>WOMEN OF COLOR <small>THE NETWORK · GARDEN PARTY</small></span><button type="button" data-gp-close aria-label="Close Garden Party planner">×</button></header>
+    <p class="gp-progress" data-gp-progress>YOUR CIRCLE STARTS HERE</p>
+    <h2 id="gp-title-{{ section.id }}" tabindex="-1" data-gp-title>Who would you love to see?</h2>
+    <p class="gp-intro" data-gp-intro>A few easy choices. A lovely plan. About 90 seconds.</p>
+    <p class="gp-story" data-gp-story hidden></p>
+    <form data-gp-form>
+      <section data-gp-step="0"><fieldset><legend>Choose your circle</legend><div class="gp-options gp-photo-options" data-gp-options="groupType"></div></fieldset></section>
+      <section data-gp-step="1" hidden><fieldset><legend>What kind of gathering?</legend><div class="gp-options" data-gp-options="gatheringType"></div></fieldset></section>
+      <section data-gp-step="2" hidden><fieldset><legend>How would you like it to feel?</legend><div class="gp-options" data-gp-options="mood"></div></fieldset></section>
+      <section data-gp-step="3" hidden>
+        <div class="gp-fields">
+          <label>Women attending, including you<input name="guestCount" type="number" min="2" max="40" value="6" required></label>
+          <label>Total gathering budget<select name="budgetRange" data-gp-select="budgetRange"></select></label>
+          <label>Where will you gather?<select name="locationType" data-gp-select="locationType"></select></label>
+          <label>How will food work?<select name="foodMethod" data-gp-select="foodMethod"></select></label>
+          <label>Inside or outside?<select name="indoorOutdoor" data-gp-select="indoorOutdoor"></select></label>
+          <label>How long?<select name="duration" data-gp-select="duration"></select></label>
+          <label class="gp-check"><input type="checkbox" name="dateUndecided" checked>We’ll choose a date together</label>
+          <div></div><label>Preferred date<input type="date" name="preferredDate" disabled></label><label>Preferred time (local)<input type="time" name="preferredTime" disabled></label>
+        </div><p class="gp-help">The budget is a planning target for the whole gathering. You can change the plan before sharing.</p>
+      </section>
+      <section data-gp-step="4" hidden><fieldset><legend>What brings you together?</legend><div class="gp-options" data-gp-options="reason"></div></fieldset><label class="gp-note-label">Anything you’d like to add? <span>(optional)</span><textarea name="hostNote" rows="3" maxlength="600" placeholder="A birthday, a fresh start, or simply missing your sisters…"></textarea></label></section>
+      <footer class="gp-nav"><button type="button" class="gp-secondary" data-gp-back>Back</button><button type="submit" class="gp-primary" data-gp-next>Continue →</button></footer>
+    </form>
+    <section data-gp-result hidden>
+      <img class="gp-reveal-photo" src="https://cdn.shopify.com/s/files/1/0766/0335/9530/files/toast.jpg?v=1788067683" alt="Editorial image of women celebrating around a table" width="1254" height="1254" loading="lazy">
+      <label class="gp-edit-title">Your party title<input data-gp-edit="partyTitle" maxlength="180"></label>
+      <label>Your gathering<textarea data-gp-edit="description" rows="3" maxlength="800"></textarea></label>
+      <div class="gp-stats" data-gp-stats></div>
+      <details open><summary>Your budget</summary><div class="gp-fields"><label>Estimated total from ($)<input type="number" min="0" max="100000" data-gp-edit="estimatedBudgetLow"></label><label>Estimated total to ($)<input type="number" min="0" max="100000" data-gp-edit="estimatedBudgetHigh"></label></div><p class="gp-help" data-gp-budget-note></p></details>
+      <div data-gp-plan-details></div>
+      <details><summary>A good word to carry</summary><label>Scripture reference<input data-gp-scripture="reference" maxlength="200"></label><label>Passage or reflection<textarea data-gp-scripture="text" rows="3" maxlength="1000"></textarea></label><p class="gp-help">Share this only if it feels right for your circle.</p></details>
+      <p class="gp-help" data-gp-photo-note></p>
+      <button type="button" class="gp-primary gp-wide" data-gp-invite>Invite My Sisters →</button>
+      <div class="gp-nav"><button type="button" class="gp-secondary" data-gp-change>Change My Choices</button><button type="button" class="gp-secondary" data-gp-save>Save My Party</button></div>
+    </section>
+    <section data-gp-keep hidden><p>Keep a complete copy of your plan, including your edits.</p><button type="button" class="gp-primary gp-wide" data-gp-download>Download My Plan</button><p class="gp-help">Your download stays with you. Email delivery and private host access are coming next.</p><button type="button" class="gp-secondary" data-gp-return>Back to My Party</button></section>
+    <section data-gp-invitation hidden><p>A personal invitation, ready for you to share.</p><div class="gp-fields"><label>Your first name <span>(optional)</span><input name="hostFirstName" maxlength="80" autocomplete="given-name"></label><label>Invitation voice<select data-gp-voice><option value="warm">Warm & personal</option><option value="joyful">Joyful & playful</option><option value="elegant">Elegant & gracious</option></select></label></div><label>Your invitation<textarea data-gp-invitation-copy rows="12" maxlength="4000"></textarea></label><p class="gp-help">Guests can reply directly to you. Private RSVP links and email invitations are coming next.</p><div class="gp-nav"><button type="button" class="gp-secondary" data-gp-copy>Copy Invitation</button><button type="button" class="gp-primary" data-gp-share>Share Invitation</button></div><button type="button" class="gp-secondary" data-gp-return>Back to My Party</button></section>
+    <p class="gp-status" data-gp-status role="status" aria-live="polite"></p>
+    <p class="gp-signoff">You do not need a garden. You only need someone you would love to see.</p>
+  </div>
+</dialog>
+<noscript><p>Enable JavaScript to use the Garden Party planner.</p></noscript>
+
+{% stylesheet %}
+.gp-app{color:#173c2e;background:#fbf7ef;border:1px solid #b69b60;border-radius:22px;width:min(860px,calc(100% - 24px));max-width:860px;max-height:92dvh;margin:auto;padding:0;box-shadow:0 24px 90px #0008;font:17px/1.5 Arial,sans-serif;overflow-y:auto;overscroll-behavior:contain}.gp-app::backdrop{background:#02170ed9}.gp-app *{box-sizing:border-box}.gp-app [hidden]{display:none!important}.gp-app .gp-wrap{padding:26px 38px 22px}.gp-app .gp-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d9caa9;padding-bottom:18px;gap:16px;font:700 18px Georgia,serif;letter-spacing:.1em}.gp-app .gp-top small{display:block;font:10px/1.5 Arial;letter-spacing:.15em;margin-top:6px}.gp-app button,.gp-app input,.gp-app select,.gp-app textarea{font:inherit}.gp-app button{cursor:pointer}.gp-app .gp-top button{flex-shrink:0;width:48px;height:48px;border:1px solid #bcaa82;border-radius:50%;background:transparent;color:#173c2e;font-size:28px}.gp-app .gp-progress{font:700 11px/1.5 Arial;letter-spacing:.17em;color:#6f5830;text-align:center;margin:28px 0 12px}.gp-app h2{font:clamp(32px,5vw,48px)/1.08 Georgia,serif;color:#173c2e!important;text-align:center;margin:0}.gp-app .gp-intro{text-align:center;color:#665b50;max-width:570px;margin:16px auto 26px}.gp-app .gp-story{border-left:3px solid #97773e;padding:10px 16px;background:#f0e8d8}.gp-app fieldset{border:0;padding:0;margin:0;min-width:0}.gp-app legend{font:22px Georgia,serif;margin:0 0 16px;padding:0}.gp-app .gp-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.gp-app .gp-option{position:relative;display:block;margin:0;cursor:pointer}.gp-app .gp-option input{position:absolute;top:15px;left:12px;width:20px;height:20px;accent-color:#70204f;z-index:1}.gp-app .gp-option span{display:block;min-height:64px;padding:17px 12px 17px 42px;border:1px solid #c7b994;border-radius:12px;background:#fffaf3;color:#173c2e;overflow:hidden;font:20px/1.35 Georgia,serif}.gp-app .gp-option input:checked+span{border:2px solid #70204f;padding:16px 11px 16px 41px;background:#f1e7ed;color:#621b45}.gp-app .gp-option input:focus-visible+span{outline:3px solid #20654d;outline-offset:3px}.gp-app .gp-photo-options{grid-template-columns:repeat(3,minmax(0,1fr))}.gp-app .gp-photo-options .gp-option span{padding:0 0 14px;text-align:center;min-height:64px}.gp-app .gp-photo-options .gp-option input:checked+span{padding:0 0 13px}.gp-app .gp-photo-options img{display:block;width:100%;height:155px;object-fit:cover;object-position:center 32%;margin-bottom:12px}.gp-app .gp-photo-options b{font-weight:normal;display:block;padding:0 10px}.gp-app .gp-photo-options .gp-text-option span{min-height:74px;padding:22px 10px 18px 32px}.gp-app .gp-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}.gp-app label{display:block;color:#284736;font-size:15px}.gp-app label>input:not([type=radio]):not([type=checkbox]),.gp-app select,.gp-app textarea{display:block;border:1px solid #bdae8f;border-radius:8px;background:#fffdf9;color:#243e31;padding:12px;width:100%;min-height:48px;margin:8px 0 16px;line-height:1.5}.gp-app textarea{resize:vertical}.gp-app input:disabled{opacity:.5}.gp-app .gp-check{display:flex;gap:10px;align-items:center;min-height:48px}.gp-app .gp-check input{width:22px;height:22px;accent-color:#70204f}.gp-app .gp-note-label{margin-top:24px}.gp-app .gp-primary,.gp-app .gp-secondary{min-height:54px;padding:12px 22px;border-radius:9px;border:1px solid #70204f;font:20px/1.3 Georgia,serif;text-align:center}.gp-app .gp-primary{background:#70204f;color:#fff!important}.gp-app .gp-secondary{background:transparent;color:#5b2043}.gp-app .gp-nav{display:flex;justify-content:space-between;gap:12px;margin:26px 0 18px}.gp-app .gp-nav>*{flex:1}.gp-app .gp-wide{display:block;width:100%;margin:22px 0 12px}.gp-app .gp-help{font:14px/1.55 Arial;color:#6b6053}.gp-app .gp-signoff{font:italic 16px/1.5 Georgia;color:#6d5840;text-align:center;border-top:1px solid #d9caa9;padding-top:20px;margin:24px 0 0}.gp-app .gp-status{color:#173c2e;font-weight:700}.gp-app .gp-status:empty{display:none}.gp-app .gp-reveal-photo{display:block;width:100%;height:280px;object-fit:cover;object-position:center 43%;border-radius:14px;margin-bottom:24px}.gp-app .gp-edit-title input{font:italic 30px/1.2 Georgia,serif!important;color:#70204f!important}.gp-app .gp-stats{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid #c6b388;margin:22px 0;text-align:center}.gp-app .gp-stats div{padding:16px 8px;font:20px Georgia,serif}.gp-app .gp-stats small{display:block;font:11px Arial;letter-spacing:.1em;color:#6b6053;margin-top:6px}.gp-app details{border-bottom:1px solid #d9caa9;padding:0 0 14px;margin-bottom:8px}.gp-app summary{cursor:pointer;font:23px/1.4 Georgia;color:#173c2e;padding:16px 0;min-height:56px}.gp-app :focus-visible{outline:3px solid #20654d;outline-offset:3px}.gp-app h2:focus{outline:none}
+@media(max-width:600px){.gp-app{width:calc(100% - 12px);max-height:96dvh;border-radius:14px}.gp-app .gp-wrap{padding:18px}.gp-app .gp-top{font-size:15px}.gp-app .gp-photo-options{grid-template-columns:repeat(2,minmax(0,1fr))}.gp-app .gp-photo-options img{height:140px}.gp-app .gp-option span{font-size:18px}.gp-app .gp-fields{grid-template-columns:1fr;gap:4px}.gp-app .gp-fields>div:empty{display:none}.gp-app .gp-nav{flex-wrap:wrap}.gp-app .gp-nav>*{flex:1 1 140px}.gp-app .gp-reveal-photo{height:220px}.gp-app .gp-stats div{font-size:18px}.gp-app .gp-signoff{font-size:15px}}
+
+{% endstylesheet %}
+{% javascript %}
+/* Controlled Garden Party plans. No network, AI service, or personal data storage. */
+const GP_OPTIONS = {
+  groupType: [['one_friend','One girlfriend'],['close_friends','Close friends'],['church_women','Church women'],['sorority_sisters','Sorority sisters'],['neighbors','Neighbors'],['family_women','Family women'],['coworkers','Coworkers'],['custom_group','My own circle']],
+  gatheringType: [['coffee','Coffee & conversation'],['brunch','Brunch'],['dinner','Dinner'],['porch_patio','Porch or patio'],['food_fashion_fun','Food, fashion & fun'],['scripture_sisters','Scripture & sisters'],['event_outing','An outing'],['eve_conversation','An EVE conversation'],['surprise_me','Choose for me']],
+  mood: [['easy','Easy'],['meaningful','Meaningful'],['joyful','Joyful'],['beautiful','Beautiful'],['elegant','Elegant'],['faith_filled','Faith-filled'],['fabulous','Fabulous'],['surprise_me','Choose for me']],
+  reason: [['miss_each_other','We miss each other'],['encouragement','A little encouragement'],['celebration','Something to celebrate'],['starting_over','A fresh start'],['laughter','We need a laugh'],['meaningful_conversation','A real conversation'],['meet_new_women','Meet new women'],['just_gather','Just because'],['custom','A reason of our own']],
+  locationType: [['home','At home'],['cafe','A cafe or restaurant'],['community','A community space'],['park','A park'],['other','Somewhere else']],
+  budgetRange: [['0_25','$0–25'],['25_50','$25–50'],['50_100','$50–100'],['100_200','$100–200'],['200_350','$200–350']],
+  foodMethod: [['host','I will provide it'],['potluck','Everyone brings something'],['takeaway','Order in'],['no_food','No food planned']],
+  indoorOutdoor: [['indoor','Indoors'],['outdoor','Outdoors'],['either','Either works']],
+  duration: [['60','An hour'],['90','An hour and a half'],['120','Two hours'],['180','Three hours']]
+};
+const GP_PACKS = {
+  everyday: ['What has brought you a little joy lately?','What would you love to make more room for?','How can we stay connected after today?'],
+  encouragement: ['What is helping you keep going?','What kind of encouragement feels useful right now?','What is one small kindness we can offer each other?'],
+  celebration: ['What are we celebrating, big or small?','Who helped you reach this moment?','What would you love to celebrate next?'],
+  fresh: ['What would a gentle fresh start look like?','What wisdom do you want to carry forward?','What is one manageable next step?'],
+  laughter: ['What is a harmless mishap you can laugh about now?','What always makes you smile?','What fun tradition could we start together?'],
+  connection: ['What is something you wish people asked you about?','What has changed your perspective lately?','What would you love to learn from another woman here?']
+};
+const GP_SCRIPTURES = {
+  friendship: {reference:'Proverbs 17:17 (KJV)', text:'A friend loveth at all times, and a brother is born for adversity.'},
+  encouragement: {reference:'1 Thessalonians 5:11 (KJV)', text:'Wherefore comfort yourselves together, and edify one another, even as also ye do.'},
+  joy: {reference:'Psalm 118:24 (KJV)', text:'This is the day which the LORD hath made; we will rejoice and be glad in it.'},
+  fresh: {reference:'Lamentations 3:23 (KJV)', text:'They are new every morning: great is thy faithfulness.'}
+};
+function gpText(value, max=600) { return String(value || '').trim().slice(0,max); }
+function gpChoice(key, value, fallback) {return GP_OPTIONS[key].some(x=>x[0]===String(value)) ? String(value) : fallback;}
+function gpLabel(key,value) {return (GP_OPTIONS[key].find(x=>x[0]===String(value)) || ['',value])[1];}
+function gpGenerate(input={}, story=null) {
+  const groupType=gpChoice('groupType',input.groupType,'close_friends');
+  let gatheringType=gpChoice('gatheringType',input.gatheringType,'coffee');
+  if(gatheringType==='surprise_me') gatheringType=groupType==='one_friend'?'coffee':'brunch';
+  const mood=gpChoice('mood',input.mood,'easy');
+  const reason=gpChoice('reason',input.reason,'just_gather');
+  const foodMethod=gpChoice('foodMethod',input.foodMethod,'host');
+  const budgetRange=gpChoice('budgetRange',input.budgetRange,'50_100');
+  const budget=budgetRange.split('_').map(Number);
+  const rawCount=Number(input.guestCount);
+  const guestCount=Number.isFinite(rawCount)&&rawCount>=2?Math.min(40,Math.round(rawCount)):(groupType==='one_friend'?2:6);
+  const durationMinutes=Number(gpChoice('duration',input.duration,'90'));
+  const locationType=gpChoice('locationType',input.locationType,'home');
+  const indoorOutdoor=gpChoice('indoorOutdoor',input.indoorOutdoor,'either');
+  const preferredDate=!input.dateUndecided&&/^\d{4}-\d{2}-\d{2}$/.test(input.preferredDate||'')?input.preferredDate:'';
+  const preferredTime=preferredDate&&/^([01]\d|2[0-3]):[0-5]\d$/.test(input.preferredTime||'')?input.preferredTime:'';
+  let partyTitle='Sister Circle Gathering';
+  if(groupType==='one_friend'&&gatheringType==='coffee') partyTitle='Coffee With One Girlfriend';
+  else if(groupType==='church_women'||gatheringType==='scripture_sisters') partyTitle='Church Ladies Around the Table';
+  else if(gatheringType==='food_fashion_fun') partyTitle='Food, Fashion & What Women Are Talking About';
+  else if(mood==='fabulous') partyTitle='Our Fabulous Sister Circle';
+  else if(gatheringType==='brunch') partyTitle='Saturday Sister Brunch';
+  // These are editable template names, not assumptions about the host's age or chosen weekday.
+  if(partyTitle==='Saturday Sister Brunch'&&preferredDate&&new Date(preferredDate+'T12:00:00').getDay()!==6) partyTitle='Sister Brunch';
+  const pack=reason==='encouragement'?'encouragement':reason==='starting_over'?'fresh':reason==='celebration'?'celebration':reason==='laughter'?'laughter':['meet_new_women','meaningful_conversation'].includes(reason)?'connection':'everyday';
+  const scripture={...GP_SCRIPTURES[pack==='encouragement'?'encouragement':pack==='fresh'?'fresh':['celebration','laughter'].includes(pack)?'joy':'friendship']};
+  const menuLevels=[['Tea or coffee from the pantry','Simple toast or a shared snack'],['Tea, coffee and water','Seasonal fruit','A simple baked treat'],['Tea, coffee and water','Seasonal fruit','A shared main dish'],['Tea, coffee and sparkling water','A shared main dish and salad','Fruit or a small dessert'],['A welcome drink and water','A main dish with two sides','A shared dessert']];
+  const tier=GP_OPTIONS.budgetRange.findIndex(x=>x[0]===budgetRange);
+  let menu=[...menuLevels[tier]];
+  if(gatheringType==='brunch') menu=menu.map(x=>x.includes('main dish')?'Egg bake or a plant-based brunch dish':x);
+  if(gatheringType==='dinner') menu=menu.map(x=>x.includes('main dish')?'A one-pot supper with a vegetarian option':x);
+  if(gatheringType==='coffee') menu=menu.slice(0,2);
+  if(gatheringType==='event_outing') menu=['Agree together whether to eat before or after the outing.','Check venue menu prices before booking.'];
+  if(foodMethod==='no_food') menu=['No food planned. Make drinking water available.'];
+  const contributionSuggestions=foodMethod==='potluck'?['Ask one sister to bring a dish.','Ask another to bring drinks.','Confirm portions and dietary needs before shopping.']:[];
+  const shoppingList=foodMethod==='no_food'?['Drinking water']:foodMethod==='takeaway'?['Confirm the order, portions and total with the restaurant.','Water, serving utensils and napkins.']:['Check the pantry before buying.',...menu.map(x=>'Ingredients for: '+x),'Water, napkins and serving utensils.'];
+  let checklist=['Choose a date and confirm the place.','Invite your circle and ask guests to reply directly to you.','Ask about dietary needs and step-free access.'];
+  if(guestCount>4) checklist.push('Count seats and plan enough table space.');
+  if(guestCount>8) checklist.push('Ask a co-host to help welcome everyone.');
+  if(guestCount>16) checklist.push('Confirm the venue capacity and divide hosting tasks.');
+  if(guestCount>24) checklist.push('Organize smaller conversation circles.');
+  if(indoorOutdoor==='outdoor'||gatheringType==='porch_patio'||locationType==='park') checklist.push('Choose a weather backup and check access to restrooms.');
+  if(foodMethod==='potluck') checklist.push('Confirm who is bringing each item.');
+  if(foodMethod==='takeaway') checklist.push('Schedule collection or delivery.');
+  checklist.push('Prepare the conversation questions.','Set aside '+durationMinutes+' minutes; leave room for everyone to speak.','Afterward, thank each woman for coming.');
+  let conversationQuestions=[...GP_PACKS[pack]];
+  const source=story&&gpText(story.headline)?{id:gpText(story.id,120),headline:gpText(story.headline,250),category:gpText(story.category,120),image:gpText(story.image,1000),question:gpText(story.question),scripture:gpText(story.scripture),url:gpText(story.url,1000)}:null;
+  if(source) {conversationQuestions.unshift(source.question||'What stood out to you in “'+source.headline+'”?');if(source.scripture){scripture.reference=source.scripture;scripture.text='Read this passage together if your circle would enjoy it.';}}
+  const voice=['elegant','beautiful'].includes(mood)?'elegant':['joyful','fabulous'].includes(mood)?'joyful':'warm';
+  const description='A '+(mood==='surprise_me'?'joyful':gpLabel('mood',mood).toLowerCase())+' '+durationMinutes+'-minute '+gpLabel('gatheringType',gatheringType).toLowerCase()+' gathering for '+guestCount+' women, including you. '+gpLabel('reason',reason)+'.';
+  return {partyTitle,description,groupType,gatheringType,mood,reason,guestCount,durationMinutes,locationType,indoorOutdoor,preferredDate,preferredTime,dateUndecided:!preferredDate,foodMethod,estimatedBudgetLow:budget[0],estimatedBudgetHigh:budget[1],budgetNote:'A planning target for the whole gathering, not a price quote. Check local costs and adjust portions. '+(foodMethod==='potluck'?'Includes the value of shared contributions. ':'')+(gatheringType==='event_outing'?'Confirm any tickets and transport separately.':''),menu,shoppingList,contributionSuggestions,checklist,conversationQuestions,scripture,invitationVoice:voice,hostNote:gpText(input.hostNote),photoSuggestion:'If everyone agrees, take one photo together. Ask separately before posting or submitting it.',sourceStoryId:source?source.id:null,sourceStory:source};
+}
+function gpInvitation(plan,hostName='',voice=plan.invitationVoice) {
+  const openings={warm:'I would love to spend some time with you.',joyful:'Let’s make a little room for laughter and something lovely!',elegant:'You are warmly invited to a gathering of good company and conversation.'};
+  return [openings[voice]||openings.warm,plan.partyTitle,plan.description,'When: '+(plan.preferredDate||'We will choose a date together')+(plan.preferredTime?' at '+plan.preferredTime:''),'Where: '+gpLabel('locationType',plan.locationType)+' — I will share the details directly.','Please reply to me to let me know whether you can come.',plan.hostNote,hostName?'With love, '+gpText(hostName,80):''].filter(Boolean).join('\n\n');
+}
+
+
+function gpMount(dialog) {
+  if(dialog.dataset.mounted) return;
+  dialog.dataset.mounted='true';
+  const $=s=>dialog.querySelector(s), $$=s=>[...dialog.querySelectorAll(s)];
+  const form=$('[data-gp-form]'), heading=$('[data-gp-title]');
+  const defaults={groupType:'close_friends',gatheringType:'coffee',mood:'easy',reason:'just_gather',budgetRange:'50_100',locationType:'home',foodMethod:'host',indoorOutdoor:'either',duration:'90'};
+  const portraits={one_friend:'one_girlfriend.jpg?v=1788067243',close_friends:'close_friends.jpg?v=1788067203',church_women:'church_women.jpg?v=1788067203',sorority_sisters:'close_friends.jpg?v=1788067203',neighbors:'neighbors.jpg?v=1788067235',family_women:'family_women.jpg?v=1788067223'};
+  let step=0, plan=null, source=null, trigger=null, oldOverflow='', invitationTouched=false;
+  const abort=new AbortController(), listen=(el,event,fn)=>el.addEventListener(event,fn,{signal:abort.signal});
+  function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
+  $$('[data-gp-options]').forEach(container=>{
+    const key=container.dataset.gpOptions;
+    GP_OPTIONS[key].forEach(([value,label])=>{
+      const item=node('label',undefined,'gp-option'+(key==='groupType'&&!portraits[value]?' gp-text-option':''));
+      const radio=document.createElement('input');radio.type='radio';radio.name=key;radio.value=value;radio.checked=defaults[key]===value;
+      const span=node('span');
+      if(key==='groupType'&&portraits[value]){const img=document.createElement('img');img.src='https://cdn.shopify.com/s/files/1/0766/0335/9530/files/'+portraits[value];img.alt='';img.width=1086;img.height=1448;img.loading='lazy';span.append(img,node('b',label));}else span.textContent=label;
+      item.append(radio,span);container.append(item);
+    });
+  });
+  $$('[data-gp-select]').forEach(select=>{GP_OPTIONS[select.dataset.gpSelect].forEach(([value,label])=>{select.add(new Option(label,value));});select.value=defaults[select.dataset.gpSelect];});
+  const titles=['Who would you love to see?','What shall we do together?','Set the feeling.','Make it work for you.','Give it a little meaning.'];
+  function status(text=''){$('[data-gp-status]').textContent=text;}
+  function screen(name,title,intro=''){
+    form.hidden=name!=='form';$('[data-gp-result]').hidden=name!=='result';$('[data-gp-keep]').hidden=name!=='keep';$('[data-gp-invitation]').hidden=name!=='invitation';
+    heading.textContent=title;$('[data-gp-intro]').textContent=intro;$('[data-gp-progress]').textContent=name==='form'?'STEP '+(step+1)+' OF 5':'MADE FOR YOUR CIRCLE';status();dialog.scrollTop=0;heading.focus({preventScroll:true});
+  }
+  function showStep(){screen('form',titles[step],step===0?'A few easy choices. A lovely plan. About 90 seconds.':'Choose what feels right. You can change it later.');$$('[data-gp-step]').forEach(el=>el.hidden=Number(el.dataset.gpStep)!==step);$('[data-gp-back]').hidden=step===0;$('[data-gp-next]').textContent=step===4?'Create My Garden Party →':'Continue →';}
+  function data(){const d=Object.fromEntries(new FormData(form));d.dateUndecided=form.elements.dateUndecided.checked;return d;}
+  function dateState(){const off=form.elements.dateUndecided.checked;form.elements.preferredDate.disabled=off;form.elements.preferredTime.disabled=off;form.elements.preferredDate.required=!off;}
+  listen(form.elements.dateUndecided,'change',dateState);
+  listen(form,'change',event=>{if(event.target.name==='groupType')form.elements.guestCount.value=event.target.value==='one_friend'?2:6;});
+  listen(form,'submit',event=>{
+    event.preventDefault();
+    if(step===3){if(!form.elements.guestCount.reportValidity()||!form.elements.preferredDate.reportValidity()||!form.elements.preferredTime.reportValidity())return;}
+    if(step<4){step++;showStep();}else{plan=gpGenerate(data(),source);renderPlan();}
+  });
+  // Validate only the visible step, avoiding hidden required controls blocking progression.
+  form.noValidate=true;
+  listen($('[data-gp-back]'),'click',()=>{step=Math.max(0,step-1);showStep();});
+  const details=[['menu','Your menu'],['shoppingList','Your shopping list'],['contributionSuggestions','What sisters can bring'],['checklist','Your host checklist'],['conversationQuestions','Conversation cards']];
+  details.forEach(([key,label])=>{const detail=node('details');detail.append(node('summary',label));const field=node('label','Make it yours — one item per line');const textarea=document.createElement('textarea');textarea.rows=5;textarea.maxLength=5000;textarea.dataset.gpList=key;field.append(textarea);detail.append(field);$('[data-gp-plan-details]').append(detail);});
+  function updateStats(){const el=$('[data-gp-stats]');el.replaceChildren();[[plan.guestCount,'WOMEN, INCLUDING YOU'],[plan.durationMinutes+' min','TIME TOGETHER'],['$'+plan.estimatedBudgetLow+'–'+plan.estimatedBudgetHigh,'TOTAL BUDGET']].forEach(([value,label])=>{const item=node('div',String(value));item.append(node('small',label));el.append(item);});}
+  function renderPlan(){
+    $$('[data-gp-edit]').forEach(el=>el.value=plan[el.dataset.gpEdit]);$$('[data-gp-list]').forEach(el=>el.value=plan[el.dataset.gpList].join('\n'));$$('[data-gp-scripture]').forEach(el=>el.value=plan.scripture[el.dataset.gpScripture]);
+    $('[data-gp-budget-note]').textContent=plan.budgetNote;$('[data-gp-photo-note]').textContent=plan.photoSuggestion;updateStats();screen('result','Your Garden Party is ready.','A little planning. A lot to look forward to. Everything below is yours to edit.');
+  }
+  function readEdits(){
+    const low=$('[data-gp-edit="estimatedBudgetLow"]'),high=$('[data-gp-edit="estimatedBudgetHigh"]');
+    high.setCustomValidity('');
+    if(!low.reportValidity()||!high.reportValidity())return false;
+    if(Number(high.value)<Number(low.value)){high.setCustomValidity('Enter an upper budget at least as large as the lower budget.');high.reportValidity();return false;}
+    $$('[data-gp-edit]').forEach(el=>plan[el.dataset.gpEdit]=el.type==='number'?Number(el.value):el.value.trim());
+    if(!plan.partyTitle)plan.partyTitle='My Garden Party';
+    $$('[data-gp-list]').forEach(el=>plan[el.dataset.gpList]=el.value.split('\n').map(x=>x.trim()).filter(Boolean));$$('[data-gp-scripture]').forEach(el=>plan.scripture[el.dataset.gpScripture]=el.value.trim());updateStats();return true;
+  }
+  listen($('[data-gp-edit="estimatedBudgetHigh"]'),'input',e=>e.target.setCustomValidity(''));
+  listen($('[data-gp-edit="estimatedBudgetLow"]'),'input',()=> $('[data-gp-edit="estimatedBudgetHigh"]').setCustomValidity(''));
+  listen($('[data-gp-change]'),'click',()=>{if(readEdits()){step=0;showStep();}});
+  listen($('[data-gp-save]'),'click',()=>{if(readEdits())screen('keep','Keep your Garden Party.');});
+  function invitation(force=false){if(force||!invitationTouched)$('[data-gp-invitation-copy]').value=gpInvitation(plan,$('[name="hostFirstName"]').value,$('[data-gp-voice]').value);}
+  listen($('[data-gp-invite]'),'click',()=>{if(!readEdits())return;$('[data-gp-voice]').value=plan.invitationVoice;invitationTouched=false;invitation(true);screen('invitation','Invite your sisters.');});
+  listen($('[data-gp-invitation-copy]'),'input',()=>invitationTouched=true);
+  listen($('[name="hostFirstName"]'),'input',()=>invitation());
+  listen($('[data-gp-voice]'),'change',()=>{invitationTouched=false;invitation(true);});
+  $$('[data-gp-return]').forEach(el=>listen(el,'click',()=>screen('result','Your Garden Party is ready.','Everything below is yours to edit.')));
+  function plainPlan(){return [plan.partyTitle,plan.description,'Date: '+(plan.preferredDate||'To be chosen')+(plan.preferredTime?' at '+plan.preferredTime:''),'Place: '+gpLabel('locationType',plan.locationType),'Budget: $'+plan.estimatedBudgetLow+'–$'+plan.estimatedBudgetHigh,plan.budgetNote,...details.flatMap(([key,label])=>[label.toUpperCase(),...plan[key].map(x=>'• '+x)]),'A GOOD WORD',plan.scripture.reference,plan.scripture.text,plan.sourceStory?'Inspired by: '+plan.sourceStory.headline:'',plan.hostNote,plan.photoSuggestion,'Women of Color — The Network'].filter(Boolean).join('\n\n');}
+  listen($('[data-gp-download]'),'click',()=>{const url=URL.createObjectURL(new Blob([plainPlan()],{type:'text/plain;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='My-Garden-Party.txt';dialog.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);status('Your plan download has been requested. Check your downloads.');});
+  async function copy(){try{await navigator.clipboard.writeText($('[data-gp-invitation-copy]').value);status('Invitation copied. Paste it into a message to your sisters.');}catch{const field=$('[data-gp-invitation-copy]');field.focus();field.select();status('Select and copy the invitation text, then paste it into your message.');}}
+  listen($('[data-gp-copy]'),'click',copy);
+  listen($('[data-gp-share]'),'click',async()=>{if(!navigator.share){await copy();return;}try{await navigator.share({title:plan.partyTitle,text:$('[data-gp-invitation-copy]').value});}catch(error){if(error.name!=='AbortError')status('Sharing is unavailable here. Use Copy Invitation instead.');}});
+  function close(){dialog.close();}
+  listen($('[data-gp-close]'),'click',close);
+  listen(dialog,'close',()=>{document.body.style.overflow=oldOverflow;if(trigger&&trigger.isConnected)trigger.focus();});
+  listen(document,'click',event=>{
+    const entry=event.target.closest('button.garden-cta,[data-eve-gather]');if(!entry||dialog.contains(entry))return;
+    event.preventDefault();trigger=entry;
+    if(!dialog.open){oldOverflow=document.body.style.overflow;document.body.style.overflow='hidden';dialog.showModal();}
+    const group=entry.dataset.gpGroup;
+    if(group&&GP_OPTIONS.groupType.some(x=>x[0]===group)){form.elements.groupType.value=group;form.elements.guestCount.value=group==='one_friend'?2:6;}
+    const storyUrl=entry.dataset.gpStoryUrl;
+    source=storyUrl?{id:entry.dataset.gpStoryId||storyUrl,headline:entry.dataset.gpStoryHeadline,category:entry.dataset.gpStoryCategory,image:entry.dataset.gpStoryImage,question:entry.dataset.gpStoryQuestion,scripture:entry.dataset.gpStoryScripture,url:storyUrl}:null;
+    const storyEl=$('[data-gp-story]');storyEl.hidden=!source;storyEl.textContent=source?'Gather around: '+source.headline:'';
+    if(source)form.elements.gatheringType.value='eve_conversation';step=0;showStep();
+  });
+  listen(document,'shopify:section:unload',event=>{if(event.target.contains(dialog)){if(dialog.open)close();abort.abort();}});
+}
+document.querySelectorAll('[data-gp-app]').forEach(gpMount);
+document.addEventListener('shopify:section:load',event=>event.target.querySelectorAll('[data-gp-app]').forEach(gpMount));
+
+{% endjavascript %}
+{% schema %}
+{"name": "Garden Party Planner", "settings": [], "presets": [{"name": "Garden Party Planner"}]}
+{% endschema %}
