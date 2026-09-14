@@ -70,6 +70,9 @@ export default async function HubPage() {
           <a className="hub-button hub-button-secondary" href="/creator-college/desk">
             OPEN MY CREATOR DESK
           </a>
+          <a className="hub-inline-link" href="/creator-college/institutions">
+            CREATOR COLLEGE FOR ORGANIZATIONS →
+          </a>
           <small style={{ opacity: .7, lineHeight: 1.45 }}>
             Start small. Finish something. Then grow what you made.
           </small>
