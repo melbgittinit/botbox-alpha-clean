@@ -13,9 +13,8 @@ export default function CreatorLockerPage(){
   const [completions,setCompletions]=useState([]);
   const [entitlements,setEntitlements]=useState([]);
   const [loading,setLoading]=useState(true);
-  const [activating,setActivating]=useState(false);
+  const [checkoutLoading,setCheckoutLoading]=useState(false);
   const [error,setError]=useState('');
-  const [notice,setNotice]=useState('');
 
   useEffect(()=>{if(creatorId)load();},[creatorId]);
 
@@ -49,14 +48,24 @@ export default function CreatorLockerPage(){
     setLoading(false);
   }
 
-  async function activateSemesterOne(){
-    setActivating(true);setNotice('Activating Semester One in staging…');setError('');
-    const supabase=getSupabaseBrowserClient();
-    const {error:rpcError}=await supabase.rpc('grant_staging_semester_one',{p_creator_id:creatorId});
-    if(rpcError){setError(rpcError.message);setNotice('');setActivating(false);return;}
-    setNotice('Semester One is active for this staging Creator.');
-    setActivating(false);
-    await load();
+  async function beginSemesterOne(){
+    if(!creatorId||checkoutLoading)return;
+    setCheckoutLoading(true);setError('');
+    try{
+      const response=await fetch('/api/semester-one/checkout',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({creatorId})
+      });
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok||!result?.checkoutUrl){
+        throw new Error(result?.detail||'We could not start checkout. Please try again.');
+      }
+      window.location.assign(result.checkoutUrl);
+    }catch(err){
+      setError(err?.message||'We could not start checkout. Please try again.');
+      setCheckoutLoading(false);
+    }
   }
 
   const activeSemester=useMemo(()=>entitlements.some((e)=>e.program_slug==='semester-one'&&e.status==='active'),[entitlements]);
@@ -68,7 +77,6 @@ export default function CreatorLockerPage(){
     <section className="card">
       {loading&&<p className="lead">Opening secure Locker…</p>}
       {error&&<><div className="notice">{error}</div><div className="actions"><a className="btn secondary" href="/parent">Back to Dashboard</a></div></>}
-      {notice&&<div className="notice">{notice}</div>}
       {!loading&&!error&&creator&&<>
         <div className="eye">PRIVATE FAMILY VIEW</div>
         <div className="avatar" style={{fontSize:64}}>{creator.avatar_key||'💡'}</div>
@@ -110,8 +118,8 @@ export default function CreatorLockerPage(){
         </div>
 
         {activeSemester?<div className="actions"><a className="btn primary" href={`/semester-one/${creatorId}/mission-1`}>Start Mission 1 — My Creator Identity →</a></div>:<>
-          <div className="tile"><small>FOUNDING STUDENT STAGING OFFER</small><h2>$19 one-time</h2><p className="muted">Shopify product remains DRAFT. The control below simulates the entitlement only for this signed-in parent’s staging Creator.</p></div>
-          <button className="btn primary" disabled={activating} onClick={activateSemesterOne}>{activating?'Activating…':'STAGING TEST — Activate Semester One'}</button>
+          <div className="tile"><small>FOUNDING STUDENT OFFER</small><h2>$19 one-time</h2><p className="muted">Continue this Creator's journey into Semester One. Checkout is completed securely through the HUB's Shopify store.</p></div>
+          <button className="btn primary" disabled={checkoutLoading} onClick={beginSemesterOne}>{checkoutLoading?'Opening secure checkout…':'Begin Semester One →'}</button>
         </>}
 
         <div className="actions">
