@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '../../../../lib/supabase/server';
 
-const VARIANT_ID = process.env.SHOPIFY_SEMESTER_ONE_VARIANT_ID || process.env.NEXT_PUBLIC_SHOPIFY_SEMESTER_ONE_VARIANT_ID || '53746665226533';
+const VARIANT_ID = process.env.SHOPIFY_SEMESTER_ONE_VARIANT_ID || process.env.NEXT_PUBLIC_SHOPIFY_SEMESTER_ONE_VARIANT_ID || '53819422146853';
 const SHOP_ORIGIN = (process.env.NEXT_PUBLIC_SHOPIFY_STORE_ORIGIN || 'https://urbanspirit.biz').replace(/\/$/, '');
 
 function toBase64Url(value) {
