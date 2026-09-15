@@ -102,29 +102,53 @@ enum FastPayReservationStatus {
   EXPIRED
 }
 
+enum CreatorCreationKind {
+  DIGITAL_PRODUCT
+  VIDEO_SERIES
+  EVENT_KIT
+  SERVICE_OFFER
+  BRAND
+  BUSINESS
+}
+
+enum CreatorCreationStatus {
+  DRAFT
+  BUILDING
+  COMPLETE
+  ARCHIVED
+}
+
 model User {
   id                   String            @id @default(cuid())
   email                String            @unique
   displayName          String?
   memberships          Membership[]
   workspaceMemberships WorkspaceMember[]
+  creatorProfiles      CreatorProfile[]
+  creatorCreations     CreatorCreation[]
+  creatorFamilies      CreatorFamily[]
+  creatorTemplates     CreatorTemplate[]
   fastPayAccount       FastPayAccount?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 }
 
 model Workspace {
-  id        String            @id @default(cuid())
-  name      String
-  tagline   String?
-  mode      WorkspaceMode     @default(FAMILY)
-  members   WorkspaceMember[]
-  families  Family[]
-  people    Person[]
-  groups    Group[]
-  events    Event[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id               String            @id @default(cuid())
+  name             String
+  tagline          String?
+  mode             WorkspaceMode     @default(FAMILY)
+  members          WorkspaceMember[]
+  families         Family[]
+  people           Person[]
+  groups           Group[]
+  events           Event[]
+  creatorProfiles  CreatorProfile[]
+  creatorCreations CreatorCreation[]
+  creatorFamilies  CreatorFamily[]
+  creatorTemplates CreatorTemplate[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model WorkspaceMember {
@@ -174,9 +198,9 @@ model Membership {
 }
 
 model Person {
-  id               String          @id @default(cuid())
+  id               String         @id @default(cuid())
   familyId         String?
-  family           Family?         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  family           Family?        @relation(fields: [familyId], references: [id], onDelete: Cascade)
   firstName        String
   middleName       String?
   lastName         String?
@@ -187,13 +211,13 @@ model Person {
   summary          String?
   portraitUrl      String?
   assetLinks       AssetPerson[]
-  relationsA       Relationship[]  @relation("PersonA")
-  relationsB       Relationship[]  @relation("PersonB")
+  relationsA       Relationship[] @relation("PersonA")
+  relationsB       Relationship[] @relation("PersonB")
   groupMemberships GroupMember[]
   workspaceId      String?
-  workspace        Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  workspace        Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([workspaceId])
   @@index([familyId])
@@ -350,6 +374,163 @@ model Task {
   updatedAt   DateTime @updatedAt
 }
 
+model CreatorProfile {
+  id              String            @id @default(cuid())
+  userId          String
+  workspaceId     String?
+  defaultAudience String?
+  defaultVoice    String?
+  defaultLook     String?
+  goals           Json?
+  creationTypes   Json?
+  preferences     Json?
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace       Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  brandKits       CreatorBrandKit[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model CreatorBrandKit {
+  id        String            @id @default(cuid())
+  profileId String
+  name      String
+  type      String?
+  audience  String?
+  voice     String?
+  look      String?
+  colors    Json?
+  assets    Json?
+  avoid     Json?
+  footer    String?
+  notes     String?
+  profile   CreatorProfile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  creations CreatorCreation[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([profileId])
+}
+
+model CreatorCreation {
+  id              String                @id @default(cuid())
+  userId          String
+  workspaceId     String?
+  kind            CreatorCreationKind
+  status          CreatorCreationStatus @default(BUILDING)
+  title           String
+  format          String?
+  style           String?
+  currentStep     String?
+  progress        Int                   @default(0)
+  schemaVersion   Int                   @default(1)
+  revision        Int                   @default(1)
+  payload         Json
+  parentId        String?
+  familyId        String?
+  sourceId        String?
+  brandKitId      String?
+  completedAt     DateTime?
+  archivedAt      DateTime?
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace       Workspace?            @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  parent          CreatorCreation?      @relation("CreatorParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children        CreatorCreation[]     @relation("CreatorParent")
+  family          CreatorFamily?        @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  rootForFamilies CreatorFamily[]       @relation("CreatorFamilyRoot")
+  source          CreatorCreation?      @relation("CreatorSource", fields: [sourceId], references: [id], onDelete: SetNull)
+  derivatives     CreatorCreation[]     @relation("CreatorSource")
+  brandKit        CreatorBrandKit?      @relation(fields: [brandKitId], references: [id], onDelete: SetNull)
+  linksFrom       CreatorCreationLink[] @relation("LinkFrom")
+  linksTo         CreatorCreationLink[] @relation("LinkTo")
+  templates       CreatorTemplate[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([userId, status, updatedAt])
+  @@index([workspaceId, status, updatedAt])
+  @@index([kind, status])
+  @@index([familyId])
+  @@index([parentId])
+  @@index([sourceId])
+}
+
+model CreatorFamily {
+  id          String            @id @default(cuid())
+  userId      String
+  workspaceId String?
+  title       String
+  rootId      String?
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  root        CreatorCreation?  @relation("CreatorFamilyRoot", fields: [rootId], references: [id], onDelete: SetNull)
+  creations   CreatorCreation[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([rootId])
+}
+
+model CreatorCreationLink {
+  id        String          @id @default(cuid())
+  fromId    String
+  toId      String
+  relation  String
+  sortOrder Int             @default(0)
+  from      CreatorCreation @relation("LinkFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to        CreatorCreation @relation("LinkTo", fields: [toId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+
+  @@unique([fromId, toId, relation])
+  @@index([toId])
+}
+
+model CreatorTemplate {
+  id            String              @id @default(cuid())
+  userId        String
+  workspaceId   String?
+  sourceId      String?
+  kind          CreatorCreationKind
+  title         String
+  format        String?
+  style         String?
+  schemaVersion Int                 @default(1)
+  seed          Json
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  source        CreatorCreation?    @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([userId, kind])
+  @@index([workspaceId, kind])
+  @@index([sourceId])
+}
+
+model InstitutionalInquiry {
+  id               String   @id @default(cuid())
+  name             String
+  email            String
+  organization     String
+  role             String?
+  organizationType String
+  participantCount String?
+  goals            String
+  status           String   @default("NEW")
+  source           String   @default("creator-college-institutions")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([email, createdAt])
+  @@index([organizationType, createdAt])
+  @@index([status, createdAt])
+}
+
 model FastPayAccount {
   id               String                    @id @default(cuid())
   userId           String                    @unique
@@ -378,23 +559,23 @@ model FastPayActionDefinition {
 }
 
 model FastPayOffer {
-  id              String               @id @default(cuid())
-  key             String               @unique
+  id              String                   @id @default(cuid())
+  key             String                   @unique
   name            String
   description     String?
-  provider        FastPayProvider      @default(STRIPE)
+  provider        FastPayProvider          @default(STRIPE)
   providerPriceId String?
   amountCents     Int
-  currency        String               @default("usd")
+  currency        String                   @default("usd")
   actionKey       String?
   action          FastPayActionDefinition? @relation(fields: [actionKey], references: [key], onDelete: SetNull)
-  grantUnits      Int                  @default(0)
-  grantsUnlimited Boolean              @default(false)
-  offerStyle      String               @default("BUY")
-  active          Boolean              @default(false)
+  grantUnits      Int                      @default(0)
+  grantsUnlimited Boolean                  @default(false)
+  offerStyle      String                   @default("BUY")
+  active          Boolean                  @default(false)
   transactions    FastPayTransaction[]
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
 
   @@index([actionKey, active])
 }
@@ -422,32 +603,32 @@ model FastPayTransaction {
 }
 
 model FastPayEntitlement {
-  id                  String                   @id @default(cuid())
+  id                  String                    @id @default(cuid())
   accountId           String
-  account             FastPayAccount           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account             FastPayAccount            @relation(fields: [accountId], references: [id], onDelete: Cascade)
   actionKey           String
-  action              FastPayActionDefinition  @relation(fields: [actionKey], references: [key], onDelete: Restrict)
+  action              FastPayActionDefinition   @relation(fields: [actionKey], references: [key], onDelete: Restrict)
   sourceTransactionId String?
-  sourceTransaction   FastPayTransaction?      @relation(fields: [sourceTransactionId], references: [id], onDelete: SetNull)
-  unitsGranted        Int                      @default(0)
-  unitsRemaining      Int                      @default(0)
-  unlimited           Boolean                  @default(false)
-  status              FastPayEntitlementStatus @default(ACTIVE)
+  sourceTransaction   FastPayTransaction?       @relation(fields: [sourceTransactionId], references: [id], onDelete: SetNull)
+  unitsGranted        Int                       @default(0)
+  unitsRemaining      Int                       @default(0)
+  unlimited           Boolean                   @default(false)
+  status              FastPayEntitlementStatus  @default(ACTIVE)
   expiresAt           DateTime?
-  version             Int                      @default(0)
+  version             Int                       @default(0)
   ledgerEntries       FastPayLedgerEntry[]
   reservations        FastPayUsageReservation[]
-  createdAt           DateTime                 @default(now())
-  updatedAt           DateTime                 @updatedAt
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
 
   @@index([accountId, actionKey, status])
   @@index([sourceTransactionId])
 }
 
 model FastPayLedgerEntry {
-  id             String             @id @default(cuid())
+  id             String              @id @default(cuid())
   accountId      String
-  account        FastPayAccount     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account        FastPayAccount      @relation(fields: [accountId], references: [id], onDelete: Cascade)
   entitlementId  String?
   entitlement    FastPayEntitlement? @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
   deltaUnits     Int
@@ -455,43 +636,43 @@ model FastPayLedgerEntry {
   reason         String
   referenceType  String?
   referenceId    String?
-  idempotencyKey String             @unique
-  createdAt      DateTime           @default(now())
+  idempotencyKey String              @unique
+  createdAt      DateTime            @default(now())
 
   @@index([accountId, createdAt])
   @@index([entitlementId, createdAt])
 }
 
 model FastPayUsageReservation {
-  id             String                    @id @default(cuid())
+  id             String                   @id @default(cuid())
   accountId      String
-  account        FastPayAccount            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account        FastPayAccount           @relation(fields: [accountId], references: [id], onDelete: Cascade)
   entitlementId  String
-  entitlement    FastPayEntitlement        @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  entitlement    FastPayEntitlement       @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
   actionKey      String
-  action         FastPayActionDefinition   @relation(fields: [actionKey], references: [key], onDelete: Restrict)
+  action         FastPayActionDefinition  @relation(fields: [actionKey], references: [key], onDelete: Restrict)
   units          Int
-  status         FastPayReservationStatus  @default(RESERVED)
-  idempotencyKey String                    @unique
+  status         FastPayReservationStatus @default(RESERVED)
+  idempotencyKey String                   @unique
   expiresAt      DateTime
   committedAt    DateTime?
   releasedAt     DateTime?
-  createdAt      DateTime                  @default(now())
-  updatedAt      DateTime                  @updatedAt
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
 
   @@index([accountId, actionKey, status])
   @@index([status, expiresAt])
 }
 
 model FastPayProcessedEvent {
-  id              String   @id @default(cuid())
+  id              String          @id @default(cuid())
   provider        FastPayProvider
   externalEventId String
   eventType       String
   status          String
   errorCode       String?
   processedAt     DateTime?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime        @default(now())
 
   @@unique([provider, externalEventId])
   @@index([status, createdAt])

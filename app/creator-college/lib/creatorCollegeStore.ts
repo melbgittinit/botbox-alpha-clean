@@ -5,7 +5,7 @@ export type UnifiedCreation={
 };
 
 export const STORAGE_BY_KIND:Record<CreationKind,{key:string;activeKey:string;builderRoute:string}>={
- digital_product:{key:"creator-college-v1-creations",activeKey:"creator-college-v1-active",builderRoute:"/creator-college"},
+ digital_product:{key:"creator-college-v1-creations",activeKey:"creator-college-v1-active",builderRoute:"/creator-college/digital"},
  video_series:{key:"creator-college-v1-video-projects",activeKey:"creator-college-v1-video-active",builderRoute:"/creator-college/video"},
  event_kit:{key:"creator-college-v1-event-projects",activeKey:"creator-college-v1-event-active",builderRoute:"/creator-college/event"},
  service_offer:{key:"creator-college-v1-service-projects",activeKey:"creator-college-v1-service-active",builderRoute:"/creator-college/service"},

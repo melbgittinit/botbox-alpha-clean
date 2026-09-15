@@ -1,0 +1,46 @@
+name: Creator College Build Validation
+
+on:
+  push:
+    branches:
+      - hub-core-alpha
+  pull_request:
+    branches:
+      - hub-core-alpha
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/botbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Dependency audit (diagnostic)
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Generate Creator College migration SQL review only
+        run: |
+          git show 0a3f0a2d19ff62885660b8225b943f66c28e5e2f:prisma/schema.prisma > /tmp/creator-college-before.prisma
+          npx prisma migrate diff --from-schema-datamodel=/tmp/creator-college-before.prisma --to-schema-datamodel=prisma/schema.prisma --script > /tmp/creator-college-migration-review.sql
+          echo '===== CREATOR COLLEGE MIGRATION SQL REVIEW — NOT APPLIED ====='
+          cat /tmp/creator-college-migration-review.sql
+          echo '===== END CREATOR COLLEGE MIGRATION SQL REVIEW ====='
+
+      - name: Build Next.js app
+        run: npm run build
