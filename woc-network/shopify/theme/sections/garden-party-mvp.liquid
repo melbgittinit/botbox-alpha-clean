@@ -34,7 +34,7 @@
       <details><summary>A good word to carry</summary><label>Scripture reference<input data-gp-scripture="reference" maxlength="200"></label><label>Passage or reflection<textarea data-gp-scripture="text" rows="3" maxlength="1000"></textarea></label><p class="gp-help">Share this only if it feels right for your circle.</p></details>
       <p class="gp-help" data-gp-photo-note></p>
       <button type="button" class="gp-primary gp-wide" data-gp-invite>Invite My Sisters →</button>
-      <div class="gp-nav"><button type="button" class="gp-secondary" data-gp-change>Change My Choices</button><button type="button" class="gp-secondary" data-gp-save>Save My Party</button></div>
+      <div class="gp-nav"><button type="button" class="gp-secondary" data-gp-change>Change My Choices</button><button type="button" class="gp-secondary" data-gp-save>{{ section.settings.keep_label | escape }}</button></div>
     </section>
     <section data-gp-keep hidden><p>Keep a complete copy of your plan, including your edits.</p><button type="button" class="gp-primary gp-wide" data-gp-download>Download My Plan</button><p class="gp-help">Your download stays with you. Email delivery and private host access are coming next.</p><button type="button" class="gp-secondary" data-gp-return>Back to My Party</button></section>
     <section data-gp-invitation hidden><p>A personal invitation, ready for you to share.</p><div class="gp-fields"><label>Your first name <span>(optional)</span><input name="hostFirstName" maxlength="80" autocomplete="given-name"></label><label>Invitation voice<select data-gp-voice><option value="warm">Warm & personal</option><option value="joyful">Joyful & playful</option><option value="elegant">Elegant & gracious</option></select></label></div><label>Your invitation<textarea data-gp-invitation-copy rows="12" maxlength="4000"></textarea></label><p class="gp-help">Guests can reply directly to you. Private RSVP links and email invitations are coming next.</p><div class="gp-nav"><button type="button" class="gp-secondary" data-gp-copy>Copy Invitation</button><button type="button" class="gp-primary" data-gp-share>Share Invitation</button></div><button type="button" class="gp-secondary" data-gp-return>Back to My Party</button></section>
@@ -229,5 +229,5 @@ document.addEventListener('shopify:section:load',event=>event.target.querySelect
 
 {% endjavascript %}
 {% schema %}
-{"name": "Garden Party Planner", "settings": [], "presets": [{"name": "Garden Party Planner"}]}
+{"name": "Garden Party Planner", "settings": [{"type":"text","id":"keep_label","label":"Download action label","default":"Keep a Downloaded Copy"}], "presets": [{"name": "Garden Party Planner"}]}
 {% endschema %}

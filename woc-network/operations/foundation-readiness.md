@@ -3,7 +3,8 @@ Updated: 2026-09-15. Scope excludes ALL The Tree work.
 Owner: Mel Banks II. Store: womenofcolorstudybibles.com.
 Repository: melbgittinit/botbox-alpha-clean; branch woc-garden-party-alpha.
 Working theme: 190252056874, WOC FINAL — WORKING COPY.
-Latest verified theme role: UNPUBLISHED (2026-09-15).
+Latest verified theme role: MAIN (2026-09-15). Do not write to this theme.
+Existing repair draft: 190859313450, WOC — FIND HER imagery repair, UNPUBLISHED.
 Image implementation commit: ae02dc907b75f34868176d5a63be2abce27cf9f5.
 Preview: https://womenofcolorstudybibles.com/?preview_theme_id=190252056874
 
@@ -83,3 +84,27 @@ Completed in Shopify product records (not theme-only drafts): replaced placehold
 Product IDs: Fall 10204926902570; Purple 10290481201450; Full 10290484183338; Purple10 10290487525674; Full10 10290488639786.
 Remaining: verify bundle component inventory linkage/packing/weights/shipping and book binding before claiming full fulfillment readiness. Catalog standalone purple tote has 101 units, while bundles independently show 500 single sets and 100 group packs; this is a reconciliation flag, not proof of physical stock or linked inventory. Do not use aggregate bundle counts as confirmed supply. Existing catalog book-cover asset used; exact binding for bundle still requires authoritative confirmation. Component galleries now replace missing images, but no full-set hero composite has been created. Bonus entitlements and checkout fulfillment untested.
 Next highest-value work: inspect inventory linkage and shipping setup read-only; then fix exact destination links for customer journeys using approved sources. Do not count descriptions/gallery completion as checkout/fulfillment completion.
+
+
+## Follow-through verification and draft repair — 2026-09-15, 11:50 UTC run
+### Latest owner correction — binding
+FIND HER visuals must focus on finding the book at Choice Books racks in Georgia, Illinois and Northern Indiana. The general reading/gifting collage was rejected. Never install find-her-editorial-discovery-collage.png as this repair. Restore rack-oriented campaign direction before the three-region panel; no generated customer proof and no claimed title stock. The Tree remains excluded.
+### Verified store/runtime
+Women of Color store connection confirmed. Theme 190252056874 is MAIN. Repair draft 190859313450 is UNPUBLISHED. Render list_services in workspace tea-d9tvrijncjis73a6k5pg still shows no Garden Party service. No production runtime activated.
+### Shipping and inventory findings — current API
+| Variant / offer | Qty in catalog | Weight lb | Native components | Shipping |
+|---|---:|---:|---|---|
+| 52465246699818 Purple Set | 500 | 3.22 | none; requiresComponents false | General profile, physical |
+| 52465253777706 Full Purple Set | 500 | 3.17 | none; requiresComponents false | General profile, physical |
+| 52465262297386 Purple 10 | 100 | 32.1 | none; requiresComponents false | General profile, physical |
+| 52465264492842 Full 10 | 100 | 39.15 | none; requiresComponents false | General profile, physical |
+| 52038402507050 Fall #2 | 1500 | 2.2 | not a native bundle | General profile, physical |
+All five are inventory-tracked with DENY out-of-stock policy. No native component relationships exist for the four sets. Third-party bundle/fulfillment logic was not inspected, so do not claim that no external stock sync exists. The Full Set being lighter than the base set needs actual packed-weight verification. Component stock and prepacked kit accounting require reconciliation. Do not change numbers from inference. Checkout rates and physical fulfillment still untested.
+### Completed draft-only change
+Garden Party result action changed from Save My Party to a configurable Keep a Downloaded Copy. Existing download screen, My-Garden-Party.txt and email/private-access-coming-next notice retained. Applied only sections/garden-party-mvp.liquid to draft 190859313450. Shopify mutation returned no errors; read-back content matched; Shopify theme check passed; local assertions passed. No end-to-end browser retest this run. MAIN and all homepage ordering untouched.
+### Recovered rack source
+Shopify file found_her_a.jpg (MediaImage 44531711607082) visually inspected:
+https://cdn.shopify.com/s/files/1/0766/0335/9530/files/found_her_a.jpg?v=1788070221
+It contains a Choice Books campaign mockup, shoppers, rack imagery, and the approved pilot regions. It ALSO contains sample store names/addresses, distances and verified-location/title-stock claims, plus drawn fake UI. It must not be installed wholesale or represented as actual store/title proof. Need isolated original rack/shopping artwork or a carefully reviewed derivative that removes all mock data and labels editorial content honestly. No new image generated and no FIND HER imagery installed in this run.
+### Handoff
+Next: continue locating original rack-only/shopping assets (not the rejected general collage), prepare narrowly scoped imagery restoration on existing draft, preserve source provenance and pilot limits. In parallel within future work, review actual bundle packing and any external inventory integration before stock/weight changes; advance unblocked destination and signup paths. Do not publish the repair draft just for the Garden wording patch; combine reviewed repairs and compare to current MAIN before eventual owner publish to preserve other chats' changes. No new owner report email sending configured. Metrics UNKNOWN; no orders, campaigns, opt-ins or RSVPs claimed.

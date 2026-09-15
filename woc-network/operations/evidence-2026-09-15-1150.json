@@ -1,0 +1,215 @@
+{
+  "checkedAt": "2026-09-15T11:50:56Z",
+  "theme": {
+    "id": "gid://shopify/OnlineStoreTheme/190252056874",
+    "name": "WOC FINAL — WORKING COPY",
+    "role": "MAIN"
+  },
+  "draftId": "190859313450",
+  "inventory": {
+    "data": {
+      "p0": {
+        "deliveryProfile": {
+          "id": "gid://shopify/DeliveryProfile/104132641066",
+          "name": "General profile"
+        },
+        "id": "gid://shopify/ProductVariant/52465246699818",
+        "inventoryItem": {
+          "measurement": {
+            "weight": {
+              "unit": "POUNDS",
+              "value": 3.22
+            }
+          },
+          "requiresShipping": true,
+          "tracked": true
+        },
+        "inventoryPolicy": "DENY",
+        "inventoryQuantity": 500,
+        "productVariantComponents": {
+          "nodes": [],
+          "pageInfo": {
+            "endCursor": null,
+            "hasNextPage": false
+          }
+        },
+        "requiresComponents": false
+      },
+      "p1": {
+        "deliveryProfile": {
+          "id": "gid://shopify/DeliveryProfile/104132641066",
+          "name": "General profile"
+        },
+        "id": "gid://shopify/ProductVariant/52465253777706",
+        "inventoryItem": {
+          "measurement": {
+            "weight": {
+              "unit": "POUNDS",
+              "value": 3.17
+            }
+          },
+          "requiresShipping": true,
+          "tracked": true
+        },
+        "inventoryPolicy": "DENY",
+        "inventoryQuantity": 500,
+        "productVariantComponents": {
+          "nodes": [],
+          "pageInfo": {
+            "endCursor": null,
+            "hasNextPage": false
+          }
+        },
+        "requiresComponents": false
+      },
+      "p2": {
+        "deliveryProfile": {
+          "id": "gid://shopify/DeliveryProfile/104132641066",
+          "name": "General profile"
+        },
+        "id": "gid://shopify/ProductVariant/52465262297386",
+        "inventoryItem": {
+          "measurement": {
+            "weight": {
+              "unit": "POUNDS",
+              "value": 32.1
+            }
+          },
+          "requiresShipping": true,
+          "tracked": true
+        },
+        "inventoryPolicy": "DENY",
+        "inventoryQuantity": 100,
+        "productVariantComponents": {
+          "nodes": [],
+          "pageInfo": {
+            "endCursor": null,
+            "hasNextPage": false
+          }
+        },
+        "requiresComponents": false
+      },
+      "p3": {
+        "deliveryProfile": {
+          "id": "gid://shopify/DeliveryProfile/104132641066",
+          "name": "General profile"
+        },
+        "id": "gid://shopify/ProductVariant/52465264492842",
+        "inventoryItem": {
+          "measurement": {
+            "weight": {
+              "unit": "POUNDS",
+              "value": 39.15
+            }
+          },
+          "requiresShipping": true,
+          "tracked": true
+        },
+        "inventoryPolicy": "DENY",
+        "inventoryQuantity": 100,
+        "productVariantComponents": {
+          "nodes": [],
+          "pageInfo": {
+            "endCursor": null,
+            "hasNextPage": false
+          }
+        },
+        "requiresComponents": false
+      },
+      "p4": {
+        "deliveryProfile": {
+          "id": "gid://shopify/DeliveryProfile/104132641066",
+          "name": "General profile"
+        },
+        "id": "gid://shopify/ProductVariant/52038402507050",
+        "inventoryItem": {
+          "measurement": {
+            "weight": {
+              "unit": "POUNDS",
+              "value": 2.2
+            }
+          },
+          "requiresShipping": true,
+          "tracked": true
+        },
+        "inventoryPolicy": "DENY",
+        "inventoryQuantity": 1500,
+        "productVariantComponents": {
+          "nodes": [],
+          "pageInfo": {
+            "endCursor": null,
+            "hasNextPage": false
+          }
+        },
+        "requiresComponents": false
+      }
+    }
+  },
+  "rackSearch": {
+    "data": {
+      "files": {
+        "nodes": [
+          {
+            "alt": "",
+            "id": "gid://shopify/MediaImage/44531711607082",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/found_her_a.jpg?v=1788070221"
+            }
+          },
+          {
+            "alt": "",
+            "id": "gid://shopify/MediaImage/44531711639850",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find_her_fotos_b.jpg?v=1788070221"
+            }
+          },
+          {
+            "alt": "Women of the Bible for Women of Color — book cover",
+            "id": "gid://shopify/MediaImage/44700020965674",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-book.jpg?v=1789459070"
+            }
+          },
+          {
+            "alt": "Fall #2 Harvest Season — devotional book cover",
+            "id": "gid://shopify/MediaImage/44700021555498",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-fall.jpg?v=1789459077"
+            }
+          },
+          {
+            "alt": "Women of Color purple tote",
+            "id": "gid://shopify/MediaImage/44700022047018",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-tote.jpg?v=1789459087"
+            }
+          },
+          {
+            "alt": "Women of Color purple water bottle",
+            "id": "gid://shopify/MediaImage/44700023292202",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-bottle.jpg?v=1789459096"
+            }
+          },
+          {
+            "alt": "Illustrative FIND HER campaign scenes: discovering, reading and sharing Women of the Bible for Women of Color.",
+            "id": "gid://shopify/MediaImage/44700278685994",
+            "image": {
+              "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-editorial-discovery-collage.png?v=1789462051"
+            }
+          }
+        ],
+        "pageInfo": {
+          "endCursor": "eyJsYXN0X2lkIjo0NDcwMDI3ODY4NTk5NCwibGFzdF92YWx1ZSI6NDQ3MDAyNzg2ODU5OTR9",
+          "hasNextPage": false
+        }
+      }
+    }
+  },
+  "changes": {
+    "file": "sections/garden-party-mvp.liquid",
+    "themeCheck": "PASS",
+    "readBack": "exact match",
+    "browserRetest": false
+  }
+}
