@@ -1,0 +1,287 @@
+{
+  "order": [
+    "network_masthead",
+    "network_today",
+    "women_bible",
+    "tree",
+    "teaching_room",
+    "mtc",
+    "reset",
+    "publishing",
+    "from_world",
+    "more_promises",
+    "eve_five",
+    "eve_report",
+    "garden_visible",
+    "garden_mvp",
+    "wonderful_baby",
+    "find_her_final",
+    "fall_book",
+    "find_bundles",
+    "found_fotos",
+    "find_next",
+    "join_network"
+  ],
+  "sections": {
+    "eve_five": {
+      "settings": {},
+      "type": "network-eve-five"
+    },
+    "eve_report": {
+      "settings": {
+        "builder_link": "",
+        "garden_image_alt": "Women gathered around a table for a Garden Party.",
+        "hero_deck": "What women are talking about, going to, gathering around and passing along.",
+        "hero_heading": "Fun • Fashion • Food • Faith • Fabulous Ways to Gather",
+        "hero_image_alt": "Women gathering and enjoying conversation.",
+        "story_link": "",
+        "five_1_image": "shopify://shop_images/eve-the-conversation.jpg",
+        "five_2_image": "shopify://shop_images/eve-the-look.jpg",
+        "five_3_image": "shopify://shop_images/eve-the-taste.jpg",
+        "five_4_image": "shopify://shop_images/eve-the-place.jpg",
+        "five_5_image": "shopify://shop_images/eve-the-good-word.jpg"
+      },
+      "type": "network-eve-report"
+    },
+    "fall_book": {
+      "settings": {
+        "bonuses_ready": false,
+        "product": "women-of-color-daily-devotional-fall-harvest-season"
+      },
+      "type": "network-fall-book"
+    },
+    "find_bundles": {
+      "block_order": [
+        "offer0",
+        "offer1",
+        "offer2",
+        "offer3"
+      ],
+      "blocks": {
+        "offer0": {
+          "settings": {
+            "label": "For you or a gift",
+            "product": "find-her-purple-set"
+          },
+          "type": "offer"
+        },
+        "offer1": {
+          "settings": {
+            "label": "The full set",
+            "product": "find-her-full-purple-set-books-tote-bottle"
+          },
+          "type": "offer"
+        },
+        "offer2": {
+          "settings": {
+            "label": "Share with your group",
+            "product": "find-her-purple-set-10-pack"
+          },
+          "type": "offer"
+        },
+        "offer3": {
+          "settings": {
+            "label": "The full group set",
+            "product": "find-her-full-purple-set-10-pack-with-bottle"
+          },
+          "type": "offer"
+        }
+      },
+      "settings": {},
+      "type": "network-find-bundles"
+    },
+    "find_her_final": {
+      "settings": {},
+      "type": "network-find-her-final"
+    },
+    "find_next": {
+      "settings": {},
+      "type": "network-find-next"
+    },
+    "found_fotos": {
+      "settings": {},
+      "type": "network-found-fotos"
+    },
+    "from_world": {
+      "settings": {
+        "deck": "Books are part of the story. So are music, tools, experiences and the next good idea. This is the curated shelf.",
+        "heading": "A few things worth taking with you."
+      },
+      "type": "network-from-world"
+    },
+    "garden_mvp": {
+      "settings": {},
+      "type": "garden-party-mvp"
+    },
+    "garden_visible": {
+      "settings": {},
+      "type": "garden-party-visible"
+    },
+    "join_network": {
+      "settings": {
+        "deck": "Come back for the stories, the rooms, the women, the ideas and the good things worth passing on.",
+        "heading": "Stay close to what matters."
+      },
+      "type": "network-join"
+    },
+    "more_promises": {
+      "disabled": true,
+      "settings": {},
+      "type": "network-more-promises"
+    },
+    "mtc": {
+      "settings": {
+        "copy": "<p>More Than a Conqueror—simple faith-strengthening support for the day in front of you.</p>",
+        "gift_label": "Gift an MTC",
+        "gift_url": "",
+        "heading": "MY MTC",
+        "image_alt": "MY MTC bot, the friendly Women of Color faith companion.",
+        "start_label": "Start My MTC",
+        "start_url": ""
+      },
+      "type": "network-mtc"
+    },
+    "network_masthead": {
+      "settings": {},
+      "type": "network-masthead"
+    },
+    "network_today": {
+      "block_order": [
+        "story0",
+        "story1",
+        "story2",
+        "story3"
+      ],
+      "blocks": {
+        "story0": {
+          "settings": {
+            "category": "CULTURE · FILM",
+            "link": "https://tylerperry.com/tyler-perrys-why-did-i-get-married-again-now-streaming-on-netflix/",
+            "source": "Tyler Perry · September 11, 2026",
+            "summary": "Why Did I Get Married Again? is now streaming on Netflix. The reunion moves to a wedding in Lake Como, with Taraji P. Henson joining the cast.",
+            "title": "Tyler Perry brings the couples back together."
+          },
+          "type": "story"
+        },
+        "story1": {
+          "settings": {
+            "category": "WOMEN · TELEVISION",
+            "link": "https://www.forbes.com/sites/dominiquefluker/2026/09/02/black-women-directors-are-making-emmy-history-in-2026--and-changing-who-gets-to-shape-television/",
+            "source": "Forbes · September 2, 2026",
+            "summary": "A look at the women whose directing nominations are helping reshape who tells the stories on television.",
+            "title": "Black women directors are making Emmy history."
+          },
+          "type": "story"
+        },
+        "story2": {
+          "settings": {
+            "category": "SPORT · PEOPLE",
+            "link": "https://people.com/ben-shelton-alexander-zverev-2026-us-open-final-12116565",
+            "source": "People · September 13, 2026",
+            "summary": "Shelton became the first Black American man to reach the final since Arthur Ashe in 1972, finishing runner-up to Alexander Zverev.",
+            "title": "Ben Shelton’s historic run reaches the US Open final."
+          },
+          "type": "story"
+        },
+        "story3": {
+          "settings": {
+            "category": "ON THE CALENDAR",
+            "link": "https://www.nbc.com/nbc-insider/2026-emmys-air-date-host-nominees-details",
+            "source": "NBC · August 13, 2026",
+            "summary": "The awards air at 8 p.m. Eastern on NBC and Peacock, with Mariska Hargitay hosting. Here is how to watch.",
+            "title": "Emmy night: Monday, September 14."
+          },
+          "type": "story"
+        }
+      },
+      "settings": {},
+      "type": "network-today"
+    },
+    "publishing": {
+      "settings": {
+        "deck": "The Network is new. The publishing legacy beneath it is not. This is where the page remembers what women have already carried into homes, churches and study circles.",
+        "heading": "Books built to stay with you."
+      },
+      "type": "network-publishing"
+    },
+    "reset": {
+      "settings": {
+        "copy": "<p>The Network does not only tell you what is happening. It should also give you somewhere to put the weight of it.</p>",
+        "heading": "Reset what the day has been carrying.",
+        "subheading": "A little room to breathe, listen and begin again."
+      },
+      "type": "network-reset"
+    },
+    "teaching_room": {
+      "settings": {
+        "cole_image": "shopify://shop_images/woc-dr-tt-cole.jpg",
+        "jordan_image": "shopify://shop_images/woc-ms-jordan.jpg"
+      },
+      "type": "teaching-room"
+    },
+    "tree": {
+      "settings": {
+        "deck": "Heritage. Stories. Wisdom. Life application. The Tree is still growing; take time with what is already taking root.",
+        "heading": "You were never outside The Tree."
+      },
+      "type": "network-tree-crown"
+    },
+    "women_bible": {
+      "block_order": [
+        "step0",
+        "step1",
+        "step2",
+        "step3"
+      ],
+      "blocks": {
+        "step0": {
+          "settings": {
+            "copy": "Discover women whose stories are often passed over.",
+            "title": "MEET HER"
+          },
+          "type": "experience_step"
+        },
+        "step1": {
+          "settings": {
+            "copy": "Explore Scripture and the world around her.",
+            "title": "UNDERSTAND"
+          },
+          "type": "experience_step"
+        },
+        "step2": {
+          "settings": {
+            "copy": "Consider the wisdom her story offers.",
+            "title": "REFLECT"
+          },
+          "type": "experience_step"
+        },
+        "step3": {
+          "settings": {
+            "copy": "Bring the learning into everyday life.",
+            "title": "APPLY"
+          },
+          "type": "experience_step"
+        }
+      },
+      "settings": {
+        "commerce_copy": "<p>The companion book is already available on Amazon. Read it while the expanded digital experience takes shape.</p>",
+        "commerce_eyebrow": "THE BOOK — AVAILABLE NOW",
+        "commerce_label": "FIND THE BOOK ON AMAZON",
+        "commerce_link": "https://www.amazon.com/dp/B0FHTL9V77",
+        "commerce_title": "More Women of the Bible for Women of Color",
+        "feature_copy": "<p>Our extensive digital experience is being finalized: discover the lesser-known women who were not included in the original Women of the Bible book, with context, reflection, and tools for life.</p>",
+        "feature_title": "More stories. A deeper study.",
+        "intro": "<p>The women you have yet to meet. Their stories, their courage, and wisdom for your life today.</p>"
+      },
+      "type": "network-women-bible"
+    },
+    "wonderful_baby": {
+      "settings": {
+        "amazon_url": "https://www.amazon.com/Wonderful-BABY-Bible-Snuggled-WonderfulTM/dp/B0FPFQ5FQF",
+        "cover_image": "shopify://shop_images/wonderful-baby-bible-english.png",
+        "future_note": "The Wonderful family is growing. Baby care and more Wonderful products are in development."
+      },
+      "type": "network-wonderful-baby"
+    }
+  }
+}
