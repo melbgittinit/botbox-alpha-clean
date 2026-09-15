@@ -1,0 +1,36 @@
+{
+  "branch": "woc-garden-party-alpha",
+  "branchHeadBeforeEvidenceCommit": "a2bec7311b90d2a74c829cf1c9a3f7ea989c3fbf",
+  "checkedAt": "2026-09-15T19:48:31Z",
+  "connectedShop": {
+    "myshopifyDomain": "distributorsofurbanspiritbiblesbooks-gifts.myshopify.com",
+    "name": "Urban Spirit - HUB",
+    "primaryDomain": "urbanspirit.biz"
+  },
+  "metrics": {
+    "findHerReports": "UNKNOWN",
+    "optIns": "UNKNOWN",
+    "orders": "UNKNOWN",
+    "rsvps": "UNKNOWN"
+  },
+  "mutationsAttempted": false,
+  "renderServiceNames": [
+    "bot-factory-alpha",
+    "fast-pay-action-value-v1-preview",
+    "creator-college-junior-alpha",
+    "hub-core-alpha-staging",
+    "me1st-alpha",
+    "agent-qr-system-1",
+    "botbox-alpha-clean",
+    "agent-qr-system"
+  ],
+  "renderWorkspace": "tea-d9tvrijncjis73a6k5pg",
+  "repository": "melbgittinit/botbox-alpha-clean",
+  "requestedStore": "womenofcolorstudybibles.com",
+  "shopifyStatus": "BLOCKED_WRONG_STORE_CONNECTION",
+  "themeReads": {
+    "190252056874": null,
+    "190859313450": null
+  },
+  "wocGardenPartyServicePresent": false
+}

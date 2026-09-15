@@ -129,3 +129,15 @@ Draft checksums after write: templates/index.json 22f9a04ccb257fd2950716aa37433d
 ### Next task
 Compare the combined repair draft against current MAIN in a full desktop/mobile browser pass before any owner publication. Confirm the new editorial image reads as Choice Books rack discovery without being mistaken for live inventory; replace it with authentic permission-approved Choice rack photography if such files become available. Continue P0 exact destination/capture checks and reconcile bundle packing/weights/native or external component inventory before any stock edits. Garden Party production persistence remains blocked on a deployed service, database and verified sender.
 
+## Follow-through blocked connection check — 2026-09-15, 19:48 UTC run
+### Shopify identity mismatch
+The Shopify connector currently resolves to shop name **Urban Spirit - HUB**, primary domain **urbanspirit.biz**, and myshopify domain **distributorsofurbanspiritbiblesbooks-gifts.myshopify.com**. The required storefront identity womenofcolorstudybibles.com could not be verified through this connection. Direct Admin GraphQL reads for theme IDs 190252056874 and 190859313450 both returned null, confirming that the connected shop does not expose the authorized WOC MAIN or repair draft themes.
+
+Status: **BLOCKED BEFORE IMPLEMENTATION**. No Shopify theme, product, customer, order, or content mutation was attempted. MAIN was not changed. The proposed Teaching Room repair (remove the stale Lala Work/The Tree CTA and keep the journey within Dr. T.T. Cole + Ms. Jordan) was not applied because the correct shop could not be verified. The Tree remained untouched.
+
+### Render and repository check
+GitHub branch woc-garden-party-alpha remained readable at a2bec7311b90d2a74c829cf1c9a3f7ea989c3fbf before this evidence-only update. Render workspace tea-d9tvrijncjis73a6k5pg remained readable and still had no service named woc-garden-party. No production runtime was created or changed.
+
+### Required recovery
+Reconnect the Shopify connector to the shop that owns womenofcolorstudybibles.com and exposes theme IDs 190252056874 / 190859313450. After identity verification, re-read fresh draft files and merge narrowly because separate Teaching Room work may have changed them. Do not reuse cached theme bodies or checksums. Metrics remain UNKNOWN.
+
