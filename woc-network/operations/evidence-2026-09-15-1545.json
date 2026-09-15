@@ -1,0 +1,106 @@
+{
+  "run_at_utc": "2026-09-15T15:45:48Z",
+  "scope": "WOC foundation; The Tree excluded",
+  "store": {
+    "name": "Women of Color Study Bibles and More",
+    "domain": "womenofcolorstudybibles.com",
+    "verified": true
+  },
+  "themes": {
+    "main": {
+      "id": "190252056874",
+      "name": "WOC FINAL — WORKING COPY",
+      "role": "MAIN",
+      "changed": false,
+      "index_checksum": "1ba81bb5d98aeceaf52d0a98de86a449"
+    },
+    "draft": {
+      "id": "190859313450",
+      "name": "WOC — FIND HER imagery repair",
+      "role": "UNPUBLISHED",
+      "changed": true,
+      "files": {
+        "templates/index.json": "22f9a04ccb257fd2950716aa37433d4c",
+        "sections/network-find-her-final.liquid": "a2f356651d1b923b7d3d4369fa851907",
+        "locales/en.default.json": "a87ba4e973112eecbb3ee5a1609a2ff3"
+      }
+    }
+  },
+  "render": {
+    "workspace_id": "tea-d9tvrijncjis73a6k5pg",
+    "woc_garden_party_service_found": false,
+    "production_runtime_operational": false
+  },
+  "network_today": {
+    "previous_card": "Emmy night: Monday, September 14.",
+    "replacement_title": "Ayo Edebiri brings fire and ice to the Emmy carpet.",
+    "source": "https://www.harpersbazaar.com/celebrity/latest/a73656208/ayo-edebiri-red-carpet-photos-emmys-2026/",
+    "source_published": "2026-09-14T19:29:00-04:00",
+    "edition": "September 15, 2026 · Editor’s selections",
+    "status": {
+      "drafted": true,
+      "implemented": true,
+      "tested": true,
+      "live": false,
+      "operational": false
+    }
+  },
+  "find_her": {
+    "rejected_asset": "find-her-editorial-discovery-collage.png",
+    "recovered_source": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/found_her_a.jpg?v=1788070221",
+    "source_not_installed_reason": "contains sample stores, addresses, distances, verified-location and title-stock claims",
+    "new_asset": {
+      "file_id": "gid://shopify/MediaImage/44702750867754",
+      "filename": "woc-find-her-choice-rack-editorial-v1.png",
+      "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/woc-find-her-choice-rack-editorial-v1.png?v=1789487639",
+      "classification": "generated editorial campaign imagery; not customer proof or inventory evidence",
+      "caption": "Editorial campaign image—not verified inventory. Choice Books locator results identify display locations; please tell us what you find."
+    },
+    "pilot_regions": [
+      "Georgia",
+      "Illinois",
+      "Northern Indiana"
+    ],
+    "status": {
+      "drafted": true,
+      "implemented": true,
+      "tested": true,
+      "live": false,
+      "operational": false
+    }
+  },
+  "tests": {
+    "shopify_theme_check": "PASS",
+    "graphql_write_user_errors": [],
+    "exact_readback": {
+      "index": true,
+      "section": true,
+      "locale": true
+    },
+    "rendered_preview_html_markers": {
+      "news_headline": true,
+      "rack_asset": true,
+      "inventory_disclaimer": true
+    },
+    "full_visual_browser_signoff": false,
+    "mobile_signoff": false
+  },
+  "operating_activity": {
+    "traffic": "UNKNOWN",
+    "orders": "UNKNOWN",
+    "fulfilled_orders": "UNKNOWN",
+    "opt_ins": "UNKNOWN",
+    "rsvps": "UNKNOWN",
+    "find_her_reports": "UNKNOWN"
+  },
+  "safety": {
+    "main_untouched": true,
+    "theme_published": false,
+    "tree_changed": false,
+    "prices_changed": false,
+    "inventory_changed": false,
+    "marketing_sent": false,
+    "orders_submitted": false,
+    "consumer_proof_fabricated": false
+  }
+}

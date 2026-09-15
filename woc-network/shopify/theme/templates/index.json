@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "order": [
     "network_masthead",
@@ -91,7 +100,9 @@
       "type": "network-find-bundles"
     },
     "find_her_final": {
-      "settings": {},
+      "settings": {
+        "image": "shopify://shop_images/woc-find-her-choice-rack-editorial-v1.png"
+      },
       "type": "network-find-her-final"
     },
     "find_next": {
@@ -185,16 +196,18 @@
         },
         "story3": {
           "settings": {
-            "category": "ON THE CALENDAR",
-            "link": "https://www.nbc.com/nbc-insider/2026-emmys-air-date-host-nominees-details",
-            "source": "NBC · August 13, 2026",
-            "summary": "The awards air at 8 p.m. Eastern on NBC and Peacock, with Mariska Hargitay hosting. Here is how to watch.",
-            "title": "Emmy night: Monday, September 14."
+            "category": "CULTURE · STYLE",
+            "link": "https://www.harpersbazaar.com/celebrity/latest/a73656208/ayo-edebiri-red-carpet-photos-emmys-2026/",
+            "source": "Harper’s Bazaar · September 14, 2026",
+            "summary": "The actress returned to the Emmys in a two-tone look pairing icy blue ruffles with fiery orange draping.",
+            "title": "Ayo Edebiri brings fire and ice to the Emmy carpet."
           },
           "type": "story"
         }
       },
-      "settings": {},
+      "settings": {
+        "edition": "September 15, 2026 · Editor’s selections"
+      },
       "type": "network-today"
     },
     "publishing": {
