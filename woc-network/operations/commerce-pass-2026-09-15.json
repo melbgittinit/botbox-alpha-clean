@@ -1,0 +1,203 @@
+{
+  "before": [
+    {
+      "id": "10204926902570",
+      "product": {
+        "currencyCode": "USD",
+        "descriptionHtml": "<p>Women of Color Daily Devotional - Fall - Harvest Season</p>",
+        "featuredImageUrl": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/WOC-Fall_2022_02_FRT-COVER-ONLY.jpg?v=1783132968",
+        "id": "gid://shopify/Product/10204926902570",
+        "images": [
+          {
+            "altText": "",
+            "mediaId": "gid://shopify/MediaImage/43828425752874",
+            "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/WOC-Fall_2022_02_FRT-COVER-ONLY.jpg?v=1783132968"
+          },
+          {
+            "altText": "",
+            "mediaId": "gid://shopify/MediaImage/43828431290666",
+            "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/Your_life_is_a_harvest-2.jpg?v=1783133061"
+          },
+          {
+            "altText": "",
+            "mediaId": "gid://shopify/MediaImage/43828431323434",
+            "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/A_Devotional_for_Harvest.jpg?v=1783133062"
+          },
+          {
+            "altText": "",
+            "mediaId": "gid://shopify/MediaImage/43828431257898",
+            "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/purple_strut_thum_still.jpg?v=1783133062"
+          }
+        ],
+        "productType": "",
+        "status": "ACTIVE",
+        "tags": [],
+        "title": "Women of Color Daily Devotional - Fall - Harvest Season",
+        "totalInventory": 1500,
+        "totalVariants": 1,
+        "variants": [
+          {
+            "id": "gid://shopify/ProductVariant/52038402507050",
+            "inventoryQuantity": 1500,
+            "price": "11.99",
+            "sku": null,
+            "title": "Default Title"
+          }
+        ],
+        "vendor": "Women of Color Study Bibles and More"
+      }
+    },
+    {
+      "id": "10290481201450",
+      "product": {
+        "currencyCode": "USD",
+        "descriptionHtml": "<p><span>find-her-purple-set</span></p>",
+        "featuredImageUrl": null,
+        "id": "gid://shopify/Product/10290481201450",
+        "images": [],
+        "productType": "",
+        "status": "ACTIVE",
+        "tags": [],
+        "title": "FIND HER Purple Set — Women of the Bible + Fall #2 Devotional + Tote",
+        "totalInventory": 500,
+        "totalVariants": 1,
+        "variants": [
+          {
+            "id": "gid://shopify/ProductVariant/52465246699818",
+            "inventoryQuantity": 500,
+            "price": "29.99",
+            "sku": null,
+            "title": "Default Title"
+          }
+        ],
+        "vendor": "Women of Color Study Bibles and More"
+      }
+    },
+    {
+      "id": "10290484183338",
+      "product": {
+        "currencyCode": "USD",
+        "descriptionHtml": "<p><span>find-her-full-purple-set</span></p>",
+        "featuredImageUrl": null,
+        "id": "gid://shopify/Product/10290484183338",
+        "images": [],
+        "productType": "",
+        "status": "ACTIVE",
+        "tags": [],
+        "title": "FIND HER Full Purple Set — Books + Tote + Bottle",
+        "totalInventory": 500,
+        "totalVariants": 1,
+        "variants": [
+          {
+            "id": "gid://shopify/ProductVariant/52465253777706",
+            "inventoryQuantity": 500,
+            "price": "39.99",
+            "sku": null,
+            "title": "Default Title"
+          }
+        ],
+        "vendor": "Women of Color Study Bibles and More"
+      }
+    },
+    {
+      "id": "10290487525674",
+      "product": {
+        "currencyCode": "USD",
+        "descriptionHtml": "<p>10 </p>",
+        "featuredImageUrl": null,
+        "id": "gid://shopify/Product/10290487525674",
+        "images": [],
+        "productType": "",
+        "status": "ACTIVE",
+        "tags": [],
+        "title": "FIND HER Purple Set — 10 Pack",
+        "totalInventory": 100,
+        "totalVariants": 1,
+        "variants": [
+          {
+            "id": "gid://shopify/ProductVariant/52465262297386",
+            "inventoryQuantity": 100,
+            "price": "229.99",
+            "sku": null,
+            "title": "Default Title"
+          }
+        ],
+        "vendor": "Women of Color Study Bibles and More"
+      }
+    },
+    {
+      "id": "10290488639786",
+      "product": {
+        "currencyCode": "USD",
+        "descriptionHtml": "<p>FIND HER Full Purple Set — 10 Pack with Bottle</p>",
+        "featuredImageUrl": null,
+        "id": "gid://shopify/Product/10290488639786",
+        "images": [],
+        "productType": "",
+        "status": "ACTIVE",
+        "tags": [],
+        "title": "FIND HER Full Purple Set — 10 Pack with Bottle",
+        "totalInventory": 100,
+        "totalVariants": 1,
+        "variants": [
+          {
+            "id": "gid://shopify/ProductVariant/52465264492842",
+            "inventoryQuantity": 100,
+            "price": "329.99",
+            "sku": null,
+            "title": "Default Title"
+          }
+        ],
+        "vendor": "Women of Color Study Bibles and More"
+      }
+    }
+  ],
+  "after": [
+    {
+      "html": "<h2>A little time with God. Wisdom to carry into your day.</h2><p><em>Women of Color Daily Devotional — Fall: Harvest Season</em> is the physical devotional book featured in our FIND HER collection as Fall #2. Make room to read, reflect and return to your faith through the season.</p><h3>Make it part of your day</h3><ul><li>Keep a copy nearby for your personal devotional time.</li><li>Give a book to a woman you want to encourage.</li><li>Pair it with <em>Women of the Bible for Women of Color</em> in a FIND HER set.</li></ul><p><strong>Format:</strong> Physical book.</p><h3>Bring the books together</h3><p><a href=\"/products/find-her-purple-set\">Explore the Purple Set: two books and a tote</a>, or <a href=\"/products/find-her-full-purple-set-books-tote-bottle\">choose the Full Purple Set with a bottle</a>.</p><p><a href=\"/\">Return to Women of Color — The Network</a></p>",
+      "id": "10204926902570"
+    },
+    {
+      "html": "<h2>You found her. Take her home.</h2><p>Bring together two Women of Color books and a tote in one FIND HER Purple Set. Choose it for your own reading or as a gift of encouragement.</p><h3>In this set</h3><ul><li><em>Women of the Bible for Women of Color</em></li><li><em>Women of Color Daily Devotional — Fall: Harvest Season</em> (Fall #2)</li><li>A tote</li></ul><p>The books are physical books.</p><h3>Choose the set for your occasion</h3><p><a href=\"/products/find-her-full-purple-set-books-tote-bottle\">Add a bottle with the Full Purple Set</a>.</p><p>Sharing with a group? <a href=\"/products/find-her-purple-set-10-pack\">See the Purple Set 10 Pack</a>.</p><p><a href=\"/products/women-of-color-daily-devotional-fall-harvest-season\">Shop the Fall #2 devotional on its own</a>.</p><p><a href=\"/\">Return to Women of Color — The Network</a></p>",
+      "id": "10290481201450"
+    },
+    {
+      "html": "<h2>Two books. A tote. A bottle. A thoughtful gift.</h2><p>The FIND HER Full Purple Set brings the reading pair together with a tote and bottle. Keep a set for yourself or give one to a woman you want to encourage.</p><h3>In this set</h3><ul><li><em>Women of the Bible for Women of Color</em></li><li><em>Women of Color Daily Devotional — Fall: Harvest Season</em> (Fall #2)</li><li>A tote</li><li>A bottle</li></ul><p>The books are physical books.</p><h3>Choose your set</h3><p>Prefer the books and tote? <a href=\"/products/find-her-purple-set\">See the Purple Set without the bottle</a>.</p><p>Sharing with a group? <a href=\"/products/find-her-full-purple-set-10-pack-with-bottle\">See the Full Purple Set 10 Pack</a>.</p><p><a href=\"/\">Return to Women of Color — The Network</a></p>",
+      "id": "10290484183338"
+    },
+    {
+      "html": "<h2>Share the reading. Share the encouragement.</h2><p>The FIND HER Purple Set 10 Pack brings the Purple Set to a group. Consider it for a reading circle, ministry gathering, or a collection of thoughtful gifts.</p><h3>The Purple Set</h3><p>Each Purple Set pairs <em>Women of the Bible for Women of Color</em> with <em>Women of Color Daily Devotional — Fall: Harvest Season</em> (Fall #2) and a tote. This listing is the 10-pack option.</p><p>The books are physical books.</p><h3>Compare your options</h3><p><a href=\"/products/find-her-purple-set\">Need one set? Shop the individual Purple Set</a>.</p><p><a href=\"/products/find-her-full-purple-set-10-pack-with-bottle\">Explore the Full Purple Set 10 Pack with bottles</a>.</p><p><a href=\"/\">Return to Women of Color — The Network</a></p>",
+      "id": "10290487525674"
+    },
+    {
+      "html": "<h2>A full set to share with your circle.</h2><p>The FIND HER Full Purple Set 10 Pack brings books, totes and bottles together for group gifting. Choose it for a gathering or for women you want to encourage.</p><h3>The Full Purple Set</h3><p>The Full Purple Set pairs <em>Women of the Bible for Women of Color</em> with <em>Women of Color Daily Devotional — Fall: Harvest Season</em> (Fall #2), a tote and a bottle. This listing is the 10-pack option.</p><p>The books are physical books.</p><h3>Compare your options</h3><p><a href=\"/products/find-her-full-purple-set-books-tote-bottle\">Need one set? Shop the individual Full Purple Set</a>.</p><p><a href=\"/products/find-her-purple-set-10-pack\">Prefer the group pack without bottles? See the Purple Set 10 Pack</a>.</p><p><a href=\"/\">Return to Women of Color — The Network</a></p>",
+      "id": "10290488639786"
+    }
+  ],
+  "imageSources": [
+    {
+      "alt": "Women of the Bible for Women of Color — book cover",
+      "fileId": "gid://shopify/MediaImage/44700020965674",
+      "filename": "find-her-component-book.jpg",
+      "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-book.jpg?v=1789459070"
+    },
+    {
+      "alt": "Fall #2 Harvest Season — devotional book cover",
+      "fileId": "gid://shopify/MediaImage/44700021555498",
+      "filename": "find-her-component-fall.jpg",
+      "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-fall.jpg?v=1789459077"
+    },
+    {
+      "alt": "Women of Color purple tote",
+      "fileId": "gid://shopify/MediaImage/44700022047018",
+      "filename": "find-her-component-tote.jpg",
+      "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-tote.jpg?v=1789459087"
+    },
+    {
+      "alt": "Women of Color purple water bottle",
+      "fileId": "gid://shopify/MediaImage/44700023292202",
+      "filename": "find-her-component-bottle.jpg",
+      "url": "https://cdn.shopify.com/s/files/1/0766/0335/9530/files/find-her-component-bottle.jpg?v=1789459096"
+    }
+  ]
+}
