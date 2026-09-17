@@ -56,12 +56,17 @@ export async function reverseOrderEntitlements(input: {
   supabaseUrl: string;
   publishableKey: string;
   bridgeSecret: string;
+  webhookId: string;
+  eventId?: string | null;
+  topic: 'orders/cancelled' | 'refunds/create';
+  shopDomain: string;
   orderId: string;
-  status: 'cancelled' | 'refunded' | 'revoked';
+  payloadSha256: string;
+  status: 'cancelled' | 'refunded';
   lineItemIds?: string[] | null;
   metadata?: Record<string, unknown>;
 }) {
-  const response = await fetch(`${input.supabaseUrl}/rest/v1/rpc/agent_x_reverse_order_entitlements`, {
+  const response = await fetch(`${input.supabaseUrl}/rest/v1/rpc/agent_x_ingest_reversal_webhook`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -70,7 +75,12 @@ export async function reverseOrderEntitlements(input: {
     },
     body: JSON.stringify({
       p_secret: input.bridgeSecret,
+      p_webhook_id: input.webhookId,
+      p_event_id: input.eventId || null,
+      p_topic: input.topic,
+      p_shop_domain: input.shopDomain,
       p_order_id: input.orderId,
+      p_payload_sha256: input.payloadSha256,
       p_status: input.status,
       p_line_item_ids: input.lineItemIds ?? null,
       p_metadata: input.metadata || {},
