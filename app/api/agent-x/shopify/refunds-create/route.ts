@@ -11,7 +11,7 @@ function orderGid(value: unknown) {
   return raw.startsWith('gid://shopify/Order/') ? raw : raw ? `gid://shopify/Order/${raw}` : '';
 }
 
-function lineItemGid(item: any) {
+function lineItemGid(item: any): string {
   const nestedGid = item?.line_item?.admin_graphql_api_id;
   if (nestedGid) return String(nestedGid);
   const raw = String(item?.line_item_id || item?.line_item?.id || '');
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
   const orderId = orderGid(payload?.order_id || payload?.order?.admin_graphql_api_id || payload?.order?.id);
   if (!orderId) return NextResponse.json({ error: 'missing_order_id' }, { status: 400 });
 
-  const lineItemIds = Array.isArray(payload?.refund_line_items)
-    ? Array.from(new Set(payload.refund_line_items.map(lineItemGid).filter(Boolean)))
+  const lineItemIds: string[] = Array.isArray(payload?.refund_line_items)
+    ? Array.from(new Set<string>(payload.refund_line_items.map((item: any) => lineItemGid(item)).filter((id: string) => id.length > 0)))
     : [];
   const payloadSha256 = createHash('sha256').update(rawBody).digest('hex');
 
