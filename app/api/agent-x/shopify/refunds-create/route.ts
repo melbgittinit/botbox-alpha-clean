@@ -52,6 +52,7 @@ export async function POST(request: Request) {
   const lineItemIds = Array.isArray(payload?.refund_line_items)
     ? Array.from(new Set(payload.refund_line_items.map(lineItemGid).filter(Boolean)))
     : [];
+  const payloadSha256 = createHash('sha256').update(rawBody).digest('hex');
 
   if (lineItemIds.length === 0) {
     return NextResponse.json({ ok: true, status: 'ignored_no_product_line_items', updated_entitlements: 0 });
@@ -62,18 +63,20 @@ export async function POST(request: Request) {
       supabaseUrl,
       publishableKey,
       bridgeSecret,
+      webhookId,
+      eventId: eventId || null,
+      topic: EXPECTED_TOPIC,
+      shopDomain: shop,
       orderId,
+      payloadSha256,
       status: 'refunded',
       lineItemIds,
       metadata: {
         source: 'shopify_refunds_create',
-        webhook_id: webhookId,
-        event_id: eventId || null,
         refund_id: payload?.admin_graphql_api_id || payload?.id || null,
-        payload_sha256: createHash('sha256').update(rawBody).digest('hex'),
       },
     });
-    return NextResponse.json({ ok: true, status: 'refunded', updated_entitlements: result.updated_entitlements || 0 });
+    return NextResponse.json({ ok: true, status: result.status, duplicate: !!result.duplicate, updated_entitlements: result.updated_entitlements || 0 });
   } catch (error) {
     console.error('Agent X refund bridge failure', error);
     return NextResponse.json({ error: 'entitlement_reversal_failed' }, { status: 500 });
