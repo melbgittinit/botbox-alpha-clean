@@ -36,24 +36,27 @@ export async function POST(request: Request) {
 
   const orderId = String(payload?.admin_graphql_api_id || payload?.id || '');
   if (!orderId) return NextResponse.json({ error: 'missing_order_id' }, { status: 400 });
+  const payloadSha256 = createHash('sha256').update(rawBody).digest('hex');
 
   try {
     const result = await reverseOrderEntitlements({
       supabaseUrl,
       publishableKey,
       bridgeSecret,
+      webhookId,
+      eventId: eventId || null,
+      topic: EXPECTED_TOPIC,
+      shopDomain: shop,
       orderId,
+      payloadSha256,
       status: 'cancelled',
       lineItemIds: null,
       metadata: {
         source: 'shopify_orders_cancelled',
-        webhook_id: webhookId,
-        event_id: eventId || null,
-        payload_sha256: createHash('sha256').update(rawBody).digest('hex'),
         cancel_reason: payload?.cancel_reason || null,
       },
     });
-    return NextResponse.json({ ok: true, status: 'cancelled', updated_entitlements: result.updated_entitlements || 0 });
+    return NextResponse.json({ ok: true, status: result.status, duplicate: !!result.duplicate, updated_entitlements: result.updated_entitlements || 0 });
   } catch (error) {
     console.error('Agent X order-cancelled bridge failure', error);
     return NextResponse.json({ error: 'entitlement_reversal_failed' }, { status: 500 });
