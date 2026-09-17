@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { NextResponse } from 'next/server';
-import { verifyShopifyWebhook } from '@/lib/agent-x/shopify-webhook';
-import { ingestPaidOrderEntitlements } from '@/lib/agent-x/commerce-entitlement';
+import { verifyShopifyWebhook } from '../../../../../lib/agent-x/shopify-webhook';
+import { ingestPaidOrderEntitlements } from '../../../../../lib/agent-x/commerce-entitlement';
 
 const EXPECTED_TOPIC = 'orders/paid';
 const EXPECTED_SHOP = 'vy827r-0t.myshopify.com';
