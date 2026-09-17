@@ -22,6 +22,7 @@ export default function AgentXPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activation, setActivation] = useState<ActivationData | null>(null);
+  const [customOrganization, setCustomOrganization] = useState(false);
 
   const card = useMemo(() => ({
     border: '1px solid rgba(90,170,255,.22)',
@@ -38,7 +39,14 @@ export default function AgentXPage() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    setLoading(true); setError(''); setActivation(null);
+    setError(''); setActivation(null); setCustomOrganization(false);
+
+    if (form.role === 'executive' || form.role === 'organization') {
+      setCustomOrganization(true);
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch('/api/agent-x/activate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
@@ -97,12 +105,21 @@ export default function AgentXPage() {
         <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Email</div><input required type="email" value={form.email} onChange={e=>change('email',e.target.value)} style={fieldStyle}/></label>
         <label style={{gridColumn:'1 / -1'}}><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Business / organization name</div><input required value={form.businessName} onChange={e=>change('businessName',e.target.value)} style={fieldStyle}/></label>
         <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Who are you?</div><select value={form.role} onChange={e=>change('role',e.target.value)} style={fieldStyle}><option value="business">Business owner</option><option value="creator">Creator</option><option value="executive">Executive</option><option value="organization">Organization leader</option></select></label>
-        <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Industry</div><select value={form.industry} onChange={e=>change('industry',e.target.value)} style={fieldStyle}><option value="small_business">Small business</option><option value="beauty">Beauty</option><option value="restaurant">Restaurant</option><option value="creator_business">Creator business</option><option value="other">Other</option></select></label>
+        <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Industry</div><select value={form.industry} onChange={e=>change('industry',e.target.value)} style={fieldStyle}><option value="small_business">Small business</option><option value="beauty">Beauty</option><option value="restaurant">Restaurant</option><option value="creator_business">Creator business</option><option value="organization">Organization</option><option value="other">Other</option></select></label>
         <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Primary mission</div><select value={form.mission} onChange={e=>change('mission',e.target.value)} style={fieldStyle}><option value="grow">Grow</option><option value="organize">Organize</option><option value="create">Create</option><option value="connect">Connect with customers</option><option value="scale">Prepare to scale</option></select></label>
-        <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Biggest challenge</div><select value={form.challenge} onChange={e=>change('challenge',e.target.value)} style={fieldStyle}><option value="need_systems">Need better systems</option><option value="need_customers">Need more customers</option><option value="too_much_work">Too much work</option><option value="too_many_ideas">Too many ideas</option><option value="communication">Communication</option></select></label>
+        <label><div style={{marginBottom:7,fontSize:13,color:'#9fb2ca'}}>Biggest challenge</div><select value={form.challenge} onChange={e=>change('challenge',e.target.value)} style={fieldStyle}><option value="need_systems">Need better systems</option><option value="need_customers">Need more customers</option><option value="too_much_work">Too much work</option><option value="too_many_ideas">Too many ideas</option><option value="communication">Communication</option><option value="need_information">Need better information</option></select></label>
         <div style={{gridColumn:'1 / -1'}}><button disabled={loading} type="submit" style={{...button,border:0,cursor:'pointer',background:'#eef6ff',color:'#07111d',fontSize:15}}>{loading?'ASSEMBLING WORKFORCE…':'ASSEMBLE MY WORKFORCE'}</button></div>
         {error && <div style={{gridColumn:'1 / -1',color:'#ff9c9c'}}>We could not complete the preview activation: {error}</div>}
       </form>
+
+      {customOrganization && <section style={{marginTop:24}}>
+        <div style={{...card,border:'1px solid rgba(121,184,255,.42)'}}>
+          <div style={{fontSize:12,letterSpacing:'.18em',color:'#79b8ff',fontWeight:800}}>CUSTOM ORGANIZATION WORKFORCE</div>
+          <h3 style={{fontSize:34,margin:'10px 0 8px'}}>Your workforce should be designed around your organization.</h3>
+          <p style={{color:'#b8c5d6',lineHeight:1.6,maxWidth:760}}>Executive and organization deployments can involve multiple departments, permissions, data boundaries and approval paths. We do not force those needs into a small-business template. Your next step is a scoped Agent X workforce conversation.</p>
+          <a href="https://thebotstores.com/pages/contact" style={{...button,marginTop:12,background:'#79b8ff',color:'#07111d'}}>REQUEST CUSTOM WORKFORCE</a>
+        </div>
+      </section>}
 
       {activation && <section style={{marginTop:24,display:'grid',gap:16}}>
         <div style={{...card,border:'1px solid rgba(98,224,161,.35)'}}><div style={{fontSize:12,letterSpacing:'.18em',color:'#62e0a1',fontWeight:800}}>WORKFORCE ASSEMBLED</div><h3 style={{fontSize:34,margin:'10px 0 8px'}}>{activation.workforce.name}</h3><p style={{color:'#aebaca'}}>Prepared for {activation.organization.name}.</p><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10,marginTop:16}}>{activation.workforce.agents.map(agent=><div key={agent.id} style={{padding:14,borderRadius:12,background:'#0d1420'}}><strong>{agent.name}</strong><div style={{fontSize:13,color:'#8393a8',marginTop:5}}>{agent.category}</div></div>)}</div></div>
