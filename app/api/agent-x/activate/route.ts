@@ -1,4 +1,15 @@
+import { createHmac } from 'crypto';
 import { NextResponse } from 'next/server';
+
+const COOKIE_NAME = 'ax_workspace';
+const MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+
+function signWorkspace(organizationId: string, secret: string) {
+  const issuedAt = Math.floor(Date.now() / 1000).toString();
+  const payload = `${organizationId}.${issuedAt}`;
+  const signature = createHmac('sha256', secret).update(payload).digest('base64url');
+  return `${payload}.${signature}`;
+}
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +31,22 @@ export async function POST(request: Request) {
     });
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    const outgoing = NextResponse.json(data, { status: response.status });
+
+    const organizationId = data?.data?.organization?.id;
+    if (response.ok && data?.ok && typeof organizationId === 'string') {
+      outgoing.cookies.set({
+        name: COOKIE_NAME,
+        value: signWorkspace(organizationId, secret),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: MAX_AGE_SECONDS,
+      });
+    }
+
+    return outgoing;
   } catch (error) {
     console.error('Agent X activation proxy error', error);
     return NextResponse.json({ error: 'proxy_failed' }, { status: 500 });
