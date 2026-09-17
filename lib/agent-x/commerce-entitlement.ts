@@ -51,3 +51,37 @@ export async function ingestPaidOrderEntitlements(input: {
   }
   return data;
 }
+
+export async function reverseOrderEntitlements(input: {
+  supabaseUrl: string;
+  publishableKey: string;
+  bridgeSecret: string;
+  orderId: string;
+  status: 'cancelled' | 'refunded' | 'revoked';
+  lineItemIds?: string[] | null;
+  metadata?: Record<string, unknown>;
+}) {
+  const response = await fetch(`${input.supabaseUrl}/rest/v1/rpc/agent_x_reverse_order_entitlements`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: input.publishableKey,
+      Authorization: `Bearer ${input.publishableKey}`,
+    },
+    body: JSON.stringify({
+      p_secret: input.bridgeSecret,
+      p_order_id: input.orderId,
+      p_status: input.status,
+      p_line_item_ids: input.lineItemIds ?? null,
+      p_metadata: input.metadata || {},
+    }),
+    cache: 'no-store',
+  });
+
+  let data: any = null;
+  try { data = await response.json(); } catch { data = null; }
+  if (!response.ok || !data?.ok) {
+    throw new Error('entitlement_reversal_failed');
+  }
+  return data;
+}
