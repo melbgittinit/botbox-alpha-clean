@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 const COOKIE_NAME = 'ax_workspace';
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+const CUSTOM_ROLES = new Set(['executive', 'organization']);
 
 function signWorkspace(organizationId: string, secret: string) {
   const issuedAt = Math.floor(Date.now() / 1000).toString();
@@ -20,6 +21,20 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    const role = typeof body?.role === 'string' ? body.role.trim().toLowerCase() : '';
+    const industry = typeof body?.industry === 'string' ? body.industry.trim().toLowerCase() : '';
+
+    if (CUSTOM_ROLES.has(role) || industry === 'organization') {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'custom_organization_workforce_required',
+          next: 'https://thebotstores.com/pages/contact',
+        },
+        { status: 422 }
+      );
+    }
+
     const response = await fetch(edgeUrl, {
       method: 'POST',
       headers: {
