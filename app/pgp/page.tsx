@@ -137,6 +137,17 @@ export default function PrettyGirlPalace() {
     clarification?: string;
     sanity: "SAY_SOMETHING" | "ASK_FIRST" | "SAVE_FOR_LATER" | "LEAVE_IT";
   } | null>(null);
+  const [bagItems, setBagItems] = useState<Array<{
+    id: string;
+    environment: string;
+    observation: string;
+    productName?: string | null;
+    fitState?: string | null;
+    status: string;
+    attentionState: string;
+    createdAt: string;
+  }>>([]);
+  const [bagLoading, setBagLoading] = useState(false);
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -174,6 +185,23 @@ export default function PrettyGirlPalace() {
     setScreen("spot");
   }
 
+  async function openBag() {
+    setScreen("bag");
+    setBagLoading(true);
+    try {
+      const response = await fetch(
+        "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/opportunities?memberKey=alpha-tanya",
+        { cache: "no-store" }
+      );
+      const data = await response.json();
+      setBagItems(Array.isArray(data.opportunities) ? data.opportunities : []);
+    } catch {
+      setBagItems([]);
+    } finally {
+      setBagLoading(false);
+    }
+  }
+
   async function evaluateSpot(nextIssue: string) {
     setIssue(nextIssue);
     setMatchLoading(true);
@@ -186,6 +214,23 @@ export default function PrettyGirlPalace() {
       });
       const data = await response.json();
       setMatchResult(data);
+
+      if (data.fit !== "NOT_THIS_ONE") {
+        fetch("https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/opportunities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            memberKey: "alpha-tanya",
+            environment: place,
+            observation: nextIssue,
+            structuredProblem: data.reason,
+            productName: data.productName || null,
+            fitState: data.fit,
+            status: data.fit === "ASK_FIRST" ? "NEEDS_CLARIFICATION" : "MATCHED",
+            attentionState: data.fit === "ASK_FIRST" ? "NEEDS_YOU" : "NOTHING_TO_DO",
+          }),
+        }).catch(() => undefined);
+      }
     } catch {
       setMatchResult({
         fit: "NOT_THIS_ONE",
@@ -362,7 +407,7 @@ export default function PrettyGirlPalace() {
               <button onClick={resetSpot}><span>👁️</span><strong>I Spotted Something</strong></button>
               <button onClick={() => setScreen("key")}><span>🔑</span><strong>My Palace Key</strong></button>
               <button><span>🎵</span><strong>Music Hall</strong></button>
-              <button onClick={() => setScreen("bag")}><span>👜</span><strong>Opportunity Bag</strong></button>
+              <button onClick={openBag}><span>👜</span><strong>Opportunity Bag</strong></button>
             </div>
 
             <h3 className={styles.subhead}>What’s happening</h3>
@@ -506,16 +551,38 @@ export default function PrettyGirlPalace() {
             <p className={styles.eyebrow}>OPPORTUNITY BAG™</p>
             <h2 className={styles.sectionTitle}>What’s in my bag?</h2>
             <div className={styles.bagSummary}>
-              <div><strong>1</strong><span>NEEDS YOU</span></div>
-              <div><strong>3</strong><span>PGP IS WATCHING</span></div>
-              <div><strong>7</strong><span>NOTHING TO DO</span></div>
+              <div><strong>{bagItems.filter((x) => x.attentionState === "NEEDS_YOU").length}</strong><span>NEEDS YOU</span></div>
+              <div><strong>{bagItems.filter((x) => x.attentionState === "PGP_IS_WATCHING").length}</strong><span>PGP IS WATCHING</span></div>
+              <div><strong>{bagItems.filter((x) => x.attentionState === "NOTHING_TO_DO").length}</strong><span>NOTHING TO DO</span></div>
             </div>
-            <div className={styles.opportunityCard}>
-              <div><span>🍽️</span><div><strong>Marcus’ Café</strong><small>Restaurant · Action Signs</small></div></div>
-              <span className={styles.looked}>THEY LOOKED</span>
-              <p>You noticed: long ordering line.</p>
-              <p className={styles.guideAdvice}>🍯 Honey: “They just looked. Give them some room.”</p>
-            </div>
+            {bagLoading ? (
+              <div className={styles.opportunityCard}>
+                <p>PGP is checking your bag…</p>
+              </div>
+            ) : bagItems.length === 0 ? (
+              <div className={styles.opportunityCard}>
+                <p>Your live alpha bag is empty right now. Spot something and PGP will start filling it.</p>
+              </div>
+            ) : (
+              bagItems.slice(0, 8).map((item) => (
+                <div className={styles.opportunityCard} key={item.id}>
+                  <div>
+                    <span>{item.environment.toLowerCase().includes("restaurant") ? "🍽️" : "✨"}</span>
+                    <div>
+                      <strong>{item.environment}</strong>
+                      <small>{item.productName || "Needs another question"}</small>
+                    </div>
+                  </div>
+                  <span className={styles.looked}>{item.fitState?.replaceAll("_", " ") || item.status}</span>
+                  <p>You noticed: {item.observation}.</p>
+                  <p className={styles.guideAdvice}>
+                    {item.attentionState === "NEEDS_YOU"
+                      ? "🍯 Honey: “We need one more answer before we push this anywhere.”"
+                      : "🍯 Honey: “It’s in the bag. You don’t need to chase it.”"}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         )}
 
