@@ -172,3 +172,36 @@
 @media(prefers-reduced-motion:reduce){
   .app *{scroll-behavior:auto!important;transition:none!important}
 }
+
+.heroVisual{
+  width:min(900px,96vw);
+  max-height:52vh;
+  object-fit:cover;
+  object-position:center;
+  border-radius:30px;
+  border:1px solid rgba(243,218,146,.34);
+  box-shadow:0 26px 72px rgba(0,0,0,.4);
+  margin:8px 0 24px;
+}
+.revealVisual{
+  width:100%;
+  max-height:390px;
+  object-fit:cover;
+  object-position:center;
+  border-radius:22px;
+  margin-bottom:24px;
+  border:1px solid rgba(243,218,146,.22);
+}
+.westVisual{
+  width:100%;
+  max-height:410px;
+  object-fit:cover;
+  object-position:center;
+  border-radius:20px;
+  margin-bottom:24px;
+  border:1px solid rgba(255,225,172,.25);
+}
+@media(max-width:520px){
+  .heroVisual{max-height:36vh;border-radius:22px;margin-bottom:18px}
+  .revealVisual,.westVisual{max-height:270px}
+}
