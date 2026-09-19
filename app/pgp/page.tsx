@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./pgp.module.css";
 
 type Screen =
@@ -39,6 +39,144 @@ const guides = [
   { id: "nova", icon: "✨", name: "Nova", line: "Let’s see what you can build.", tone: "Creative + future" },
   { id: "asha", icon: "🌹", name: "Queen Asha", line: "You already have more than you think.", tone: "Wise + grounded" },
 ];
+
+const guideVoices: Record<string, {
+  welcome: string;
+  money: string;
+  rest: string;
+  strong: string;
+  ask: string;
+  noFit: string;
+}> = {
+  honey: {
+    welcome: "Girl, look what the Palace has waiting for you today.",
+    money: "Let’s see if there’s anything useful worth your time—not just anything to sell.",
+    rest: "If you’re tired, I already know where we’re going.",
+    strong: "Okayyy, this one actually makes sense.",
+    ask: "Wait. One good question first.",
+    noFit: "Nope. Leave these people alone and enjoy yourself. 😂",
+  },
+  bella: {
+    welcome: "Your Palace is ready. I’ve pulled forward what deserves your attention.",
+    money: "We’ll only surface opportunities that are relevant and presentable.",
+    rest: "Rest is part of the standard here.",
+    strong: "This is a clean, credible fit.",
+    ask: "One clarification will make the recommendation much stronger.",
+    noFit: "There is no persuasive reason to introduce anything here.",
+  },
+  rose: {
+    welcome: "Well, look who rode back in. Let’s see what moved while you were gone.",
+    money: "We’re looking for the real opening—not chasing folks around town.",
+    rest: "If the day has worn you out, kick those boots off.",
+    strong: "This dog’ll hunt. Keep it simple.",
+    ask: "Hold your horses. Ask one thing first.",
+    noFit: "Not this pasture, cowgirl. Keep riding.",
+  },
+  nova: {
+    welcome: "Your Palace updated. Let’s scan what changed and what could be built next.",
+    money: "We’re matching live context to the smallest useful solution.",
+    rest: "Even the system needs idle time.",
+    strong: "Signal is clean. This is worth opening.",
+    ask: "Missing one input. Let’s get it before we act.",
+    noFit: "No useful signal here. Skip it.",
+  },
+  asha: {
+    welcome: "Welcome back. Your Palace should meet you where you are today.",
+    money: "Useful opportunity begins with understanding, not pressure.",
+    rest: "You do not have to earn your rest.",
+    strong: "This may genuinely help. Offer it with care.",
+    ask: "Understand one thing more before you recommend anything.",
+    noFit: "Wisdom is also knowing when not to speak.",
+  },
+};
+
+const dailyPalace: Record<number, {
+  label: string;
+  forMe: string;
+  power: string;
+  pocket: string;
+  event: string;
+}> = {
+  0: {
+    label: "Crown & Wisdom Sunday",
+    forMe: "Start slow in the Velvet Room with Crown & Wisdom.",
+    power: "Write down one thing your younger self would be proud of.",
+    pocket: "No chasing today. Review what is already moving.",
+    event: "Wisdom Circle opens today.",
+  },
+  1: {
+    label: "Crown On Monday",
+    forMe: "Reset your room and choose how you want this week to feel.",
+    power: "Pick one Pretty Power to deliberately use today.",
+    pocket: "Learn one opportunity signal before you leave the Palace.",
+    event: "Crown On reset is live.",
+  },
+  2: {
+    label: "Pretty Girl Business Tuesday",
+    forMe: "Take five quiet minutes before business mode.",
+    power: "Practice one introduction until it sounds like you.",
+    pocket: "Teach My Eye has a fresh business scenario.",
+    event: "Pretty Girl Business is open.",
+  },
+  3: {
+    label: "Honey Hour Wednesday",
+    forMe: "Honey House has the table set.",
+    power: "Make one useful introduction with no expectation attached.",
+    pocket: "Look for a relationship problem before a product problem.",
+    event: "Honey Hour starts today.",
+  },
+  4: {
+    label: "Get That Money Thursday",
+    forMe: "Check your energy before you check your Bag.",
+    power: "Spot one real problem and ask one better question.",
+    pocket: "Review only the opportunities that actually need you.",
+    event: "Business Boulevard has Money Moving updates.",
+  },
+  5: {
+    label: "Palace After Dark Friday",
+    forMe: "Save something good for yourself tonight.",
+    power: "Show up somewhere as your Expansion Power.",
+    pocket: "Walk With Me can prep you before tonight’s plans.",
+    event: "Palace After Dark opens tonight.",
+  },
+  6: {
+    label: "Outside The Palace Saturday",
+    forMe: "Go somewhere that gives you a story to bring back.",
+    power: "Use your Expansion Power in the real world.",
+    pocket: "Walk With Me is ready before you head out.",
+    event: "Golden Ranch and Outside The Palace missions are live.",
+  },
+};
+
+const musicMoods: Record<string, Array<{title:string; mood:string; status:string}>> = {
+  "Palace Classics": [
+    { title: "Welcome to My Palace", mood: "Gateway anthem", status: "READY FOR AUDIO" },
+    { title: "Crown On My Own Head", mood: "Confidence", status: "PLACEHOLDER" },
+    { title: "Pretty Is A Power", mood: "Main theme", status: "PLACEHOLDER" },
+    { title: "Golden Door", mood: "Opportunity", status: "PLACEHOLDER" },
+  ],
+  "Money Energy": [
+    { title: "Honey Money", mood: "Earn Mode", status: "PLACEHOLDER" },
+    { title: "Golden Door", mood: "Opportunity", status: "PLACEHOLDER" },
+    { title: "Boots Made For Business", mood: "West Wing business", status: "PLACEHOLDER" },
+  ],
+  "West Wing": [
+    { title: "Crowns & Cowboy Boots", mood: "Golden Ranch", status: "PLACEHOLDER" },
+    { title: "She Rode In Golden", mood: "Western entrance", status: "PLACEHOLDER" },
+    { title: "Wildflower Woman", mood: "Community", status: "PLACEHOLDER" },
+  ],
+  "Palace After Dark": [
+    { title: "Palace After Dark", mood: "Friday night", status: "PLACEHOLDER" },
+    { title: "She Walks In", mood: "Presence", status: "PLACEHOLDER" },
+    { title: "Last Dance At The Palace", mood: "Late-night close", status: "PLACEHOLDER" },
+  ],
+  "Soft & Golden": [
+    { title: "Velvet Room Theme", mood: "Rest", status: "ROOM LOOP PLACEHOLDER" },
+    { title: "Queens Build Queens", mood: "Community", status: "PLACEHOLDER" },
+    { title: "No Permission Needed", mood: "Quiet confidence", status: "PLACEHOLDER" },
+  ],
+};
+
 
 const powers: Record<PowerId, { name: string; icon: string; word: string }> = {
   connector: { name: "Golden Connector", icon: "✨", word: "Connection" },
@@ -240,6 +378,12 @@ export default function PrettyGirlPalace() {
   const [currentOpportunityId, setCurrentOpportunityId] = useState<string | null>(null);
   const [destinationMode, setDestinationMode] = useState("Sorority Event");
   const [huntProduct, setHuntProduct] = useState("Action Signs");
+  const [visitCount, setVisitCount] = useState(1);
+  const [isReturning, setIsReturning] = useState(false);
+  const [palaceDay, setPalaceDay] = useState(1);
+  const [lastVisitLabel, setLastVisitLabel] = useState("");
+  const [musicMood, setMusicMood] = useState("Palace Classics");
+  const [selectedTrack, setSelectedTrack] = useState("Welcome to My Palace");
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -257,6 +401,32 @@ export default function PrettyGirlPalace() {
   }, [answers]);
 
   const selectedGuide = guides.find((g) => g.id === guide) || guides[0];
+  const guideVoice = guideVoices[guide] || guideVoices.honey;
+  const today = dailyPalace[palaceDay] || dailyPalace[1];
+
+  useEffect(() => {
+    const now = new Date();
+    setPalaceDay(now.getDay());
+
+    const rawCount = Number(window.localStorage.getItem("pgp-alpha-visit-count") || "0");
+    const previousVisit = window.localStorage.getItem("pgp-alpha-last-visit");
+    const nextCount = rawCount + 1;
+
+    setVisitCount(nextCount);
+    setIsReturning(rawCount > 0);
+
+    if (previousVisit) {
+      const previous = new Date(previousVisit);
+      if (!Number.isNaN(previous.getTime())) {
+        setLastVisitLabel(
+          previous.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+        );
+      }
+    }
+
+    window.localStorage.setItem("pgp-alpha-visit-count", String(nextCount));
+    window.localStorage.setItem("pgp-alpha-last-visit", now.toISOString());
+  }, []);
 
   function answerQuestion(power: PowerId) {
     const next = [...answers];
@@ -425,8 +595,11 @@ export default function PrettyGirlPalace() {
             <h1>Pretty Girl Palace</h1>
             <p className={styles.tagline}>There’s a room for you here.</p>
             <div className={styles.actions}>
-              <button className={styles.primary} onClick={() => setScreen("confirmed")}>
-                ENTER THE PALACE
+              <button
+                className={styles.primary}
+                onClick={() => setScreen(isReturning ? "home" : "confirmed")}
+              >
+                {isReturning ? "RETURN TO MY PALACE" : "ENTER THE PALACE"}
               </button>
               <button className={styles.secondary} onClick={() => setScreen("confirmed")}>
                 I WAS INVITED
@@ -533,10 +706,24 @@ export default function PrettyGirlPalace() {
 
         {screen === "home" && (
           <div>
+            {isReturning && (
+              <div className={styles.returnMoment}>
+                <span>👑</span>
+                <div>
+                  <small>WELCOME BACK · VISIT {visitCount}</small>
+                  <strong>Your Palace moved while you were gone.</strong>
+                  <p>
+                    {lastVisitLabel ? "Last visit: " + lastVisitLabel + ". " : ""}
+                    {today.event}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className={styles.welcomeLine}>
               <div>
-                <p className={styles.eyebrow}>WELCOME HOME</p>
+                <p className={styles.eyebrow}>{today.label}</p>
                 <h2>Tanya 👑</h2>
+                <p className={styles.guideWelcome}>{guideVoice.welcome}</p>
               </div>
               <button className={styles.guideChip} onClick={resetSpot}>
                 {selectedGuide.icon} {selectedGuide.name}
@@ -547,18 +734,18 @@ export default function PrettyGirlPalace() {
             <div className={styles.dailyGrid}>
               <button className={styles.dailyCard} onClick={() => setScreen("velvet")}>
                 <span>🍯 FOR ME</span>
-                <strong>Your Velvet Room has something soft playing.</strong>
-                <small>Go relax →</small>
+                <strong>{today.forMe}</strong>
+                <small>{guideVoice.rest} →</small>
               </button>
-              <button className={styles.dailyCard}>
+              <button className={styles.dailyCard} onClick={() => setScreen("guidehub")}>
                 <span>✨ FOR MY POWER</span>
-                <strong>Golden Connector mission: introduce two people.</strong>
-                <small>I’ll do it →</small>
+                <strong>{today.power}</strong>
+                <small>Use my Guide →</small>
               </button>
-              <button className={styles.dailyCard} onClick={resetSpot}>
+              <button className={styles.dailyCard} onClick={() => setScreen("guidehub")}>
                 <span>💰 FOR MY POCKET</span>
-                <strong>Learn what an Action Signs opportunity looks like.</strong>
-                <small>Show me →</small>
+                <strong>{today.pocket}</strong>
+                <small>{guideVoice.money} →</small>
               </button>
             </div>
 
@@ -638,11 +825,13 @@ export default function PrettyGirlPalace() {
                     <div className={styles.guideMoment}>
                       <span>{selectedGuide.icon}</span>
                       <p>
-                        {matchResult.fit === "NOT_THIS_ONE"
-                          ? selectedGuide.name + ": “Nothing to force here. Keep moving.”"
-                          : matchResult.fit === "ASK_FIRST"
-                            ? selectedGuide.name + ": “One good question first. Then we’ll know.”"
-                            : selectedGuide.name + ": “Okay—this one is worth your attention.”"}
+                        {selectedGuide.name + ": “" +
+                          (matchResult.fit === "NOT_THIS_ONE"
+                            ? guideVoice.noFit
+                            : matchResult.fit === "ASK_FIRST"
+                              ? guideVoice.ask
+                              : guideVoice.strong) +
+                          "”"}
                       </p>
                     </div>
                     <h2>{matchResult.productName || "NOT THIS ONE"}</h2>
@@ -965,23 +1154,38 @@ export default function PrettyGirlPalace() {
               </div>
             </div>
 
+            <div className={styles.musicMoodRow}>
+              {Object.keys(musicMoods).map((mood) => (
+                <button
+                  key={mood}
+                  className={musicMood === mood ? styles.musicMoodActive : styles.musicMoodChoice}
+                  onClick={() => {
+                    setMusicMood(mood);
+                    setSelectedTrack(musicMoods[mood][0].title);
+                  }}
+                >
+                  {mood}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.nowPlayingCard}>
+              <span>NOW IN YOUR ROOM</span>
+              <strong>{selectedTrack}</strong>
+              <p>{musicMood} · soundtrack slot ready</p>
+            </div>
+
             <div className={styles.trackList}>
-              {[
-                ["Welcome to My Palace","Gateway anthem","READY FOR AUDIO"],
-                ["Crown On My Own Head","Confidence","PLACEHOLDER"],
-                ["Pretty Is A Power","Main theme","PLACEHOLDER"],
-                ["Honey Money","Earn Mode","PLACEHOLDER"],
-                ["Golden Door","Opportunity","PLACEHOLDER"],
-                ["She Walks In","Presence","PLACEHOLDER"],
-                ["Palace After Dark","Friday night","PLACEHOLDER"],
-                ["Crowns & Cowboy Boots","West Wing","PLACEHOLDER"],
-                ["She Rode In Golden","Golden Ranch","PLACEHOLDER"],
-              ].map(([title,mood,status],i) => (
-                <div className={styles.track} key={title}>
+              {musicMoods[musicMood].map((track,i) => (
+                <button
+                  className={selectedTrack === track.title ? styles.trackActive : styles.track}
+                  key={track.title}
+                  onClick={() => setSelectedTrack(track.title)}
+                >
                   <span>{String(i+1).padStart(2,"0")}</span>
-                  <div><strong>{title}</strong><small>{mood}</small></div>
-                  <em>{status}</em>
-                </div>
+                  <div><strong>{track.title}</strong><small>{track.mood}</small></div>
+                  <em>{track.status}</em>
+                </button>
               ))}
             </div>
 
