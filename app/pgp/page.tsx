@@ -148,6 +148,8 @@ export default function PrettyGirlPalace() {
     createdAt: string;
   }>>([]);
   const [bagLoading, setBagLoading] = useState(false);
+  const [liveKey, setLiveKey] = useState<{ code: string; destination: string } | null>(null);
+  const [keyLoading, setKeyLoading] = useState(false);
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -183,6 +185,46 @@ export default function PrettyGirlPalace() {
     setIssue("Long line");
     setMatchResult(null);
     setScreen("spot");
+  }
+
+  async function makeLiveKey() {
+    setKeyLoading(true);
+    try {
+      const product = matchResult?.productName || "Action Signs";
+      const destination =
+        product.includes("Creator College")
+          ? "/k/pgp-tanya-creator-college"
+          : product.includes("Book Bomb")
+            ? "/k/pgp-tanya-book-bomb"
+            : product.includes("Beauty Bot")
+              ? "/k/pgp-tanya-beauty-bot"
+              : product.includes("Pretty Girl Palace")
+                ? "/k/pgp-tanya-invite"
+                : "/k/pgp-tanya-action-signs";
+
+      const response = await fetch(
+        "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/keys",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            memberKey: "alpha-tanya",
+            keyType: "QUICK",
+            contextType: place,
+            productName: product,
+            destination,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (response.ok && data?.key?.code) {
+        setLiveKey({ code: data.key.code, destination: data.key.destination });
+      }
+    } catch {
+      setLiveKey(null);
+    } finally {
+      setKeyLoading(false);
+    }
   }
 
   async function openBag() {
@@ -535,12 +577,23 @@ export default function PrettyGirlPalace() {
             <p>Opening: <strong>Customer Flow</strong> · Showing: <strong>Action Signs</strong></p>
             <QrMock />
             <div className={styles.keyActions}>
-              <a className={styles.primary} href="/k/pgp-tanya-action-signs">OPEN CUSTOMER VIEW</a>
+              {!liveKey ? (
+                <button className={styles.primary} onClick={makeLiveKey} disabled={keyLoading}>
+                  {keyLoading ? "CREATING LIVE KEY…" : "CREATE LIVE PALACE KEY"}
+                </button>
+              ) : (
+                <a className={styles.primary} href={"/k/" + liveKey.code}>
+                  OPEN LIVE KEY · {liveKey.code}
+                </a>
+              )}
+              <a className={styles.secondary} href="/k/pgp-tanya-action-signs">OPEN CUSTOMER VIEW</a>
               <button className={styles.secondary}>TEXT IT</button>
               <button className={styles.secondary}>SAVE FOR LATER</button>
             </div>
             <p className={styles.prototypeNote}>
-              Alpha preview: QR attribution is visually simulated here; live resolver + Earn Mode attribution is the next backend upload.
+              {liveKey
+                ? "Live alpha resolver active. Opening this Key records an open event before routing to the customer destination."
+                : "Create the live alpha Key to activate resolver-based routing and attribution events."}
             </p>
           </div>
         )}
