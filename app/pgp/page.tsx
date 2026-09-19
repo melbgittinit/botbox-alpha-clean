@@ -126,6 +126,17 @@ export default function PrettyGirlPalace() {
   const [spotStage, setSpotStage] = useState<"place" | "issue" | "match" | "pitch">("place");
   const [place, setPlace] = useState("Restaurant");
   const [issue, setIssue] = useState("Long line");
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [matchResult, setMatchResult] = useState<{
+    fit: "STRONG_FIT" | "WORTH_SHOWING" | "ASK_FIRST" | "NOT_THIS_ONE";
+    productName?: string;
+    observed: string;
+    reason: string;
+    whatToSay?: string;
+    dontPromise?: string;
+    clarification?: string;
+    sanity: "SAY_SOMETHING" | "ASK_FIRST" | "SAVE_FOR_LATER" | "LEAVE_IT";
+  } | null>(null);
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -159,7 +170,32 @@ export default function PrettyGirlPalace() {
     setSpotStage("place");
     setPlace("Restaurant");
     setIssue("Long line");
+    setMatchResult(null);
     setScreen("spot");
+  }
+
+  async function evaluateSpot(nextIssue: string) {
+    setIssue(nextIssue);
+    setMatchLoading(true);
+    setSpotStage("match");
+    try {
+      const response = await fetch("/api/pgp/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ environment: place, signal: nextIssue }),
+      });
+      const data = await response.json();
+      setMatchResult(data);
+    } catch {
+      setMatchResult({
+        fit: "NOT_THIS_ONE",
+        observed: nextIssue,
+        reason: "PGP could not check this opportunity right now. Try again in a moment.",
+        sanity: "SAVE_FOR_LATER",
+      });
+    } finally {
+      setMatchLoading(false);
+    }
   }
 
   return (
@@ -367,11 +403,11 @@ export default function PrettyGirlPalace() {
                 <h3>What caught your eye?</h3>
                 <div className={styles.optionList}>
                   {["Long line","People look confused","Ordering seems slow","Needs more customers","No return / loyalty system","Signage isn’t doing much"].map((x) => (
-                    <button key={x} onClick={() => { setIssue(x); setSpotStage("match"); }}>
+                    <button key={x} onClick={() => evaluateSpot(x)}>
                       {x}<span>›</span>
                     </button>
                   ))}
-                  <button onClick={() => { setIssue("I just have a feeling"); setSpotStage("match"); }}>
+                  <button onClick={() => evaluateSpot("I just have a feeling")}>
                     I just have a feeling 👀<span>›</span>
                   </button>
                 </div>
@@ -380,16 +416,41 @@ export default function PrettyGirlPalace() {
 
             {spotStage === "match" && (
               <div className={styles.matchCard}>
-                <span className={styles.fit}>● STRONG FIT</span>
-                <h2>ACTION SIGNS</h2>
-                <dl>
-                  <div><dt>WHAT YOU NOTICED</dt><dd>{issue} at a {place.toLowerCase()}.</dd></div>
-                  <div><dt>WHAT MAY HELP</dt><dd>A scan-to-action customer path.</dd></div>
-                  <div><dt>WHY</dt><dd>It can move simple customer actions away from one crowded point.</dd></div>
-                  <div><dt>DON’T PROMISE</dt><dd>Don’t claim it will eliminate every line or guarantee sales.</dd></div>
-                </dl>
-                <button className={styles.primary} onClick={() => setSpotStage("pitch")}>WHAT SHOULD I SAY?</button>
-                <button className={styles.secondary} onClick={() => setScreen("key")}>🔑 MAKE MY KEY</button>
+                {matchLoading || !matchResult ? (
+                  <>
+                    <span className={styles.fit}>PGP IS LOOKING…</span>
+                    <h2>Girl, give me a second. 👀</h2>
+                    <p>Checking what you noticed against Palace-Key-ready HUB solutions.</p>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.fit}>
+                      ● {matchResult.fit.replaceAll("_", " ")}
+                    </span>
+                    <h2>{matchResult.productName || "NOT THIS ONE"}</h2>
+                    <dl>
+                      <div><dt>WHAT YOU NOTICED</dt><dd>{matchResult.observed} at a {place.toLowerCase()}.</dd></div>
+                      <div><dt>WHY</dt><dd>{matchResult.reason}</dd></div>
+                      {matchResult.clarification && (
+                        <div><dt>ASK FIRST</dt><dd>{matchResult.clarification}</dd></div>
+                      )}
+                      {matchResult.dontPromise && (
+                        <div><dt>DON’T PROMISE</dt><dd>{matchResult.dontPromise}</dd></div>
+                      )}
+                    </dl>
+                    {matchResult.whatToSay && (
+                      <button className={styles.primary} onClick={() => setSpotStage("pitch")}>WHAT SHOULD I SAY?</button>
+                    )}
+                    {(matchResult.fit === "STRONG_FIT" || matchResult.fit === "WORTH_SHOWING") && (
+                      <button className={styles.secondary} onClick={() => setScreen("key")}>🔑 MAKE MY KEY</button>
+                    )}
+                    {(matchResult.fit === "ASK_FIRST" || matchResult.fit === "NOT_THIS_ONE") && (
+                      <button className={styles.secondary} onClick={() => setSpotStage("issue")}>
+                        ← TELL PGP SOMETHING ELSE
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
@@ -397,16 +458,23 @@ export default function PrettyGirlPalace() {
               <div className={styles.pitchCard}>
                 <p className={styles.eyebrow}>NATURAL</p>
                 <blockquote>
-                  “Y’all have a great crowd, but everybody’s getting stacked up right here.
-                  I know something that may make that easier.”
+                  “{matchResult?.whatToSay || "I noticed something that may be worth looking at."}”
                 </blockquote>
                 <div className={styles.toneRow}>
                   <button>Shorter</button><button>Warmer</button><button>Funny</button><button>More businesslike</button>
                 </div>
                 <div className={styles.sanity}>
                   <span>😬 DON’T EMBARRASS ME</span>
-                  <strong>YES — SAY SOMETHING.</strong>
-                  <p>This is a natural problem/solution match. Keep it brief.</p>
+                  <strong>
+                    {matchResult?.sanity === "SAY_SOMETHING"
+                      ? "YES — SAY SOMETHING."
+                      : matchResult?.sanity === "ASK_FIRST"
+                        ? "ASK FIRST."
+                        : matchResult?.sanity === "SAVE_FOR_LATER"
+                          ? "SAVE IT FOR LATER."
+                          : "LEAVE THESE PEOPLE ALONE. 😂"}
+                  </strong>
+                  <p>{matchResult?.reason || "Keep it brief and useful."}</p>
                 </div>
                 <button className={styles.primary} onClick={() => setScreen("key")}>MAKE MY PALACE KEY</button>
               </div>
