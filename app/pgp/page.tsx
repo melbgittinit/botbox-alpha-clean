@@ -13,6 +13,8 @@ type Screen =
   | "spot"
   | "key"
   | "bag"
+  | "prepare"
+  | "music"
   | "west"
   | "velvet";
 
@@ -151,6 +153,7 @@ export default function PrettyGirlPalace() {
   const [liveKey, setLiveKey] = useState<{ code: string; destination: string } | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
   const [currentOpportunityId, setCurrentOpportunityId] = useState<string | null>(null);
+  const [destinationMode, setDestinationMode] = useState("Sorority Event");
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -469,7 +472,7 @@ export default function PrettyGirlPalace() {
             <div className={styles.quickGrid}>
               <button onClick={resetSpot}><span>👁️</span><strong>I Spotted Something</strong></button>
               <button onClick={() => setScreen("key")}><span>🔑</span><strong>My Palace Key</strong></button>
-              <button><span>🎵</span><strong>Music Hall</strong></button>
+              <button onClick={() => setScreen("music")}><span>🎵</span><strong>Music Hall</strong></button>
               <button onClick={openBag}><span>👜</span><strong>Opportunity Bag</strong></button>
             </div>
 
@@ -481,8 +484,11 @@ export default function PrettyGirlPalace() {
               <button onClick={() => setScreen("velvet")}>
                 <span>🛋️</span><div><small>VELVET ROOM · COME REST</small><strong>Girl, come sit down.</strong></div><b>›</b>
               </button>
-              <button>
+              <button onClick={() => setScreen("music")}>
                 <span>🎤</span><div><small>MUSIC HALL · TONIGHT</small><strong>Palace After Dark</strong></div><b>›</b>
+              </button>
+              <button onClick={() => setScreen("prepare")}>
+                <span>👢</span><div><small>WALK WITH ME · PREP MODE</small><strong>I’m going somewhere.</strong></div><b>›</b>
               </button>
             </div>
           </div>
@@ -657,6 +663,105 @@ export default function PrettyGirlPalace() {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {screen === "prepare" && (
+          <div>
+            <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <p className={styles.eyebrow}>WALK WITH ME™</p>
+            <h2 className={styles.sectionTitle}>I’m going somewhere.</h2>
+            <p className={styles.prepIntro}>
+              Tell PGP where you’re headed and we’ll help you know what to listen for.
+              No background location tracking. You choose the context.
+            </p>
+
+            <div className={styles.prepGrid}>
+              {["Sorority Event","Conference","Wedding","Church","Rodeo","County Fair","School Event","Author Event","Business Mixer","Girls’ Trip"].map((d) => (
+                <button
+                  key={d}
+                  className={destinationMode === d ? styles.prepActive : styles.prepChoice}
+                  onClick={() => setDestinationMode(d)}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.prepBrief}>
+              <span className={styles.fit}>YOUR PALACE BRIEF</span>
+              <h3>{destinationMode}</h3>
+
+              {destinationMode === "Sorority Event" ? (
+                <>
+                  <div><strong>LISTEN FOR</strong><p>“Registration is a mess.” · “I wrote a book.” · “We need something creative for our girls.” · “Who did your merch?”</p></div>
+                  <div><strong>POSSIBLE FITS</strong><p>Action Signs · Book Bomb Bot · Creator College · PGP Merch · Pretty Girl Palace itself.</p></div>
+                  <div><strong>DON’T DO</strong><p>Do not walk around pitching six things to everybody. Enjoy the event and let real conversations create the opening.</p></div>
+                </>
+              ) : destinationMode === "Rodeo" || destinationMode === "County Fair" ? (
+                <>
+                  <div><strong>GOLDEN RANCH RADAR</strong><p>Watch for local vendors, Western boutiques, event-flow problems, community groups, creators, church/family programming and tourism opportunities.</p></div>
+                  <div><strong>POSSIBLE FITS</strong><p>Golden Ranch Market · Action Signs · Bot Stores · Creator College · County Fair / rural VBS experiences.</p></div>
+                  <div><strong>DON’T FORCE</strong><p>Local trust matters. Add a useful digital layer only where it actually solves something.</p></div>
+                </>
+              ) : (
+                <>
+                  <div><strong>LISTEN FOR</strong><p>Problems people say out loud: too many steps, no clear next action, poor promotion, slow follow-up, scattered tools, or a good idea with no path.</p></div>
+                  <div><strong>YOUR JOB</strong><p>Notice first. Ask one good question. Let Pretty Girl Vision decide whether there is a real HUB fit.</p></div>
+                  <div><strong>REMEMBER</strong><p>You are going to the event—not going hunting through people. Opportunity should feel natural.</p></div>
+                </>
+              )}
+
+              <button className={styles.primary} onClick={resetSpot}>I SEE SOMETHING →</button>
+            </div>
+          </div>
+        )}
+
+        {screen === "music" && (
+          <div>
+            <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <p className={styles.eyebrow}>PGP MUSIC HALL</p>
+            <h2 className={styles.sectionTitle}>The Palace has a sound.</h2>
+
+            <div className={styles.musicHero}>
+              <img
+                src="https://cdn.shopify.com/s/files/1/1982/3607/files/pgp-home-ui.png?v=1789834463"
+                alt="Pretty Girl Palace Music Hall atmosphere"
+              />
+              <div>
+                <small>MAIN ALBUM</small>
+                <h3>Pretty Girl Palace</h3>
+                <p>The Crown Inside Me</p>
+              </div>
+            </div>
+
+            <div className={styles.trackList}>
+              {[
+                ["Welcome to My Palace","Gateway anthem","READY FOR AUDIO"],
+                ["Crown On My Own Head","Confidence","PLACEHOLDER"],
+                ["Pretty Is A Power","Main theme","PLACEHOLDER"],
+                ["Honey Money","Earn Mode","PLACEHOLDER"],
+                ["Golden Door","Opportunity","PLACEHOLDER"],
+                ["She Walks In","Presence","PLACEHOLDER"],
+                ["Palace After Dark","Friday night","PLACEHOLDER"],
+                ["Crowns & Cowboy Boots","West Wing","PLACEHOLDER"],
+                ["She Rode In Golden","Golden Ranch","PLACEHOLDER"],
+              ].map(([title,mood,status],i) => (
+                <div className={styles.track} key={title}>
+                  <span>{String(i+1).padStart(2,"0")}</span>
+                  <div><strong>{title}</strong><small>{mood}</small></div>
+                  <em>{status}</em>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.musicNote}>
+              <strong>SONIC BUILD RULE</strong>
+              <p>
+                Full songs, room loops and short 6–22 second motifs can all use the same musical DNA.
+                We can drop final audio into these slots as it becomes available without changing the experience.
+              </p>
+            </div>
           </div>
         )}
 
