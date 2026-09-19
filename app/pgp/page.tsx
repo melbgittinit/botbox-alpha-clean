@@ -13,6 +13,8 @@ type Screen =
   | "spot"
   | "key"
   | "bag"
+  | "guidehub"
+  | "hunt"
   | "prepare"
   | "music"
   | "west"
@@ -237,6 +239,7 @@ export default function PrettyGirlPalace() {
   const [keyLoading, setKeyLoading] = useState(false);
   const [currentOpportunityId, setCurrentOpportunityId] = useState<string | null>(null);
   const [destinationMode, setDestinationMode] = useState("Sorority Event");
+  const [huntProduct, setHuntProduct] = useState("Action Signs");
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -742,8 +745,15 @@ export default function PrettyGirlPalace() {
         {screen === "bag" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
-            <p className={styles.eyebrow}>OPPORTUNITY BAG™</p>
-            <h2 className={styles.sectionTitle}>What’s in my bag?</h2>
+            <div className={styles.bagHeader}>
+              <div>
+                <p className={styles.eyebrow}>OPPORTUNITY BAG™</p>
+                <h2 className={styles.sectionTitle}>What’s in my bag?</h2>
+              </div>
+              <button className={styles.refreshButton} onClick={openBag} disabled={bagLoading}>
+                {bagLoading ? "Checking…" : "Refresh"}
+              </button>
+            </div>
             <div className={styles.bagSummary}>
               <div><strong>{bagItems.filter((x) => x.attentionState === "NEEDS_YOU").length}</strong><span>NEEDS YOU</span></div>
               <div><strong>{bagItems.filter((x) => x.attentionState === "PGP_IS_WATCHING").length}</strong><span>PGP IS WATCHING</span></div>
@@ -767,16 +777,122 @@ export default function PrettyGirlPalace() {
                       <small>{item.productName || "Needs another question"}</small>
                     </div>
                   </div>
-                  <span className={styles.looked}>{item.fitState?.replaceAll("_", " ") || item.status}</span>
+                  <span className={styles.looked}>
+                    {item.status === "VIEWED"
+                      ? "THEY LOOKED"
+                      : item.status === "KEY_READY"
+                        ? "KEY READY"
+                        : item.status === "CONVERSION_PENDING"
+                          ? "MONEY MOVING"
+                          : item.fitState?.replaceAll("_", " ") || item.status}
+                  </span>
                   <p>You noticed: {item.observation}.</p>
                   <p className={styles.guideAdvice}>
                     {item.attentionState === "NEEDS_YOU"
-                      ? "🍯 Honey: “We need one more answer before we push this anywhere.”"
-                      : "🍯 Honey: “It’s in the bag. You don’t need to chase it.”"}
+                      ? selectedGuide.icon + " " + selectedGuide.name + ": “We need one more answer before we push this anywhere.”"
+                      : item.status === "VIEWED"
+                        ? selectedGuide.icon + " " + selectedGuide.name + ": “They looked. Give them some room.”"
+                        : item.status === "CONVERSION_PENDING"
+                          ? selectedGuide.icon + " " + selectedGuide.name + ": “The handoff is recorded. Let the system do its work.”"
+                          : selectedGuide.icon + " " + selectedGuide.name + ": “It’s in the bag. You don’t need to chase it.”"}
                   </p>
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {screen === "guidehub" && (
+          <div>
+            <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <p className={styles.eyebrow}>YOUR PALACE GUIDE</p>
+            <h2 className={styles.sectionTitle}>What are we doing, girl?</h2>
+
+            <div className={styles.guideHubIntro}>
+              <span>{selectedGuide.icon}</span>
+              <div>
+                <strong>{selectedGuide.name}</strong>
+                <p>{selectedGuide.line} Pick the kind of help you need and I’ll take it from there.</p>
+              </div>
+            </div>
+
+            <div className={styles.guideHubGrid}>
+              <button onClick={resetSpot}>
+                <span>👁️</span><strong>I SAW SOMETHING</strong><small>Help me figure out whether it is really an opportunity.</small>
+              </button>
+              <button onClick={() => setScreen("prepare")}>
+                <span>👢</span><strong>I’M GOING SOMEWHERE</strong><small>Prepare my eye before I get there.</small>
+              </button>
+              <button onClick={() => setScreen("hunt")}>
+                <span>💰</span><strong>I’M LOOKING FOR SOMETHING</strong><small>Teach me where a particular HUB opportunity naturally appears.</small>
+              </button>
+              <button onClick={() => setScreen("velvet")}>
+                <span>🛋️</span><strong>GIRL, I’M DONE</strong><small>No work. Take me to the Velvet Room.</small>
+              </button>
+            </div>
+
+            <p className={styles.guideHubRule}>
+              PGP rule: you never have to sell just because you noticed something.
+            </p>
+          </div>
+        )}
+
+        {screen === "hunt" && (
+          <div>
+            <button className={styles.back} onClick={() => setScreen("guidehub")}>← My Guide</button>
+            <p className={styles.eyebrow}>TEACH MY EYE™</p>
+            <h2 className={styles.sectionTitle}>What kind of opportunity are you looking for?</h2>
+
+            <div className={styles.huntTabs}>
+              {["Action Signs","Book Bomb Bot","Creator College","Beauty Bot","Bot Stores"].map((product) => (
+                <button
+                  key={product}
+                  className={huntProduct === product ? styles.huntActive : styles.huntChoice}
+                  onClick={() => setHuntProduct(product)}
+                >
+                  {product}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.huntCard}>
+              <span className={styles.fit}>LOOK FOR THE REAL SIGNAL</span>
+              <h3>{huntProduct}</h3>
+
+              {huntProduct === "Action Signs" ? (
+                <>
+                  <div><strong>GOOD PLACES TO NOTICE</strong><p>Restaurants, registrations, events, schools, churches, retail counters and anywhere people repeat a simple action.</p></div>
+                  <div><strong>LISTEN FOR</strong><p>“Everybody keeps asking…” · “The line gets backed up…” · “People don’t know where to go…”</p></div>
+                  <div><strong>DON’T PITCH JUST BECAUSE</strong><p>A business has a line. First find out whether the line is structural, temporary, or already solved.</p></div>
+                </>
+              ) : huntProduct === "Book Bomb Bot" ? (
+                <>
+                  <div><strong>GOOD PLACES TO NOTICE</strong><p>Author events, bookstores, church authors, writing groups, conferences and creator gatherings.</p></div>
+                  <div><strong>LISTEN FOR</strong><p>“My book isn’t moving.” · “I don’t know how to market it.” · “Amazon isn’t doing much.”</p></div>
+                  <div><strong>ASK FIRST</strong><p>Is the book actually published and available for purchase?</p></div>
+                </>
+              ) : huntProduct === "Creator College" ? (
+                <>
+                  <div><strong>GOOD PLACES TO NOTICE</strong><p>Schools, parent groups, creator meetups, churches, organizations and people sitting on unfinished ideas.</p></div>
+                  <div><strong>LISTEN FOR</strong><p>“I want them creating.” · “I have an idea but don’t know what to build.” · “We need something practical.”</p></div>
+                  <div><strong>KEEP IT REAL</strong><p>Creator College is a build pathway—not a promise of income or academic outcomes.</p></div>
+                </>
+              ) : huntProduct === "Beauty Bot" ? (
+                <>
+                  <div><strong>GOOD PLACES TO NOTICE</strong><p>Salons, beauty suites, stylists, barbers, beauty educators and busy service businesses.</p></div>
+                  <div><strong>LISTEN FOR</strong><p>“Clients keep asking the same thing.” · “I need them to come back.” · “Booking is all over the place.”</p></div>
+                  <div><strong>DON’T ASSUME</strong><p>A busy salon does not automatically need a new system. Find the actual friction.</p></div>
+                </>
+              ) : (
+                <>
+                  <div><strong>GOOD PLACES TO NOTICE</strong><p>Small businesses with a good product but a confusing digital customer path.</p></div>
+                  <div><strong>LISTEN FOR</strong><p>“People don’t know what to click.” · “I answer the same questions all day.” · “I need something simple on the front end.”</p></div>
+                  <div><strong>YOUR JOB</strong><p>Identify the customer problem first. Then let PGP match the smallest useful bot or digital layer.</p></div>
+                </>
+              )}
+
+              <button className={styles.primary} onClick={resetSpot}>I FOUND SOMETHING →</button>
+            </div>
           </div>
         )}
 
@@ -933,7 +1049,7 @@ export default function PrettyGirlPalace() {
         <nav className={styles.bottomNav}>
           <button onClick={() => setScreen("home")}><span>🏰</span>PALACE</button>
           <button onClick={resetSpot}><span>👁️</span>SPOT</button>
-          <button className={styles.crownNav} onClick={resetSpot}><span>♛</span>GUIDE</button>
+          <button className={styles.crownNav} onClick={() => setScreen("guidehub")}><span>♛</span>GUIDE</button>
           <button><span>👭</span>GIRLS</button>
           <button onClick={() => setScreen("reveal")}><span>✨</span>ME</button>
         </nav>
