@@ -285,9 +285,17 @@ export default function PrettyGirlPalace() {
             ? "/k/pgp-tanya-book-bomb"
             : product.includes("Beauty Bot")
               ? "/k/pgp-tanya-beauty-bot"
-              : product.includes("Pretty Girl Palace")
-                ? "/k/pgp-tanya-invite"
-                : "/k/pgp-tanya-action-signs";
+              : product.includes("Sunday School") || product.includes("VBS")
+                ? "/k/pgp-tanya-vbs"
+                : product.includes("Dude Fan")
+                  ? "/k/pgp-tanya-dudefan"
+                  : product.includes("Wedding") || product.includes("Event System")
+                    ? "/k/pgp-tanya-event"
+                    : product.includes("Bot Stores")
+                      ? "/k/pgp-tanya-bot-stores"
+                      : product.includes("Pretty Girl Palace")
+                        ? "/k/pgp-tanya-invite"
+                        : "/k/pgp-tanya-action-signs";
 
       const response = await fetch(
         "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/keys",
