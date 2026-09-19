@@ -266,3 +266,30 @@
 .keyGuideNote>span{font-size:26px}
 .keyGuideNote strong{display:block;color:var(--gold2);margin-bottom:4px}
 .keyGuideNote p{margin:0!important;font-size:13px;line-height:1.45!important;color:#e8dbe6}
+
+.bagHeader{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.refreshButton{border:1px solid rgba(243,218,146,.24);background:rgba(255,255,255,.04);color:var(--cream);border-radius:999px;padding:10px 13px;font-weight:800;cursor:pointer}
+.guideHubIntro{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:22px;background:rgba(169,86,120,.11);border:1px solid rgba(169,86,120,.25);margin:14px 0 20px}
+.guideHubIntro>span{font-size:42px}
+.guideHubIntro strong{display:block;font-family:Georgia,serif;font-size:28px;color:#fff0cc}
+.guideHubIntro p{margin:6px 0 0;line-height:1.55;color:#eadde8}
+.guideHubGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.guideHubGrid button{min-height:170px;text-align:left;border-radius:22px;border:1px solid rgba(243,218,146,.18);background:linear-gradient(145deg,rgba(80,34,85,.82),rgba(26,14,31,.9));color:var(--cream);padding:20px;cursor:pointer}
+.guideHubGrid button>span{display:block;font-size:34px;margin-bottom:18px}
+.guideHubGrid strong{display:block;color:var(--gold2);font-size:13px;letter-spacing:.08em;margin-bottom:8px}
+.guideHubGrid small{display:block;line-height:1.5;color:#ded0df}
+.guideHubRule{margin:18px 0 0;text-align:center;font-family:Georgia,serif;color:#e6d5e5}
+.huntTabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin:16px 0 20px}
+.huntChoice,.huntActive{flex:none;border:1px solid rgba(243,218,146,.18);border-radius:999px;background:rgba(255,255,255,.035);color:var(--cream);padding:10px 13px;font-weight:800;cursor:pointer}
+.huntActive{background:rgba(214,179,95,.16);border-color:var(--gold2);color:#fff0cc}
+.huntCard{border:1px solid rgba(243,218,146,.23);border-radius:26px;padding:26px;background:linear-gradient(180deg,rgba(71,31,76,.74),rgba(26,14,31,.9))}
+.huntCard h3{font-family:Georgia,serif;font-size:42px;margin:8px 0 18px;color:#fff0cc}
+.huntCard>div{border-top:1px solid rgba(255,255,255,.08);padding:14px 0}
+.huntCard strong{font-size:10px;letter-spacing:.12em;color:var(--gold2)}
+.huntCard p{line-height:1.55;margin:7px 0 0}
+.huntCard .primary{margin-top:12px}
+@media(max-width:620px){
+  .guideHubGrid{grid-template-columns:1fr}
+  .bagHeader{align-items:center}
+  .bagHeader .sectionTitle{margin-bottom:8px}
+}
