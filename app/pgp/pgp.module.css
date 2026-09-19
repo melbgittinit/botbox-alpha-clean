@@ -205,3 +205,37 @@
   .heroVisual{max-height:36vh;border-radius:22px;margin-bottom:18px}
   .revealVisual,.westVisual{max-height:270px}
 }
+
+.prepIntro{max-width:700px;color:#e6d8e3;line-height:1.6;margin-bottom:22px}
+.prepGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:18px 0 24px}
+.prepChoice,.prepActive{min-height:76px;border-radius:17px;border:1px solid rgba(243,218,146,.16);background:rgba(255,255,255,.035);color:var(--cream);padding:12px;font-weight:800;cursor:pointer}
+.prepActive{border-color:var(--gold2);background:rgba(214,179,95,.14);box-shadow:0 12px 26px rgba(0,0,0,.18)}
+.prepBrief{border:1px solid rgba(243,218,146,.23);border-radius:26px;padding:26px;background:linear-gradient(180deg,rgba(71,31,76,.74),rgba(26,14,31,.9))}
+.prepBrief h3{font-family:Georgia,serif;font-size:36px;margin:7px 0 18px;color:#fff0cc}
+.prepBrief>div{border-top:1px solid rgba(255,255,255,.08);padding:14px 0}
+.prepBrief strong{font-size:10px;letter-spacing:.12em;color:var(--gold2)}
+.prepBrief p{line-height:1.55;margin:7px 0 0}
+.prepBrief .primary{margin-top:14px}
+.musicHero{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:end;border:1px solid rgba(243,218,146,.22);border-radius:28px;padding:15px;background:rgba(255,255,255,.03);overflow:hidden}
+.musicHero img{width:100%;height:310px;object-fit:cover;border-radius:19px}
+.musicHero small{letter-spacing:.15em;color:var(--gold2);font-weight:900}
+.musicHero h3{font-family:Georgia,serif;font-size:46px;margin:6px 0 3px;color:#fff1d1}
+.musicHero p{font-family:Georgia,serif;font-size:22px;color:#e8d5e5}
+.trackList{display:grid;gap:7px;margin:22px 0}
+.track{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:13px 16px;background:rgba(255,255,255,.025)}
+.track>span{color:var(--gold2);font-family:Georgia,serif}
+.track strong,.track small{display:block}
+.track small{opacity:.62;margin-top:3px}
+.track em{font-size:8px;font-style:normal;letter-spacing:.11em;color:var(--gold2);border:1px solid rgba(243,218,146,.22);border-radius:999px;padding:6px 8px}
+.musicNote{border-radius:19px;padding:18px;background:rgba(169,86,120,.11);border:1px solid rgba(169,86,120,.25)}
+.musicNote strong{font-size:10px;letter-spacing:.12em;color:var(--gold2)}
+.musicNote p{line-height:1.55;margin-bottom:0}
+@media(max-width:760px){
+  .prepGrid{grid-template-columns:repeat(2,1fr)}
+  .musicHero{grid-template-columns:1fr}
+  .musicHero img{height:250px}
+}
+@media(max-width:520px){
+  .track{grid-template-columns:34px 1fr}
+  .track em{grid-column:2}
+}
