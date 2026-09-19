@@ -150,6 +150,7 @@ export default function PrettyGirlPalace() {
   const [bagLoading, setBagLoading] = useState(false);
   const [liveKey, setLiveKey] = useState<{ code: string; destination: string } | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
+  const [currentOpportunityId, setCurrentOpportunityId] = useState<string | null>(null);
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -212,6 +213,7 @@ export default function PrettyGirlPalace() {
             keyType: "QUICK",
             contextType: place,
             productName: product,
+            opportunityId: currentOpportunityId,
             destination,
           }),
         }
@@ -258,20 +260,33 @@ export default function PrettyGirlPalace() {
       setMatchResult(data);
 
       if (data.fit !== "NOT_THIS_ONE") {
-        fetch("https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/opportunities", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            memberKey: "alpha-tanya",
-            environment: place,
-            observation: nextIssue,
-            structuredProblem: data.reason,
-            productName: data.productName || null,
-            fitState: data.fit,
-            status: data.fit === "ASK_FIRST" ? "NEEDS_CLARIFICATION" : "MATCHED",
-            attentionState: data.fit === "ASK_FIRST" ? "NEEDS_YOU" : "NOTHING_TO_DO",
-          }),
-        }).catch(() => undefined);
+        try {
+          const saved = await fetch(
+            "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/opportunities",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                memberKey: "alpha-tanya",
+                environment: place,
+                observation: nextIssue,
+                structuredProblem: data.reason,
+                productName: data.productName || null,
+                fitState: data.fit,
+                status: data.fit === "ASK_FIRST" ? "NEEDS_CLARIFICATION" : "MATCHED",
+                attentionState: data.fit === "ASK_FIRST" ? "NEEDS_YOU" : "NOTHING_TO_DO",
+              }),
+            }
+          );
+          const savedData = await saved.json();
+          if (saved.ok && savedData?.opportunity?.id) {
+            setCurrentOpportunityId(savedData.opportunity.id);
+          }
+        } catch {
+          setCurrentOpportunityId(null);
+        }
+      } else {
+        setCurrentOpportunityId(null);
       }
     } catch {
       setMatchResult({
@@ -304,10 +319,11 @@ export default function PrettyGirlPalace() {
       <section className={styles.stage}>
         {screen === "gateway" && (
           <div className={styles.gateway}>
-            <div className={styles.palaceSilhouette}>
-              <span>♛</span>
-              <div />
-            </div>
+            <img
+              className={styles.heroVisual}
+              src="https://cdn.shopify.com/s/files/1/1982/3607/files/pgp-enter-the-palace.png?v=1789834055"
+              alt="Pretty Girl Palace grand entrance"
+            />
             <p className={styles.eyebrow}>WELCOME TO</p>
             <h1>Pretty Girl Palace</h1>
             <p className={styles.tagline}>There’s a room for you here.</p>
@@ -385,6 +401,11 @@ export default function PrettyGirlPalace() {
 
         {screen === "reveal" && (
           <div className={styles.reveal}>
+            <img
+              className={styles.revealVisual}
+              src="https://cdn.shopify.com/s/files/1/1982/3607/files/pgp-discover-your-power.png?v=1789834458"
+              alt="Pretty Girl Palace Pretty Power result"
+            />
             <p className={styles.eyebrow}>YOUR PALACE COMBINATION</p>
             <div className={styles.powerHero}>
               <span>{powers[combination[0]].icon}</span>
@@ -644,6 +665,11 @@ export default function PrettyGirlPalace() {
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
             <p className={styles.eyebrow}>PRETTY GIRL PALACE · WEST WING</p>
             <div className={styles.westHero}>
+              <img
+                className={styles.westVisual}
+                src="https://cdn.shopify.com/s/files/1/1982/3607/files/pgp-golden-ranch.png?v=1789834060"
+                alt="Pretty Girl Palace Golden Ranch West Wing"
+              />
               <span>🤠</span>
               <small>THE GOLDEN RANCH</small>
               <h2>Crowns & Cowboy Boots</h2>
