@@ -293,3 +293,23 @@
   .bagHeader{align-items:center}
   .bagHeader .sectionTitle{margin-bottom:8px}
 }
+
+.returnMoment{display:flex;gap:14px;align-items:flex-start;margin:10px 0 22px;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,rgba(214,179,95,.12),rgba(169,86,120,.09));border:1px solid rgba(243,218,146,.22)}
+.returnMoment>span{font-size:32px}
+.returnMoment small{display:block;font-size:9px;font-weight:900;letter-spacing:.13em;color:var(--gold2);margin-bottom:5px}
+.returnMoment strong{display:block;font-family:Georgia,serif;font-size:21px;color:#fff0cc}
+.returnMoment p{margin:5px 0 0;color:#e5d8e3;line-height:1.45;font-size:13px}
+.guideWelcome{margin:6px 0 0;color:#dccde0;max-width:530px;line-height:1.45}
+.musicMoodRow{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;margin-top:18px}
+.musicMoodChoice,.musicMoodActive{flex:none;border:1px solid rgba(243,218,146,.18);border-radius:999px;background:rgba(255,255,255,.035);color:var(--cream);padding:9px 12px;font-weight:800;cursor:pointer}
+.musicMoodActive{background:rgba(214,179,95,.16);border-color:var(--gold2);color:#fff1d1}
+.nowPlayingCard{margin:10px 0 18px;padding:18px;border-radius:20px;background:radial-gradient(circle at 10% 0,rgba(214,179,95,.16),transparent 13rem),rgba(255,255,255,.03);border:1px solid rgba(243,218,146,.2)}
+.nowPlayingCard>span{display:block;font-size:9px;letter-spacing:.14em;color:var(--gold2);font-weight:900}
+.nowPlayingCard strong{display:block;font-family:Georgia,serif;font-size:31px;margin-top:5px;color:#fff0cc}
+.nowPlayingCard p{margin:4px 0 0;color:#d9cadc}
+.trackActive{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;border:1px solid var(--gold2);border-radius:16px;padding:13px 16px;background:rgba(214,179,95,.11);color:var(--cream);text-align:left}
+.trackActive>span{color:var(--gold2);font-family:Georgia,serif}
+.trackActive strong,.trackActive small{display:block}
+.trackActive small{opacity:.68;margin-top:3px}
+.trackActive em{font-size:8px;font-style:normal;letter-spacing:.11em;color:var(--gold2);border:1px solid rgba(243,218,146,.22);border-radius:999px;padding:6px 8px}
+@media(max-width:520px){.returnMoment{padding:14px}.nowPlayingCard strong{font-size:25px}.trackActive{grid-template-columns:34px 1fr}.trackActive em{grid-column:2}}
