@@ -677,3 +677,62 @@ model FastPayProcessedEvent {
   @@unique([provider, externalEventId])
   @@index([status, createdAt])
 }
+
+
+model PgpOpportunity {
+  id                String                @id @default(cuid())
+  memberKey         String
+  environment       String
+  observation       String
+  structuredProblem String?
+  productName       String?
+  fitState          String?
+  status            String                @default("SPOTTED")
+  attentionState    String                @default("NOTHING_TO_DO")
+  palaceKeyCode     String?
+  events            PgpOpportunityEvent[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([memberKey, createdAt])
+  @@index([status, updatedAt])
+}
+
+model PgpOpportunityEvent {
+  id            String         @id @default(cuid())
+  opportunityId String
+  opportunity   PgpOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  type          String
+  payload       Json?
+  createdAt     DateTime       @default(now())
+
+  @@index([opportunityId, createdAt])
+}
+
+model PgpPalaceKey {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  memberKey      String
+  keyType        String   @default("QUICK")
+  contextType    String?
+  productName    String?
+  destination    String
+  attributionKey String
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([memberKey, createdAt])
+  @@index([attributionKey])
+}
+
+model PgpKeyEvent {
+  id        String   @id @default(cuid())
+  keyCode   String
+  eventType String
+  sessionId String?
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([keyCode, createdAt])
+}
