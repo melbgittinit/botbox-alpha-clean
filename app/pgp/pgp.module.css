@@ -170,5 +170,5 @@
   .tileGrid{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){
-  *{scroll-behavior:auto!important;transition:none!important}
+  .app *{scroll-behavior:auto!important;transition:none!important}
 }
