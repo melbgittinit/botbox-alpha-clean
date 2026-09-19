@@ -60,3 +60,36 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ opportunity: created }, { status: 201, headers: cors });
 }
+
+
+export async function PATCH(request: Request) {
+  const body = await request.json();
+  const id = body.id ? String(body.id) : null;
+
+  if (!id) {
+    return NextResponse.json({ error: "id required" }, { status: 400, headers: cors });
+  }
+
+  const status = body.status ? String(body.status) : undefined;
+  const attentionState = body.attentionState ? String(body.attentionState) : undefined;
+  const palaceKeyCode = body.palaceKeyCode ? String(body.palaceKeyCode) : undefined;
+  const eventType = body.eventType ? String(body.eventType) : "updated";
+
+  const opportunity = await prisma.pgpOpportunity.update({
+    where: { id },
+    data: {
+      ...(status ? { status } : {}),
+      ...(attentionState ? { attentionState } : {}),
+      ...(palaceKeyCode ? { palaceKeyCode } : {}),
+      events: {
+        create: {
+          type: eventType,
+          payload: body.payload || {},
+        },
+      },
+    },
+    include: { events: { orderBy: { createdAt: "asc" } } },
+  });
+
+  return NextResponse.json({ opportunity }, { headers: cors });
+}
