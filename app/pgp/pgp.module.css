@@ -239,3 +239,30 @@
   .track{grid-template-columns:34px 1fr}
   .track em{grid-column:2}
 }
+
+.guideMoment{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:10px 0 14px;
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(169,86,120,.11);
+  border:1px solid rgba(169,86,120,.25);
+}
+.guideMoment>span{font-size:24px}
+.guideMoment p{margin:0;line-height:1.45;color:#eadde8}
+.keyGuideNote{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  text-align:left;
+  margin:16px 0 6px;
+  padding:14px 15px;
+  border-radius:16px;
+  background:rgba(214,179,95,.08);
+  border:1px solid rgba(214,179,95,.18);
+}
+.keyGuideNote>span{font-size:26px}
+.keyGuideNote strong{display:block;color:var(--gold2);margin-bottom:4px}
+.keyGuideNote p{margin:0!important;font-size:13px;line-height:1.45!important;color:#e8dbe6}
