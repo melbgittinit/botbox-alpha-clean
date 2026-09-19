@@ -422,7 +422,7 @@ export default function PrettyGirlPalace() {
             <p>Opening: <strong>Customer Flow</strong> · Showing: <strong>Action Signs</strong></p>
             <QrMock />
             <div className={styles.keyActions}>
-              <button className={styles.primary}>SHOW FULL SCREEN</button>
+              <a className={styles.primary} href="/k/pgp-tanya-action-signs">OPEN CUSTOMER VIEW</a>
               <button className={styles.secondary}>TEXT IT</button>
               <button className={styles.secondary}>SAVE FOR LATER</button>
             </div>
