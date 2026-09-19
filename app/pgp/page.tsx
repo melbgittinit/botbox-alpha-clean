@@ -51,6 +51,89 @@ const powers: Record<PowerId, { name: string; icon: string; word: string }> = {
   luxury: { name: "Luxury Navigator", icon: "✈️", word: "Discovery" },
 };
 
+const opportunityChoices: Record<string, string[]> = {
+  Restaurant: [
+    "Long line",
+    "Ordering seems slow",
+    "People look confused",
+    "Needs repeat customers",
+    "Signage isn’t doing much",
+    "Needs more customers",
+  ],
+  Salon: [
+    "No return / loyalty system",
+    "Same booking questions",
+    "Customers seem confused",
+    "Needs follow-up",
+    "Needs more customers",
+    "Something else",
+  ],
+  School: [
+    "Students need something creative",
+    "Registration / check-in line",
+    "Parent communication is scattered",
+    "School spirit needs a boost",
+    "Event flow is messy",
+    "Something else",
+  ],
+  Church: [
+    "Registration / check-in line",
+    "Planning VBS",
+    "Building Sunday School lessons",
+    "People keep asking the same questions",
+    "Event information is scattered",
+    "Something else",
+  ],
+  Store: [
+    "Customers don’t know what to do next",
+    "Needs a better digital follow-up",
+    "Signage isn’t doing much",
+    "Checkout line",
+    "Needs repeat customers",
+    "Something else",
+  ],
+  Event: [
+    "Registration is messy",
+    "Check-in line",
+    "Too many tools / links",
+    "Wedding planning is scattered",
+    "Attendees keep asking the same questions",
+    "Something else",
+  ],
+  "Bar / Club": [
+    "Only using flyers / social",
+    "Needs a fan / repeat system",
+    "Event promotion feels scattered",
+    "VIP flow is messy",
+    "Needs more customers",
+    "Something else",
+  ],
+  "Author / Creator": [
+    "Published book needs promotion",
+    "Book sales are slow",
+    "Has an audience but nothing to sell",
+    "Needs a product idea",
+    "Promotion feels scattered",
+    "Something else",
+  ],
+  Business: [
+    "Customers don’t know what to do next",
+    "Same questions all day",
+    "Needs a digital layer",
+    "Needs more customers",
+    "Needs repeat customers",
+    "Something else",
+  ],
+  "Rural / Western": [
+    "Needs a useful digital layer",
+    "Event / fair registration",
+    "Signage isn’t doing much",
+    "Customer path is unclear",
+    "Needs more repeat customers",
+    "Something else",
+  ],
+};
+
 const questions: Array<{
   prompt: string;
   options: Array<{ label: string; power: PowerId }>;
@@ -516,7 +599,7 @@ export default function PrettyGirlPalace() {
                 <div className={styles.contextPill}>{place}</div>
                 <h3>What caught your eye?</h3>
                 <div className={styles.optionList}>
-                  {["Long line","People look confused","Ordering seems slow","Needs more customers","No return / loyalty system","Signage isn’t doing much"].map((x) => (
+                  {(opportunityChoices[place] || opportunityChoices.Business).map((x) => (
                     <button key={x} onClick={() => evaluateSpot(x)}>
                       {x}<span>›</span>
                     </button>
@@ -541,6 +624,16 @@ export default function PrettyGirlPalace() {
                     <span className={styles.fit}>
                       ● {matchResult.fit.replaceAll("_", " ")}
                     </span>
+                    <div className={styles.guideMoment}>
+                      <span>{selectedGuide.icon}</span>
+                      <p>
+                        {matchResult.fit === "NOT_THIS_ONE"
+                          ? selectedGuide.name + ": “Nothing to force here. Keep moving.”"
+                          : matchResult.fit === "ASK_FIRST"
+                            ? selectedGuide.name + ": “One good question first. Then we’ll know.”"
+                            : selectedGuide.name + ": “Okay—this one is worth your attention.”"}
+                      </p>
+                    </div>
                     <h2>{matchResult.productName || "NOT THIS ONE"}</h2>
                     <dl>
                       <div><dt>WHAT YOU NOTICED</dt><dd>{matchResult.observed} at a {place.toLowerCase()}.</dd></div>
@@ -600,8 +693,21 @@ export default function PrettyGirlPalace() {
           <div className={styles.keyScreen}>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
             <p className={styles.eyebrow}>MY PALACE KEY™</p>
-            <h2>Tanya’s Restaurant Key</h2>
-            <p>Opening: <strong>Customer Flow</strong> · Showing: <strong>Action Signs</strong></p>
+            <h2>Tanya’s {place} Key</h2>
+            <p>
+              Opening: <strong>{issue}</strong> · Showing: <strong>{matchResult?.productName || "Best-fit HUB solution"}</strong>
+            </p>
+            <div className={styles.keyGuideNote}>
+              <span>{selectedGuide.icon}</span>
+              <div>
+                <strong>{selectedGuide.name} says:</strong>
+                <p>
+                  {matchResult?.whatToSay
+                    ? "Keep it natural. You already have the words—now just open the right door."
+                    : "This Key should only be shared when the fit feels real."}
+                </p>
+              </div>
+            </div>
             <QrMock />
             <div className={styles.keyActions}>
               {!liveKey ? (
