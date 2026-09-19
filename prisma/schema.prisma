@@ -713,6 +713,7 @@ model PgpPalaceKey {
   id             String   @id @default(cuid())
   code           String   @unique
   memberKey      String
+  opportunityId  String?
   keyType        String   @default("QUICK")
   contextType    String?
   productName    String?
@@ -723,6 +724,7 @@ model PgpPalaceKey {
   updatedAt      DateTime @updatedAt
 
   @@index([memberKey, createdAt])
+  @@index([opportunityId])
   @@index([attributionKey])
 }
 
@@ -735,4 +737,26 @@ model PgpKeyEvent {
   createdAt DateTime @default(now())
 
   @@index([keyCode, createdAt])
+}
+
+
+model PgpEarnAttribution {
+  id                    String   @id @default(cuid())
+  memberKey             String
+  keyCode               String
+  opportunityId         String?
+  productName           String?
+  conversionRef         String?  @unique
+  provider              String   @default("EARN_MODE")
+  providerStatus        String   @default("PENDING_HANDOFF")
+  grossAmountCents      Int?
+  eligibleAmountCents   Int?
+  commissionAmountCents Int?
+  payload               Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([memberKey, createdAt])
+  @@index([keyCode, createdAt])
+  @@index([providerStatus, createdAt])
 }
