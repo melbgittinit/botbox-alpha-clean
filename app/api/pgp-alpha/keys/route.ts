@@ -24,15 +24,35 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "key not found" }, { status: 404, headers: cors });
   }
 
-  await prisma.pgpKeyEvent.create({
-    data: {
-      keyCode: code,
-      eventType: "opened",
-      sessionId: crypto.randomUUID(),
-    },
+  const sessionId = crypto.randomUUID();
+
+  await prisma.$transaction(async (tx) => {
+    await tx.pgpKeyEvent.create({
+      data: {
+        keyCode: code,
+        eventType: "opened",
+        sessionId,
+      },
+    });
+
+    if (key.opportunityId) {
+      await tx.pgpOpportunity.update({
+        where: { id: key.opportunityId },
+        data: {
+          status: "VIEWED",
+          attentionState: "PGP_IS_WATCHING",
+          events: {
+            create: {
+              type: "key_opened",
+              payload: { keyCode: code, sessionId },
+            },
+          },
+        },
+      });
+    }
   });
 
-  return NextResponse.json({ key }, { headers: cors });
+  return NextResponse.json({ key, sessionId }, { headers: cors });
 }
 
 export async function POST(request: Request) {
@@ -42,6 +62,7 @@ export async function POST(request: Request) {
   const destination = String(body.destination || "/pgp");
   const keyType = String(body.keyType || "QUICK");
   const contextType = body.contextType ? String(body.contextType) : null;
+  const opportunityId = body.opportunityId ? String(body.opportunityId) : null;
   const code = body.code ? String(body.code) : "pgp-" + crypto.randomUUID().slice(0, 8);
   const attributionKey = body.attributionKey
     ? String(body.attributionKey)
@@ -51,6 +72,7 @@ export async function POST(request: Request) {
     data: {
       code,
       memberKey,
+      opportunityId,
       productName,
       destination,
       keyType,
@@ -59,12 +81,31 @@ export async function POST(request: Request) {
     },
   });
 
-  await prisma.pgpKeyEvent.create({
-    data: {
-      keyCode: code,
-      eventType: "created",
-      payload: { memberKey, productName, contextType, destination },
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.pgpKeyEvent.create({
+      data: {
+        keyCode: code,
+        eventType: "created",
+        payload: { memberKey, opportunityId, productName, contextType, destination },
+      },
+    });
+
+    if (opportunityId) {
+      await tx.pgpOpportunity.update({
+        where: { id: opportunityId },
+        data: {
+          palaceKeyCode: code,
+          status: "KEY_READY",
+          attentionState: "NOTHING_TO_DO",
+          events: {
+            create: {
+              type: "key_created",
+              payload: { keyCode: code, productName, destination },
+            },
+          },
+        },
+      });
+    }
   });
 
   return NextResponse.json({ key }, { status: 201, headers: cors });
