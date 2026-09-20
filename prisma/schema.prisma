@@ -129,6 +129,8 @@ model User {
   creatorFamilies      CreatorFamily[]
   creatorTemplates     CreatorTemplate[]
   fastPayAccount       FastPayAccount?
+  wmrProfile           WmrProfile?
+  wmrEvents            WmrEvent[]
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 }
@@ -678,6 +680,32 @@ model FastPayProcessedEvent {
   @@index([status, createdAt])
 }
 
+
+model WmrProfile {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planState            Json?
+  wmrBase              Boolean  @default(false)
+  forReal              Boolean  @default(false)
+  bwfPassport          Boolean  @default(false)
+  vipMe                Boolean  @default(false)
+  entitlementCheckedAt DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model WmrEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventName String
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([eventName, createdAt])
+}
 
 model PgpOpportunity {
   id                String                @id @default(cuid())
