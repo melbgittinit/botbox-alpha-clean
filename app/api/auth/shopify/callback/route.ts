@@ -1,5 +1,6 @@
 import { prisma } from "../../../../../lib/prisma";
 import { createHubSessionToken, getCookie, sessionCookieHeader } from "../../../../../lib/hub-auth/session";
+import { fetchWmrEntitlements } from "../../../../../lib/wmr-entitlements";
 import {
   OAUTH_NONCE_COOKIE,
   OAUTH_STATE_COOKIE,
@@ -38,11 +39,36 @@ export async function GET(request: Request) {
       origin,
     });
     const identity = await fetchShopifyCustomer(customerApi.graphql_api, token.access_token);
+    let wmrEntitlements = { wmrBase: false, forReal: false, bwfPassport: false, vipMe: false };
+    try {
+      wmrEntitlements = await fetchWmrEntitlements(customerApi.graphql_api, token.access_token);
+    } catch (error) {
+      console.warn("WMR entitlement refresh skipped", error);
+    }
 
     const user = await prisma.user.upsert({
       where: { email: identity.email },
       update: { displayName: identity.displayName || undefined },
       create: { email: identity.email, displayName: identity.displayName },
+    });
+
+    await prisma.wmrProfile.upsert({
+      where: { userId: user.id },
+      update: {
+        wmrBase: wmrEntitlements.wmrBase,
+        forReal: wmrEntitlements.forReal,
+        bwfPassport: wmrEntitlements.bwfPassport,
+        vipMe: wmrEntitlements.vipMe,
+        entitlementCheckedAt: new Date(),
+      },
+      create: {
+        userId: user.id,
+        wmrBase: wmrEntitlements.wmrBase,
+        forReal: wmrEntitlements.forReal,
+        bwfPassport: wmrEntitlements.bwfPassport,
+        vipMe: wmrEntitlements.vipMe,
+        entitlementCheckedAt: new Date(),
+      },
     });
 
     const sessionToken = createHubSessionToken(user.id);
