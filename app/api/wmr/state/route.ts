@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 
@@ -13,7 +14,7 @@ function cleanPlan(input: unknown) {
     if (allowedKeys.has(key)) output[key] = value;
   }
   if (JSON.stringify(output).length > 200000) throw new Error("PLAN_TOO_LARGE");
-  return output;
+  return JSON.parse(JSON.stringify(output)) as Prisma.InputJsonValue;
 }
 
 async function authorizedProfile(request: Request) {
