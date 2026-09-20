@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       origin,
     });
     const identity = await fetchShopifyCustomer(customerApi.graphql_api, token.access_token);
-    let wmrEntitlements = { wmrBase: false, forReal: false, bwfPassport: false, vipMe: false };
+    let wmrEntitlements: Awaited<ReturnType<typeof fetchWmrEntitlements>> | null = null;
     try {
       wmrEntitlements = await fetchWmrEntitlements(customerApi.graphql_api, token.access_token);
     } catch (error) {
@@ -52,24 +52,27 @@ export async function GET(request: Request) {
       create: { email: identity.email, displayName: identity.displayName },
     });
 
-    await prisma.wmrProfile.upsert({
-      where: { userId: user.id },
-      update: {
-        wmrBase: wmrEntitlements.wmrBase,
-        forReal: wmrEntitlements.forReal,
-        bwfPassport: wmrEntitlements.bwfPassport,
-        vipMe: wmrEntitlements.vipMe,
-        entitlementCheckedAt: new Date(),
-      },
-      create: {
-        userId: user.id,
-        wmrBase: wmrEntitlements.wmrBase,
-        forReal: wmrEntitlements.forReal,
-        bwfPassport: wmrEntitlements.bwfPassport,
-        vipMe: wmrEntitlements.vipMe,
-        entitlementCheckedAt: new Date(),
-      },
-    });
+    if (wmrEntitlements) {
+      const existing = await prisma.wmrProfile.findUnique({ where: { userId: user.id } });
+      await prisma.wmrProfile.upsert({
+        where: { userId: user.id },
+        update: {
+          wmrBase: Boolean(existing?.wmrBase || wmrEntitlements.wmrBase),
+          forReal: Boolean(existing?.forReal || wmrEntitlements.forReal),
+          bwfPassport: Boolean(existing?.bwfPassport || wmrEntitlements.bwfPassport),
+          vipMe: Boolean(existing?.vipMe || wmrEntitlements.vipMe),
+          entitlementCheckedAt: new Date(),
+        },
+        create: {
+          userId: user.id,
+          wmrBase: wmrEntitlements.wmrBase,
+          forReal: wmrEntitlements.forReal,
+          bwfPassport: wmrEntitlements.bwfPassport,
+          vipMe: wmrEntitlements.vipMe,
+          entitlementCheckedAt: new Date(),
+        },
+      });
+    }
 
     const sessionToken = createHubSessionToken(user.id);
     const successPath = process.env.HUB_AUTH_SUCCESS_PATH || "/hub";
