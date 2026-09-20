@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 
@@ -13,7 +14,9 @@ export async function POST(request: Request) {
   if (!/^[a-z0-9_.:-]{2,80}$/i.test(eventName)) {
     return Response.json({ error: "INVALID_EVENT_NAME" }, { status: 400 });
   }
-  const payload = body?.payload && typeof body.payload === "object" && !Array.isArray(body.payload) ? body.payload : null;
-  const event = await prisma.wmrEvent.create({ data: { userId: user.id, eventName, payload } });
+  const payload = body?.payload && typeof body.payload === "object" && !Array.isArray(body.payload)
+    ? JSON.parse(JSON.stringify(body.payload)) as Prisma.InputJsonValue
+    : undefined;
+  const event = await prisma.wmrEvent.create({ data: { userId: user.id, eventName, ...(payload ? { payload } : {}) } });
   return Response.json({ ok: true, id: event.id });
 }
