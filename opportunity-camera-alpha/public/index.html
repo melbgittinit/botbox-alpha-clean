@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06110b">
+<title>Earn Mode Opportunity Camera</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main>
+  <section class="hero">
+    <img id="heroImage" alt="Earn Mode Opportunity Camera">
+    <div class="heroOverlay"></div>
+    <div class="heroCopy">
+      <div class="eyebrow">EARN MODE POWER-UP</div>
+      <h1>Opportunity Camera™</h1>
+      <p class="tagline">See it. Scan it. Earn from it.</p>
+      <p>Turn everyday places into earning opportunities.</p>
+      <button id="openCamera">Find an Opportunity</button>
+      <div class="micro">3 free looks • $1.99 / 30 days</div>
+    </div>
+  </section>
+
+  <section id="cameraPanel" class="panel hidden">
+    <div class="panelHead">
+      <div>
+        <div class="eyebrow">OPPORTUNITY CAMERA</div>
+        <h2>What do you see?</h2>
+      </div>
+      <button class="ghost" id="closeCamera">Close</button>
+    </div>
+    <p class="hint">Aim toward a storefront, sign, display, booth, event board, or other public information — not people's faces.</p>
+    <label class="capture">
+      <input id="cameraInput" type="file" accept="image/*" capture="environment">
+      <span>📷 Open Camera</span>
+    </label>
+    <img id="preview" class="preview hidden" alt="Camera preview">
+    <button id="scanButton" class="hidden">See the Opportunity</button>
+    <div id="scanStatus" class="status"></div>
+  </section>
+
+  <section id="resultPanel" class="panel hidden">
+    <div id="resultState" class="state"></div>
+    <h2 id="resultHeadline"></h2>
+    <div class="resultGrid">
+      <div class="card"><span>What I see</span><strong id="sceneLabel">—</strong></div>
+      <div class="card"><span>Best match</span><strong id="offerLabel">—</strong></div>
+    </div>
+    <div class="actionCard">
+      <span>Your move</span>
+      <strong id="actionLabel">—</strong>
+    </div>
+    <div class="moneyCard">
+      <span>Potential earnings</span>
+      <strong id="moneyLabel">Verified amounts appear only from live commerce + commission data.</strong>
+    </div>
+    <div class="actions">
+      <button id="scanAgain">Scan Another</button>
+      <button class="secondary" disabled>Make My QR — next connection</button>
+    </div>
+  </section>
+
+  <section class="why">
+    <div><b>SEE</b><span>notice the opportunity</span></div>
+    <div><b>MATCH</b><span>find the right HUB offer</span></div>
+    <div><b>ACT</b><span>get the next move</span></div>
+    <div><b>EARN</b><span>track qualifying results</span></div>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
