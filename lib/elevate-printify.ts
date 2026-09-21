@@ -92,3 +92,65 @@ export async function createPrintifyOrder(args: {
   if (!response.ok) throw new Error("PRINTIFY_ORDER_FAILED_" + response.status);
   return response.json() as Promise<{ id?: string; status?: string }>;
 }
+
+export async function printifyVariantCost(args: {
+  blueprintId: number;
+  printProviderId: number;
+  variantId: number;
+}) {
+  const cfg = config();
+  if (!cfg) throw new Error("PRINTIFY_NOT_CONFIGURED");
+
+  const response = await fetch(
+    baseUrl + "/catalog/blueprints/" + args.blueprintId + "/print_providers/" + args.printProviderId + "/variants.json",
+    {
+      method: "GET",
+      headers: headers(cfg.token),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) throw new Error("PRINTIFY_VARIANT_LOOKUP_FAILED_" + response.status);
+  const payload = await response.json() as { variants?: Array<{ id?: number; cost?: number; title?: string }> };
+  const variant = (payload.variants || []).find(v => v.id === args.variantId);
+  if (!variant || !Number.isFinite(variant.cost)) throw new Error("PRINTIFY_VARIANT_COST_NOT_FOUND");
+  return { cost: Number(variant.cost), title: variant.title || "" };
+}
+
+export async function createPrintifyCustomOrder(args: {
+  externalId: string;
+  blueprintId: number;
+  printProviderId: number;
+  variantId: number;
+  quantity: number;
+  shippingMethod: number;
+  artworkUrl: string;
+  address: PrintifyAddress;
+}) {
+  const cfg = config();
+  if (!cfg) throw new Error("PRINTIFY_NOT_CONFIGURED");
+
+  const response = await fetch(baseUrl + "/shops/" + cfg.shopId + "/orders.json", {
+    method: "POST",
+    headers: headers(cfg.token),
+    body: JSON.stringify({
+      external_id: args.externalId,
+      label: args.externalId,
+      line_items: [{
+        print_provider_id: args.printProviderId,
+        blueprint_id: args.blueprintId,
+        variant_id: args.variantId,
+        print_areas: { front: args.artworkUrl },
+        quantity: args.quantity,
+        external_id: args.externalId + "-1",
+      }],
+      shipping_method: args.shippingMethod,
+      send_shipping_notification: true,
+      address_to: args.address,
+    }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) throw new Error("PRINTIFY_ORDER_FAILED_" + response.status);
+  return response.json() as Promise<{ id?: string; status?: string }>;
+}
