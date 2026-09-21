@@ -13,6 +13,7 @@ export default function ClaimOpenHouse(){
   const [status,setStatus]=useState('Checking secure session…');
   const [busy,setBusy]=useState(false);
   const [userEmail,setUserEmail]=useState('');
+  const [claimedCreatorId,setClaimedCreatorId]=useState('');
   const mix=useMemo(()=>score(saved?.picks||[]),[saved]);
 
   useEffect(()=>{
@@ -46,6 +47,7 @@ export default function ClaimOpenHouse(){
     setBusy(false);
     if(error){setStatus(`Could not save yet: ${error.message}`);return;}
     localStorage.setItem('ccj-last-creator-id',data);
+    setClaimedCreatorId(data);
     setStatus('Saved! This Creator journey is now attached to your secure grown-up account.');
   }
 
@@ -53,10 +55,10 @@ export default function ClaimOpenHouse(){
 
   return <main className="app"><div className="shell"><div className="brand">CREATOR COLLEGE<b>GROWN-UP CLAIM</b></div><section className="card">
     <div className="eye">SECURE PARENT ACCOUNT</div><h1 className="title">Claim this Open House.</h1>
-    <p className="lead">Signed in as <b>{userEmail||'grown-up'}</b>. Saving here moves the Creator ID, first idea, badge and credits from this device into the secure staging database.</p>
+    <p className="lead">Signed in as <b>{userEmail||'grown-up'}</b>. Saving here moves the Creator ID, first idea, badge and credits from this device into your secure family account.</p>
     {!saved&&<div className="notice">No Open House journey was found on this device. Complete the free Open House first.</div>}
     {saved&&<><div className="id"><small>READY TO SAVE</small><div className="avatar">{saved.avatar||'💡'}</div><h2>{saved.creator||'Creator'}</h2><p className="muted">{saved.name||'My First Creator Idea'}</p><p>{saved.idea||''}</p></div><div className="mix">{mix.map(([k],i)=><div key={k}><em>#{i+1}</em><b>{schools[k]}</b></div>)}</div><button className="btn primary" disabled={busy} onClick={claim}>{busy?'Saving…':'Save Creator Journey Securely'}</button></>}
     <div className="notice" style={{marginTop:18}}>{status}</div>
-    <div className="actions"><a className="btn secondary" href="/locker">View Locker</a><a className="btn secondary" href="/">Back to Open House</a><button className="btn secondary" onClick={signOut}>Sign out</button></div>
+    <div className="actions">{claimedCreatorId?<a className="btn primary" href={`/parent/creator/${claimedCreatorId}`}>Open Secure Creator Locker →</a>:<a className="btn secondary" href="/locker">Preview Device Locker</a>}<a className="btn secondary" href="/parent">Grown-up Dashboard</a><a className="btn secondary" href="/">Back to Open House</a><button className="btn secondary" onClick={signOut}>Sign out</button></div>
   </section></div></main>;
 }
