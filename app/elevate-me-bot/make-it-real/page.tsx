@@ -173,7 +173,13 @@ export default function MakeItRealPage() {
       <div style={{maxWidth:1050,margin:"0 auto"}}>
         <p style={{letterSpacing:".14em",textTransform:"uppercase",color:"#f3c969",fontWeight:800}}>ELEVATE ME BOT • MAKE IT REAL</p>
         <h1 style={{fontSize:"clamp(44px,9vw,82px)",lineHeight:.94,margin:"10px 0"}}>PRINT MY STUFF</h1>
-        <p style={{fontSize:20,lineHeight:1.55,color:"#ddd9ef",maxWidth:760}}>Turn one digital result into a practical production package for a card, flyer, QR card or postcard.</p>
+        <p style={{fontSize:20,lineHeight:1.55,color:"#ddd9ef",maxWidth:760}}>Turn one digital result into something physical.</p>
+        {access === "ready" && (
+          <div style={{display:"flex",gap:10,flexWrap:"wrap",margin:"18px 0 22px"}}>
+            <a href="/elevate-me-bot/make-it-real" style={{display:"inline-block",padding:"13px 18px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>PRINT MY STUFF</a>
+            <a href="/elevate-me-bot/merch" style={{display:"inline-block",padding:"13px 18px",borderRadius:999,background:"#78e6df",color:"#041117",textDecoration:"none",fontWeight:900}}>PUT THIS ON SOMETHING</a>
+          </div>
+        )}
 
         {access === "locked" && (
           <section style={card}>
