@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 
 const offers = {
   activate: {
@@ -27,10 +26,9 @@ const offers = {
 type Level = keyof typeof offers;
 
 export default function ElevateUnlockPage() {
-  const params = useSearchParams();
-  const level = (params.get("level") || "activate") as Level;
+  const [level, setLevel] = useState<Level>("activate");
+  const [surface, setSurface] = useState<"hub"|"botstores">("hub");
   const offer = offers[level] || offers.activate;
-  const surface = params.get("surface") === "botstores" ? "botstores" : "hub";
   const [state, setState] = useState<"idle"|"checking"|"auth"|"locked"|"unlocked"|"error">("idle");
   const [message, setMessage] = useState("");
 
@@ -61,6 +59,14 @@ export default function ElevateUnlockPage() {
       setMessage("We could not verify the purchase right now.");
     }
   }
+
+  useEffect(() => {
+    const search = new URLSearchParams(window.location.search);
+    const nextLevel = (search.get("level") || "activate") as Level;
+    const nextSurface = search.get("surface") === "botstores" ? "botstores" : "hub";
+    setLevel(offers[nextLevel] ? nextLevel : "activate");
+    setSurface(nextSurface);
+  }, []);
 
   useEffect(() => {
     try {
