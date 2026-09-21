@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 export default function ElevateGiftPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [credits, setCredits] = useState(0);
+  const [reserved, setReserved] = useState(0);
+  const [claimed, setClaimed] = useState(0);
   const [recipientEmail, setRecipientEmail] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [message, setMessage] = useState("");
@@ -19,7 +21,9 @@ export default function ElevateGiftPage() {
       })
       .then(data => {
         setAuthenticated(true);
-        setCredits(data.entitlements?.giftCreditsPurchased || 0);
+        setCredits(data.entitlements?.giftCreditsRemaining || 0);
+        setReserved(data.entitlements?.giftCreditsReserved || 0);
+        setClaimed(data.entitlements?.giftCreditsClaimed || 0);
       })
       .catch(() => {
         setAuthenticated(false);
@@ -59,7 +63,8 @@ export default function ElevateGiftPage() {
           <a href="/api/auth/shopify/start?next=%2Felevate-me-bot%2Fgift" style={{display:"inline-block",padding:"14px 20px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:800}}>SIGN IN TO USE MY GIFT CREDITS</a>
         ) : (
           <section style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.18)",borderRadius:22,padding:22}}>
-            <div style={{marginBottom:18,fontWeight:800}}>Purchased gift credits on account: {credits}</div>
+            <div style={{marginBottom:18,fontWeight:800}}>Gift credits remaining: {credits}</div>
+            <div style={{marginBottom:18,color:"#c9c5dd",fontSize:14}}>Reserved in private links: {reserved} · Successfully claimed: {claimed}</div>
             <label style={{display:"block",marginBottom:14}}>
               <span style={{display:"block",marginBottom:6}}>Recipient email</span>
               <input value={recipientEmail} onChange={e=>setRecipientEmail(e.target.value)} type="email" style={{width:"100%",boxSizing:"border-box",padding:13,borderRadius:12,border:"1px solid #6b6790",background:"#0a1028",color:"#fff"}} />
