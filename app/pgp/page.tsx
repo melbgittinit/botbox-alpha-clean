@@ -9,6 +9,7 @@ type Screen =
   | "guide"
   | "quiz"
   | "reveal"
+  | "save"
   | "home"
   | "spot"
   | "key"
@@ -384,6 +385,11 @@ export default function PrettyGirlPalace() {
   const [lastVisitLabel, setLastVisitLabel] = useState("");
   const [musicMood, setMusicMood] = useState("Palace Classics");
   const [selectedTrack, setSelectedTrack] = useState("Welcome to My Palace");
+  const [leadName, setLeadName] = useState("");
+  const [leadEmail, setLeadEmail] = useState("");
+  const [leadSaving, setLeadSaving] = useState(false);
+  const [leadSaved, setLeadSaved] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -698,9 +704,87 @@ export default function PrettyGirlPalace() {
               Your Palace will emphasize experiences, people and opportunities that fit this
               combination. You can discover more powers later.
             </p>
-            <button className={styles.primary} onClick={() => setScreen("home")}>
-              ENTER MY PALACE
+            <button className={styles.primary} onClick={() => setScreen("save")}>
+              SAVE MY PALACE
             </button>
+            <button className={styles.textButton} onClick={() => setScreen("home")}>
+              Keep exploring as a guest
+            </button>
+          </div>
+        )}
+
+        {screen === "save" && (
+          <div className={styles.saveCard}>
+            <button className={styles.back} onClick={() => setScreen("reveal")}>← My Power</button>
+            <p className={styles.eyebrow}>KEEP MY PALACE READY</p>
+            <h2>Your room should still be here when you come back.</h2>
+            <p>
+              Save your Palace Combination and early-access place. No subscription required.
+            </p>
+
+            <label className={styles.saveLabel}>First name</label>
+            <input
+              className={styles.saveInput}
+              value={leadName}
+              onChange={(e) => setLeadName(e.target.value)}
+              placeholder="What should the Palace call you?"
+            />
+
+            <label className={styles.saveLabel}>Email</label>
+            <input
+              className={styles.saveInput}
+              type="email"
+              value={leadEmail}
+              onChange={(e) => setLeadEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+
+            <button
+              className={styles.primary}
+              disabled={leadSaving || !leadEmail.includes("@")}
+              onClick={async () => {
+                setLeadSaving(true);
+                try {
+                  const response = await fetch(
+                    "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/leads",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        email: leadEmail,
+                        displayName: leadName || null,
+                        source: "pgp-public-beta",
+                        guideId: guide,
+                        naturalPower: combination[0],
+                        supportingPower: combination[1],
+                        expansionPower: combination[2],
+                        payload: { visitCount, publicBeta: true },
+                      }),
+                    }
+                  );
+                  if (response.ok) {
+                    setLeadSaved(true);
+                    if (leadName.trim()) {
+                      window.localStorage.setItem("pgp-alpha-name", leadName.trim());
+                    }
+                    window.localStorage.setItem("pgp-alpha-email", leadEmail.trim().toLowerCase());
+                    setTimeout(() => setScreen("home"), 500);
+                  }
+                } finally {
+                  setLeadSaving(false);
+                }
+              }}
+            >
+              {leadSaving ? "SAVING MY PALACE…" : leadSaved ? "PALACE SAVED 👑" : "SAVE MY PALACE"}
+            </button>
+
+            <button className={styles.textButton} onClick={() => setScreen("home")}>
+              Not now — keep exploring
+            </button>
+
+            <small className={styles.saveFine}>
+              We’ll use this to keep your Palace access and beta updates connected to you.
+            </small>
           </div>
         )}
 
@@ -722,7 +806,7 @@ export default function PrettyGirlPalace() {
             <div className={styles.welcomeLine}>
               <div>
                 <p className={styles.eyebrow}>{today.label}</p>
-                <h2>Tanya 👑</h2>
+                <h2>{leadName || (typeof window !== "undefined" ? window.localStorage.getItem("pgp-alpha-name") : null) || "Pretty Girl"} 👑</h2>
                 <p className={styles.guideWelcome}>{guideVoice.welcome}</p>
               </div>
               <button className={styles.guideChip} onClick={resetSpot}>
@@ -755,6 +839,23 @@ export default function PrettyGirlPalace() {
               <button onClick={() => setScreen("key")}><span>🔑</span><strong>My Palace Key</strong></button>
               <button onClick={() => setScreen("music")}><span>🎵</span><strong>Music Hall</strong></button>
               <button onClick={openBag}><span>👜</span><strong>Opportunity Bag</strong></button>
+              <button
+                onClick={async () => {
+                  const shareUrl = "https://urbanspirit.biz/pages/pretty-girl-palace";
+                  const shareText = "I found Pretty Girl Palace. There’s a room for you here.";
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ title: "Pretty Girl Palace", text: shareText, url: shareUrl });
+                    } else {
+                      await navigator.clipboard.writeText(shareText + " " + shareUrl);
+                      setShareCopied(true);
+                      setTimeout(() => setShareCopied(false), 1800);
+                    }
+                  } catch {}
+                }}
+              >
+                <span>👭</span><strong>{shareCopied ? "Invite Copied!" : "Call My Girl"}</strong>
+              </button>
             </div>
 
             <h3 className={styles.subhead}>What’s happening</h3>
