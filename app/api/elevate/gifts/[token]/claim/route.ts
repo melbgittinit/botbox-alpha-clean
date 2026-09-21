@@ -1,5 +1,5 @@
-import { prisma } from "../../../../../lib/prisma";
-import { resolveHubUser } from "../../../../../lib/hub-auth/session";
+import { prisma } from "../../../../../../lib/prisma";
+import { resolveHubUser } from "../../../../../../lib/hub-auth/session";
 
 export async function POST(request: Request, context: { params: Promise<{ token: string }> }) {
   const user = await resolveHubUser(request);
@@ -18,6 +18,14 @@ export async function POST(request: Request, context: { params: Promise<{ token:
 
   if (gift.recipientEmail !== user.email.toLowerCase()) {
     return Response.json({ error: "GIFT_EMAIL_MISMATCH" }, { status: 403 });
+  }
+
+  const giverProfile = await prisma.elevateProfile.findUnique({ where: { userId: gift.giverUserId } });
+  const claimedCount = await prisma.elevateGift.count({
+    where: { giverUserId: gift.giverUserId, claimedAt: { not: null } },
+  });
+  if (!giverProfile || claimedCount >= giverProfile.giftCreditsPurchased) {
+    return Response.json({ error: "GIFT_CREDIT_UNAVAILABLE" }, { status: 409 });
   }
 
   await prisma.$transaction([
