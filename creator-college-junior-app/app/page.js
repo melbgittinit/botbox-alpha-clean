@@ -114,7 +114,6 @@ export default function App() {
   if (!ready) return null;
 
   return <main className="app"><div className="shell">
-    <button className="reset" onClick={reset}>reset demo</button>
     <div className="brand">CREATOR COLLEGE<b>JUNIOR • OPEN HOUSE</b></div>
     {resumed && state.step > 0 && <div className="notice">✓ Resume My Journey — this Open House was restored from this device.</div>}
     {state.step>0 && state.step<10 && <div className="progress">{[1,2,3,4,5,6,7,8,9].map((n)=><i key={n} className={n<=state.step?'on':''}/>)}</div>}
