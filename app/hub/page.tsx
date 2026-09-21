@@ -79,6 +79,16 @@ export default async function HubPage() {
         </div>
       </section>
 
+
+      <section className="leaders-entry-banner">
+        <div>
+          <div className="hub-eyebrow">FOR LEADERS, FAMILIES & ORGANIZATIONS</div>
+          <h2>See THE HUB in a situation you already understand.</h2>
+          <p>Pastors on Point, Family HUB Love and Mom Connected — Dad Too turn the same HUB engine into three clear starting experiences.</p>
+        </div>
+        <a className="hub-button hub-button-primary" href="/hub/leaders">EXPLORE THE 3 LANES</a>
+      </section>
+
       <section className="hub-mode-doors" aria-label="Primary HUB operating modes">
         {MODE_GROUPS.map(([title, kind, icon, copy]) => (
           <div className={`hub-mode-door hub-mode-door-${kind}`} key={title}>
