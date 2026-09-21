@@ -741,6 +741,8 @@ model ElevatePrintJob {
   currency          String   @default("usd")
   recipient         Json?
   artworkUrl        String?
+  artworkToken      String?  @unique
+  artworkPayload    Json?
   providerOrderId   String?
   paymentRef        String?
   createdAt         DateTime @default(now())
