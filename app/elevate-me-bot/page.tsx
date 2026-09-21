@@ -206,7 +206,7 @@ export default function ElevateMeBotPage() {
             <button onClick={() => saveAndRun(need, true)} style={{ ...button, background: "#f3c969", color: "#111" }}>PREVIEW MY FIRST ELEVATION</button>
             {access.entitlements.activated
     ? <span style={{ ...button, background: "#78e6df", color: "#041117" }}>ACTIVATED ✓</span>
-    : <a href={checkout.activate} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
+    : <a href={`/elevate-me-bot/unlock?level=activate&surface=${surface}`} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
   {!access.entitlements.activated && (
     <a href={signInUrl()} style={{ ...button, background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.45)" }}>I ALREADY PURCHASED • VERIFY</a>
   )}
@@ -226,7 +226,7 @@ export default function ElevateMeBotPage() {
   </button>
               {access.entitlements.powerUp
     ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE THIS ✓</a>
-    : <a href={checkout.power} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
+    : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
               {access.entitlements.giftCreditsPurchased > 0
     ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>
         USE MY GIFT CREDIT{access.entitlements.giftCreditsPurchased > 1 ? "S" : ""} • {access.entitlements.giftCreditsPurchased}
@@ -256,7 +256,7 @@ export default function ElevateMeBotPage() {
             <p>EXPLODE, Reach My People, Sell Something, Help Me Earn, Plan This, Remix It, and better saved-project continuity.</p>
             {access.entitlements.powerUp
     ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#78e6df", color: "#041117" }}>OPEN POWER UP TOOLS ✓</a>
-    : <a href={checkout.power} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
+    : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
           </div>
           <div style={card}>
             <div style={{ color: "#f3c969", fontWeight: 800 }}>$7.99 MAKE IT REAL</div>
@@ -264,7 +264,7 @@ export default function ElevateMeBotPage() {
             <p>Print My Stuff, HUB merch access, physical promo pathways, order/ship connections, and Creator College Freshman.</p>
             {access.entitlements.makeItReal
     ? <span style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL OWNED ✓</span>
-    : <a href={checkout.real} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
+    : <a href={`/elevate-me-bot/unlock?level=real&surface=${surface}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
           </div>
         </section>
 
