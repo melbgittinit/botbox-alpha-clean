@@ -154,3 +154,33 @@ export async function createPrintifyCustomOrder(args: {
   if (!response.ok) throw new Error("PRINTIFY_ORDER_FAILED_" + response.status);
   return response.json() as Promise<{ id?: string; status?: string }>;
 }
+
+
+export async function printifyShippingQuoteCustom(args: {
+  blueprintId: number;
+  printProviderId: number;
+  variantId: number;
+  quantity: number;
+  address: PrintifyAddress;
+}) {
+  const cfg = config();
+  if (!cfg) throw new Error("PRINTIFY_NOT_CONFIGURED");
+
+  const response = await fetch(baseUrl + "/shops/" + cfg.shopId + "/orders/shipping.json", {
+    method: "POST",
+    headers: headers(cfg.token),
+    body: JSON.stringify({
+      line_items: [{
+        print_provider_id: args.printProviderId,
+        blueprint_id: args.blueprintId,
+        variant_id: args.variantId,
+        quantity: args.quantity,
+      }],
+      address_to: args.address,
+    }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) throw new Error("PRINTIFY_QUOTE_FAILED_" + response.status);
+  return response.json() as Promise<Record<string, number>>;
+}
