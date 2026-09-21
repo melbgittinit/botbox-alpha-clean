@@ -313,3 +313,22 @@
 .trackActive small{opacity:.68;margin-top:3px}
 .trackActive em{font-size:8px;font-style:normal;letter-spacing:.11em;color:var(--gold2);border:1px solid rgba(243,218,146,.22);border-radius:999px;padding:6px 8px}
 @media(max-width:520px){.returnMoment{padding:14px}.nowPlayingCard strong{font-size:25px}.trackActive{grid-template-columns:34px 1fr}.trackActive em{grid-column:2}}
+
+.saveCard{
+  max-width:680px;
+  margin:5vh auto 0;
+  padding:34px;
+  border:1px solid rgba(243,218,146,.24);
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(79,35,84,.86),rgba(27,14,33,.94));
+  box-shadow:0 24px 70px rgba(0,0,0,.3);
+}
+.saveCard h2{font-family:Georgia,serif;font-size:clamp(38px,6vw,62px);line-height:1.02;margin:8px 0 12px;color:#fff0cc}
+.saveCard>p{line-height:1.6;color:#eadde8}
+.saveLabel{display:block;margin:16px 0 7px;color:var(--gold2);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.saveInput{width:100%;padding:15px 16px;border-radius:15px;border:1px solid rgba(243,218,146,.2);background:rgba(255,255,255,.045);color:var(--cream);outline:none}
+.saveInput:focus{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(243,218,146,.07)}
+.saveFine{display:block;margin-top:14px;color:#cdbecf;line-height:1.45}
+.quickGrid{grid-template-columns:repeat(5,1fr)}
+@media(max-width:760px){.quickGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.saveCard{padding:24px 18px}.quickGrid{grid-template-columns:repeat(2,1fr)}}
