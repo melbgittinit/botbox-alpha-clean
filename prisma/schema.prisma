@@ -743,7 +743,7 @@ model ElevatePrintJob {
   currency          String   @default("usd")
   recipient         Json?
   artworkUrl        String?
-  artworkToken      String?  @unique
+  artworkToken      String?
   artworkPayload    Json?
   providerOrderId   String?
   paymentRef        String?
@@ -753,6 +753,7 @@ model ElevatePrintJob {
   @@index([userId, createdAt])
   @@index([status, createdAt])
   @@index([providerOrderId])
+  @@index([artworkToken])
 }
 
 model WmrEvent {
