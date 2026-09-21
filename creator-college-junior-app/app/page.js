@@ -154,7 +154,7 @@ function Adult({s,patch,go}) {
     <p className="lead">Young creators don’t need their own email or public account. A grown-up stays in control.</p>
     <label className="field"><b>GROWN-UP FIRST NAME</b><input className="input" value={s.parent} onChange={(e)=>patch({parent:e.target.value})}/></label>
     <label className="field"><b>GROWN-UP EMAIL</b><input className="input" type="email" value={s.email} onChange={(e)=>patch({email:e.target.value})}/></label>
-    <p className="muted">Staging note: this email stays in this browser only until Supabase is connected.</p>
+    <p className="muted">You’ll use this grown-up email again when you save the Creator journey securely.</p>
     <div className="actions"><button className="btn secondary" onClick={()=>go(0)}>Back</button><button className="btn primary" disabled={!ok} onClick={()=>go(2,'grownup_checkin_complete')}>Continue to Campus</button></div>
   </section>;
 }
@@ -263,9 +263,9 @@ function Parent({s,mix,go}) {
     <div className="skills"><div className="skill">💡 Idea development</div><div className="skill">🧩 Creative problem solving</div><div className="skill">🗣️ Explaining an idea</div><div className="skill">🏷️ Naming & positioning</div></div>
     <div className="id"><small>FIRST CREATION</small><div className="avatar">💡</div><h2>{s.name}</h2><p>{s.idea}</p></div>
     <div className="reward"><b>SEMESTER ONE • I CAN CREATE</b><span>6 missions • Creator Showcase • Digital diploma</span></div>
-    <div className="tile"><small>FOUNDING STUDENT STAGING OFFER</small><h2>$19 one-time</h2><p className="muted">The Shopify product remains DRAFT until parent authentication/database staging is complete.</p></div>
-    <button className="btn primary" disabled>Semester One checkout is staged</button>
-    <div className="actions"><a className="btn secondary" href="/locker">View Creator Locker</a><button className="btn secondary" onClick={()=>go(8)}>Back to Campus</button></div>
+    <div className="tile"><small>FOUNDING STUDENT OFFER</small><h2>$19 one-time</h2><p className="muted">Save this Open House to a secure grown-up account, then continue into Semester One when you’re ready.</p></div>
+    <a className="btn primary" href="/parent/claim">SAVE & CONTINUE AS GROWN-UP →</a>
+    <div className="actions"><a className="btn secondary" href="/locker">Preview Creator Locker</a><button className="btn secondary" onClick={()=>go(8)}>Back to Campus</button></div>
   </section>;
 }
 
