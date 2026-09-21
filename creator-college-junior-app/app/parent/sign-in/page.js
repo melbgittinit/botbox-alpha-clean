@@ -1,12 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSupabaseBrowserClient } from '../../../lib/supabase/browser';
+
+const KEY = 'ccj-open-house-v3';
 
 export default function ParentSignIn() {
   const [email,setEmail] = useState('');
   const [status,setStatus] = useState('');
   const [busy,setBusy] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      if (saved?.email) setEmail(saved.email);
+    } catch {}
+  },[]);
 
   async function sendLink(e) {
     e.preventDefault();
