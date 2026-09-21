@@ -14,7 +14,6 @@ export default function ClaimOpenHouse(){
   const [busy,setBusy]=useState(false);
   const [userEmail,setUserEmail]=useState('');
   const [claimedCreatorId,setClaimedCreatorId]=useState('');
-  const [claimedCreatorId,setClaimedCreatorId]=useState('');
   const mix=useMemo(()=>score(saved?.picks||[]),[saved]);
 
   useEffect(()=>{
