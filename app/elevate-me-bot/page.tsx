@@ -263,7 +263,7 @@ export default function ElevateMeBotPage() {
             <h3>Move from digital to real-world results.</h3>
             <p>Print My Stuff, HUB merch access, physical promo pathways, order/ship connections, and Creator College Freshman.</p>
             {access.entitlements.makeItReal
-    ? <span style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL OWNED ✓</span>
+    ? <a href="/elevate-me-bot/make-it-real" style={{ ...button, background: "#f3c969", color: "#111" }}>PRINT MY STUFF ✓</a>
     : <a href={`/elevate-me-bot/unlock?level=real&surface=${surface}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
           </div>
         </section>
