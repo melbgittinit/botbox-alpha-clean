@@ -92,6 +92,10 @@ export default function ElevateMeBotPage() {
   const [need, setNeed] = useState<Need>("next");
   const [surface, setSurface] = useState<Surface>("hub");
   const [result, setResult] = useState<string[] | null>(null);
+  const [resultTitle, setResultTitle] = useState("Your next Elevation");
+  const [resultSource, setResultSource] = useState<"ai"|"structured"|"local">("local");
+  const [resultExtra, setResultExtra] = useState<string | null>(null);
+  const [runningAction, setRunningAction] = useState(false);
   const [access, setAccess] = useState<ElevateAccess>({
     authenticated: false,
     level: "CUSTOMIZE",
@@ -130,7 +134,7 @@ export default function ElevateMeBotPage() {
     return `/api/auth/shopify/start?next=${encodeURIComponent(`/elevate-me-bot?surface=${surface}`)}`;
   }
 
-  function saveAndRun(n: Need = need, preview = false) {
+  async function saveAndRun(n: Need = need, preview = false) {
     if (!preview && !access.entitlements.activated) {
       window.location.href = signInUrl();
       return;
@@ -142,7 +146,36 @@ export default function ElevateMeBotPage() {
       );
     } catch {}
     setNeed(n);
-    setResult(firstElevation(n, mission));
+
+    if (preview) {
+      setResultTitle("Preview Elevation");
+      setResultSource("local");
+      setResultExtra(null);
+      setResult(firstElevation(n, mission));
+      return;
+    }
+
+    setRunningAction(true);
+    try {
+      const response = await fetch("/api/elevate/action", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: n, mission, botName }),
+      });
+      if (!response.ok) throw new Error("ACTION_FAILED");
+      const data = await response.json();
+      setResultTitle(data.result?.title || "Your next Elevation");
+      setResultSource(data.result?.source || "structured");
+      setResultExtra(data.result?.result || null);
+      setResult(Array.isArray(data.result?.steps) ? data.result.steps : firstElevation(n, mission));
+    } catch {
+      setResultTitle("Your next Elevation");
+      setResultSource("structured");
+      setResultExtra(null);
+      setResult(firstElevation(n, mission));
+    } finally {
+      setRunningAction(false);
+    }
   }
 
   const bg = surface === "botstores"
@@ -216,10 +249,10 @@ export default function ElevateMeBotPage() {
         {result && (
           <section style={{ ...card, marginBottom: 18, background: "rgba(255,255,255,.12)" }}>
             <div style={{ color: "#78e6df", fontWeight: 800 }}>✓ ELEVATION COMPLETE</div>
-            <h2 style={{ fontSize: 30, margin: "8px 0" }}>{botName || "Your Bot"} says:</h2>
+            <h2 style={{ fontSize: 30, margin: "8px 0" }}>{resultTitle}</h2><div style={{fontSize:12,letterSpacing:".08em",textTransform:"uppercase",color:"#c9c5dd"}}>{resultSource === "ai" ? "AI-assisted" : resultSource === "structured" ? "Smart structured mode" : "Preview mode"}</div>
             <ol style={{ lineHeight: 1.75, fontSize: 18 }}>
               {result.map((r, i) => <li key={i}>{r}</li>)}
-            </ol>
+            </ol>{resultExtra && <div style={{marginTop:14,padding:14,borderRadius:14,background:"rgba(255,255,255,.07)",whiteSpace:"pre-wrap",lineHeight:1.6}}>{resultExtra}</div>}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
               <button onClick={() => saveAndRun("reach")} style={{ ...button, background: "#fff", color: "#111" }}>
     {access.entitlements.activated ? "SEND IT • 1 / 5 / 50" : "SEND IT • ACTIVATE TO USE"}
@@ -243,7 +276,7 @@ export default function ElevateMeBotPage() {
             {needs.map(n => (
               <button key={n.id} onClick={() => saveAndRun(n.id)} style={{ textAlign: "left", padding: 18, borderRadius: 17, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.06)", color: "#fff", cursor: "pointer", opacity: access.entitlements.activated ? 1 : .68 }}>
                 <strong style={{ display: "block", fontSize: 18 }}>{n.label.toUpperCase()}</strong>
-                <span style={{ color: "#c9c5dd", fontSize: 14 }}>{access.entitlements.activated ? "One touch → useful next action" : "Activate to unlock this one-touch action"}</span>
+                <span style={{ color: "#c9c5dd", fontSize: 14 }}>{access.entitlements.activated ? (runningAction ? "Working…" : "One touch → AI-assisted useful action") : "Activate to unlock this one-touch action"}</span>
               </button>
             ))}
           </div>
