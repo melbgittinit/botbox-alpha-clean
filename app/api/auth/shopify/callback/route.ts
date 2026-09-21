@@ -1,6 +1,7 @@
 import { prisma } from "../../../../../lib/prisma";
 import { createHubSessionToken, getCookie, sessionCookieHeader } from "../../../../../lib/hub-auth/session";
 import { fetchWmrEntitlements } from "../../../../../lib/wmr-entitlements";
+import { fetchElevateEntitlements } from "../../../../../lib/elevate-entitlements";
 import {
   OAUTH_NONCE_COOKIE,
   OAUTH_STATE_COOKIE,
@@ -40,10 +41,16 @@ export async function GET(request: Request) {
     });
     const identity = await fetchShopifyCustomer(customerApi.graphql_api, token.access_token);
     let wmrEntitlements: Awaited<ReturnType<typeof fetchWmrEntitlements>> | null = null;
+    let elevateEntitlements: Awaited<ReturnType<typeof fetchElevateEntitlements>> | null = null;
     try {
       wmrEntitlements = await fetchWmrEntitlements(customerApi.graphql_api, token.access_token);
     } catch (error) {
       console.warn("WMR entitlement refresh skipped", error);
+    }
+    try {
+      elevateEntitlements = await fetchElevateEntitlements(customerApi.graphql_api, token.access_token);
+    } catch (error) {
+      console.warn("Elevate entitlement refresh skipped", error);
     }
 
     const user = await prisma.user.upsert({
@@ -69,6 +76,27 @@ export async function GET(request: Request) {
           forReal: wmrEntitlements.forReal,
           bwfPassport: wmrEntitlements.bwfPassport,
           vipMe: wmrEntitlements.vipMe,
+          entitlementCheckedAt: new Date(),
+        },
+      });
+    }
+
+    if (elevateEntitlements) {
+      await prisma.elevateProfile.upsert({
+        where: { userId: user.id },
+        update: {
+          activated: elevateEntitlements.activated,
+          powerUp: elevateEntitlements.powerUp,
+          makeItReal: elevateEntitlements.makeItReal,
+          giftCreditsPurchased: elevateEntitlements.giftCreditsPurchased,
+          entitlementCheckedAt: new Date(),
+        },
+        create: {
+          userId: user.id,
+          activated: elevateEntitlements.activated,
+          powerUp: elevateEntitlements.powerUp,
+          makeItReal: elevateEntitlements.makeItReal,
+          giftCreditsPurchased: elevateEntitlements.giftCreditsPurchased,
           entitlementCheckedAt: new Date(),
         },
       });
