@@ -1,5 +1,6 @@
 import {
   OAUTH_NONCE_COOKIE,
+  OAUTH_RETURN_COOKIE,
   OAUTH_STATE_COOKIE,
   OAUTH_VERIFIER_COOKIE,
   authConfig,
@@ -7,9 +8,10 @@ import {
   oauthCookie,
   pkceChallenge,
   randomUrlSafe,
+  safeReturnPath,
 } from "../../../../../lib/hub-auth/shopify";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { shopDomain, clientId, callbackUrl } = authConfig();
     const oidc = await discoverOidc(shopDomain);
@@ -17,6 +19,8 @@ export async function GET() {
     const nonce = randomUrlSafe();
     const verifier = randomUrlSafe(48);
 
+    const requestUrl = new URL(request.url);
+    const returnPath = safeReturnPath(requestUrl.searchParams.get("next"));
     const authorizationUrl = new URL(oidc.authorization_endpoint);
     authorizationUrl.searchParams.set("scope", "openid email customer-account-api:full");
     authorizationUrl.searchParams.set("client_id", clientId);
@@ -30,6 +34,7 @@ export async function GET() {
     const headers = new Headers({ location: authorizationUrl.toString(), "cache-control": "no-store" });
     headers.append("set-cookie", oauthCookie(OAUTH_STATE_COOKIE, state));
     headers.append("set-cookie", oauthCookie(OAUTH_NONCE_COOKIE, nonce));
+    headers.append("set-cookie", oauthCookie(OAUTH_RETURN_COOKIE, returnPath));
     headers.append("set-cookie", oauthCookie(OAUTH_VERIFIER_COOKIE, verifier));
     return new Response(null, { status: 302, headers });
   } catch (error) {
