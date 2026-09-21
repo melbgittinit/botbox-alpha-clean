@@ -5,6 +5,7 @@ const OAUTH_COOKIE_TTL_SECONDS = 10 * 60;
 export const OAUTH_STATE_COOKIE = "hub_oauth_state";
 export const OAUTH_VERIFIER_COOKIE = "hub_oauth_verifier";
 export const OAUTH_NONCE_COOKIE = "hub_oauth_nonce";
+export const OAUTH_RETURN_COOKIE = "hub_oauth_return";
 
 export type ShopifyOidcConfig = {
   authorization_endpoint: string;
@@ -38,6 +39,11 @@ export function pkceChallenge(verifier: string) {
 
 export function oauthCookie(name: string, value: string) {
   return `${name}=${encodeURIComponent(value)}; Path=/api/auth/shopify; Max-Age=${OAUTH_COOKIE_TTL_SECONDS}; HttpOnly; Secure; SameSite=Lax`;
+}
+
+export function safeReturnPath(input: string | null | undefined) {
+  if (!input || !input.startsWith("/") || input.startsWith("//")) return "/hub";
+  return input.slice(0, 500);
 }
 
 export function clearOauthCookie(name: string) {
