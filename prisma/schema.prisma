@@ -709,6 +709,23 @@ model ElevateProfile {
   updatedAt            DateTime @updatedAt
 }
 
+model ElevateGift {
+  id             String   @id @default(cuid())
+  giverUserId    String
+  recipientEmail String
+  recipientName  String?
+  message        String?
+  token          String   @unique
+  claimedByUserId String?
+  claimedAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([giverUserId, createdAt])
+  @@index([recipientEmail, createdAt])
+  @@index([claimedByUserId])
+}
+
 model WmrEvent {
   id        String   @id @default(cuid())
   userId    String
