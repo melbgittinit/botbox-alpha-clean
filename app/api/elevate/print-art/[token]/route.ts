@@ -39,7 +39,7 @@ export async function GET(
   context: { params: Promise<{ token: string }> }
 ) {
   const { token } = await context.params;
-  const job = await prisma.elevatePrintJob.findUnique({ where: { artworkToken: token } });
+  const job = await prisma.elevatePrintJob.findFirst({ where: { artworkToken: token } });
   if (!job || !job.artworkPayload) return new Response("Not found", { status: 404 });
 
   const format = job.format as keyof typeof layouts;
