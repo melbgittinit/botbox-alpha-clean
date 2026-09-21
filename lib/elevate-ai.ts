@@ -92,7 +92,7 @@ Rules:
         authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: process.env.ELEVATE_AI_MODEL || "gpt-6-astra",
+        model: process.env.ELEVATE_AI_MODEL || "gpt-5.6-luna",
         instructions,
         input: prompt,
         max_output_tokens: 550,
