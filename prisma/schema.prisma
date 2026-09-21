@@ -733,6 +733,8 @@ model ElevatePrintJob {
   status            String   @default("DRAFT")
   provider          String   @default("PRINTIFY")
   providerProductId String?
+  blueprintId       Int?
+  printProviderId   Int?
   providerVariantId Int?
   quantity          Int      @default(1)
   shippingMethod    Int      @default(1)
