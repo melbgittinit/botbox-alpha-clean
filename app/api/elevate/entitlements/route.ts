@@ -32,11 +32,18 @@ export async function GET(request: Request) {
   }
 
   const profile = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
+  const [claimedGifts, reservedGifts] = await Promise.all([
+    prisma.elevateGift.count({ where: { giverUserId: user.id, claimedAt: { not: null } } }),
+    prisma.elevateGift.count({ where: { giverUserId: user.id, claimedAt: null } }),
+  ]);
   const entitlements = {
     activated: Boolean(profile?.activated),
     powerUp: Boolean(profile?.powerUp),
     makeItReal: Boolean(profile?.makeItReal),
     giftCreditsPurchased: profile?.giftCreditsPurchased || 0,
+    giftCreditsClaimed: claimedGifts,
+    giftCreditsReserved: reservedGifts,
+    giftCreditsRemaining: Math.max(0, (profile?.giftCreditsPurchased || 0) - claimedGifts - reservedGifts),
   };
 
   return Response.json(
