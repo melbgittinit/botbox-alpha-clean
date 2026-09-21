@@ -104,6 +104,8 @@ export async function POST(request: Request) {
   const pricing = retailQuote(providerCostCents);
   const artworkToken = crypto.randomBytes(24).toString("base64url");
 
+  const artworkUrl = new URL("/api/elevate/print-art/" + artworkToken, request.url).toString();
+
   const job = await prisma.elevatePrintJob.create({
     data: {
       userId: user.id,
@@ -120,6 +122,7 @@ export async function POST(request: Request) {
       recipient: address as Prisma.InputJsonValue,
       artworkPayload: artworkPayload as Prisma.InputJsonValue,
       artworkToken,
+      artworkUrl,
     },
   });
 
@@ -136,6 +139,7 @@ export async function POST(request: Request) {
     estimatedPaymentFeeCents: pricing.estimatedPaymentFee,
     targetMarginPct: pricing.targetMarginPct,
     shippingQuotesCents: shippingQuotes,
+    artworkUrl,
     orderStatus: "QUOTED_NOT_PAID",
   }, { headers: { "cache-control": "no-store" } });
 }
