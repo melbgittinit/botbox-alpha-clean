@@ -28,6 +28,10 @@ export default function MakeItRealPage() {
   const [audience, setAudience] = useState("");
   const [pkg, setPkg] = useState<PrintPackage | null>(null);
   const [status, setStatus] = useState("");
+  const [fulfillment, setFulfillment] = useState<{configured:boolean;liveOrderingEnabled:boolean;mappings:any}|null>(null);
+  const [quantity, setQuantity] = useState(25);
+  const [ship, setShip] = useState({firstName:"",lastName:"",email:"",phone:"",country:"US",region:"",address1:"",address2:"",city:"",zip:""});
+  const [quote, setQuote] = useState<any>(null);
 
   useEffect(() => {
     try {
@@ -40,6 +44,8 @@ export default function MakeItRealPage() {
         }
       }
     } catch {}
+
+    fetch("/api/elevate/fulfillment/status", { cache: "no-store" }).then(r=>r.json()).then(setFulfillment).catch(()=>setFulfillment(null));
 
     fetch("/api/elevate/entitlements", { cache: "no-store" })
       .then(async r => {
@@ -65,6 +71,28 @@ export default function MakeItRealPage() {
     }
     setPkg(data.package);
     setStatus("Print package ready.");
+  }
+
+  async function getShippingQuote() {
+    setStatus("Checking shipping…");
+    setQuote(null);
+    const response = await fetch("/api/elevate/fulfillment/quote", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ format, quantity, address: ship }),
+    });
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) {
+      setStatus(
+        data.error === "PRINT_PROVIDER_NOT_CONNECTED" ? "Print provider connection is not active yet." :
+        data.error === "FORMAT_NOT_MAPPED_TO_PROVIDER" ? "This print format is not mapped to a provider product yet." :
+        data.error === "SHIPPING_ADDRESS_REQUIRED" ? "Complete the shipping address first." :
+        "We could not calculate shipping yet."
+      );
+      return;
+    }
+    setQuote(data);
+    setStatus("Shipping quote ready.");
   }
 
   const card: React.CSSProperties = {
@@ -127,6 +155,40 @@ export default function MakeItRealPage() {
 
               <button onClick={buildPackage} disabled={!title.trim()||!message.trim()||!cta.trim()} style={{marginTop:16,padding:"14px 20px",borderRadius:999,border:0,background:"#f3c969",color:"#111",fontWeight:900,cursor:"pointer",opacity:title.trim()&&message.trim()&&cta.trim()?1:.5}}>BUILD MY PRINT PACKAGE</button>
               {status && <p style={{color:"#ddd9ef"}}>{status}</p>}
+            </section>
+
+
+            <section style={{...card,marginTop:18}}>
+              <strong style={{color:"#f3c969"}}>PRINT + SHIP CONNECTION</strong>
+              <p style={{color:"#ddd9ef"}}>
+                {fulfillment?.configured
+                  ? "Printify is connected. Choose quantity and shipping destination to request a live shipping quote."
+                  : "The print workflow is ready, but the Printify API connection and product mappings still need to be supplied before live fulfillment can run."}
+              </p>
+
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:10}}>
+                <label><span style={{display:"block",marginBottom:6}}>Quantity</span><input type="number" min={1} max={500} value={quantity} onChange={e=>setQuantity(Number(e.target.value)||1)} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>First name</span><input value={ship.firstName} onChange={e=>setShip({...ship,firstName:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>Last name</span><input value={ship.lastName} onChange={e=>setShip({...ship,lastName:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>Email</span><input value={ship.email} onChange={e=>setShip({...ship,email:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>Address</span><input value={ship.address1} onChange={e=>setShip({...ship,address1:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>City</span><input value={ship.city} onChange={e=>setShip({...ship,city:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>State/region</span><input value={ship.region} onChange={e=>setShip({...ship,region:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+                <label><span style={{display:"block",marginBottom:6}}>ZIP/postal</span><input value={ship.zip} onChange={e=>setShip({...ship,zip:e.target.value})} style={{width:"100%",boxSizing:"border-box",padding:11,borderRadius:10,background:"#0a1028",color:"#fff",border:"1px solid #6b6790"}} /></label>
+              </div>
+
+              <button onClick={getShippingQuote} style={{marginTop:14,padding:"13px 18px",borderRadius:999,border:0,background:fulfillment?.configured?"#78e6df":"#777",color:"#041117",fontWeight:900,cursor:"pointer"}}>
+                CHECK PRINT + SHIPPING
+              </button>
+
+              {quote && (
+                <div style={{marginTop:14,padding:14,borderRadius:14,background:"#0a1028"}}>
+                  <strong>Shipping quote</strong>
+                  <p>Standard: {quote.shippingQuotesCents?.standard != null ? "$"+(quote.shippingQuotesCents.standard/100).toFixed(2) : "not returned"}</p>
+                  <p style={{color:"#ffd36d"}}>{quote.productionCostStatus}</p>
+                  <p>{quote.orderStatus}</p>
+                </div>
+              )}
             </section>
 
             {pkg && (
