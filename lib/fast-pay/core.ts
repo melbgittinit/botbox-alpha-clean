@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import Stripe from "stripe";
 import { prisma } from "../prisma";
+import { markElevatePrintPaid } from "../elevate-fulfillment";
 
 export class FastPayError extends Error {
   status: number;
@@ -479,6 +480,13 @@ export async function handleStripeWebhook(rawBody: string, signature: string | n
       const session = event.data.object as Stripe.Checkout.Session;
       const transactionId = session.metadata?.fastPayTransactionId;
       if (transactionId) await grantPaidTransaction(transactionId, session);
+      const elevatePrintJobId = session.metadata?.elevatePrintJobId;
+      if (elevatePrintJobId) {
+        const paymentIntentId = typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
+        await markElevatePrintPaid(elevatePrintJobId, session.id, paymentIntentId || null);
+      }
     } else if (event.type === "checkout.session.expired") {
       const session = event.data.object as Stripe.Checkout.Session;
       const transactionId = session.metadata?.fastPayTransactionId;
@@ -486,6 +494,13 @@ export async function handleStripeWebhook(rawBody: string, signature: string | n
         await prisma.fastPayTransaction.updateMany({
           where: { id: transactionId, status: "PENDING" },
           data: { status: "CANCELED" },
+        });
+      }
+      const elevatePrintJobId = session.metadata?.elevatePrintJobId;
+      if (elevatePrintJobId) {
+        await prisma.elevatePrintJob.updateMany({
+          where: { id: elevatePrintJobId, status: "PAYMENT_PENDING", paymentRef: session.id },
+          data: { status: "QUOTED", paymentRef: null },
         });
       }
     } else if (event.type === "charge.refunded" || event.type === "charge.dispute.created") {
