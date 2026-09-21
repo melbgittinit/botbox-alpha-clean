@@ -32,6 +32,8 @@ export default function MakeItRealPage() {
   const [quantity, setQuantity] = useState(25);
   const [ship, setShip] = useState({firstName:"",lastName:"",email:"",phone:"",country:"US",region:"",address1:"",address2:"",city:"",zip:""});
   const [quote, setQuote] = useState<any>(null);
+  const [printJob, setPrintJob] = useState<any>(null);
+  const [paymentState, setPaymentState] = useState("");
 
   useEffect(() => {
     try {
@@ -46,6 +48,17 @@ export default function MakeItRealPage() {
     } catch {}
 
     fetch("/api/elevate/fulfillment/status", { cache: "no-store" }).then(r=>r.json()).then(setFulfillment).catch(()=>setFulfillment(null));
+
+    const params = new URLSearchParams(window.location.search);
+    const returnedJob = params.get("job");
+    const printPayment = params.get("print_payment");
+    if (returnedJob) {
+      setPaymentState(printPayment || "");
+      fetch("/api/elevate/fulfillment/job?job=" + encodeURIComponent(returnedJob), { cache: "no-store" })
+        .then(async r => r.ok ? r.json() : Promise.reject())
+        .then(data => setPrintJob(data.job))
+        .catch(()=>{});
+    }
 
     fetch("/api/elevate/entitlements", { cache: "no-store" })
       .then(async r => {
@@ -79,7 +92,12 @@ export default function MakeItRealPage() {
     const response = await fetch("/api/elevate/fulfillment/quote", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ format, quantity, address: ship }),
+      body: JSON.stringify({
+        format,
+        quantity,
+        address: ship,
+        artwork: { title, message, cta, destination, audience }
+      }),
     });
     const data = await response.json().catch(()=>({}));
     if (!response.ok) {
@@ -92,7 +110,55 @@ export default function MakeItRealPage() {
       return;
     }
     setQuote(data);
-    setStatus("Shipping quote ready.");
+    setPrintJob({ id: data.jobId, status: "QUOTED", retailCents: data.retailCents, artworkUrl: data.artworkUrl });
+    setStatus("Print quote ready.");
+  }
+
+  async function payPrintJob() {
+    if (!quote?.jobId) return;
+    setStatus("Opening secure print checkout…");
+    const response = await fetch("/api/elevate/fulfillment/checkout", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jobId: quote.jobId }),
+    });
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok || !data.checkoutUrl) {
+      setStatus("We could not open print checkout.");
+      return;
+    }
+    window.location.href = data.checkoutUrl;
+  }
+
+  async function refreshPrintJob() {
+    const id = printJob?.id || quote?.jobId;
+    if (!id) return;
+    const response = await fetch("/api/elevate/fulfillment/job?job=" + encodeURIComponent(id), { cache: "no-store" });
+    const data = await response.json().catch(()=>({}));
+    if (response.ok) setPrintJob(data.job);
+  }
+
+  async function sendToPrint() {
+    const id = printJob?.id || quote?.jobId;
+    if (!id) return;
+    setStatus("Sending paid job to print provider…");
+    const response = await fetch("/api/elevate/fulfillment/submit", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jobId: id }),
+    });
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) {
+      setStatus(
+        data.error === "LIVE_FULFILLMENT_DISABLED" ? "Live fulfillment is not enabled yet." :
+        data.error === "PRINT_JOB_NOT_PAID" ? "Payment has not been confirmed yet." :
+        data.error === "PRINT_PROVIDER_NOT_CONNECTED" ? "Print provider is not connected yet." :
+        "We could not submit this print job."
+      );
+      return;
+    }
+    setPrintJob((prev:any)=>({...(prev||{}), status:data.status, providerOrderId:data.providerOrderId}));
+    setStatus("Print job submitted.");
   }
 
   const card: React.CSSProperties = {
@@ -183,10 +249,27 @@ export default function MakeItRealPage() {
 
               {quote && (
                 <div style={{marginTop:14,padding:14,borderRadius:14,background:"#0a1028"}}>
-                  <strong>Shipping quote</strong>
-                  <p>Standard: {quote.shippingQuotesCents?.standard != null ? "$"+(quote.shippingQuotesCents.standard/100).toFixed(2) : "not returned"}</p>
-                  <p style={{color:"#ffd36d"}}>{quote.productionCostStatus}</p>
-                  <p>{quote.orderStatus}</p>
+                  <strong>Print job quote</strong>
+                  <p>Production: {quote.productionCents != null ? "$"+(quote.productionCents/100).toFixed(2) : "—"}</p>
+                  <p>Shipping: {quote.shippingCents != null ? "$"+(quote.shippingCents/100).toFixed(2) : "—"}</p>
+                  <p><b>Your print price: {quote.retailCents != null ? "$"+(quote.retailCents/100).toFixed(2) : "—"}</b></p>
+                  <p style={{color:"#78e6df"}}>Target margin protection: {quote.targetMarginPct}%</p>
+                  {quote.artworkUrl && <p><a href={quote.artworkUrl} target="_blank" rel="noreferrer" style={{color:"#78e6df"}}>PREVIEW PROVIDER ARTWORK →</a></p>}
+                  <button onClick={payPrintJob} style={{marginTop:10,padding:"13px 18px",borderRadius:999,border:0,background:"#f3c969",color:"#111",fontWeight:900,cursor:"pointer"}}>PAY PRINT JOB</button>
+                </div>
+              )}
+
+              {printJob && (
+                <div style={{marginTop:14,padding:14,borderRadius:14,background:"rgba(120,230,223,.09)",border:"1px solid rgba(120,230,223,.35)"}}>
+                  <strong>Print job status: {printJob.status}</strong>
+                  {paymentState === "success" && <p style={{color:"#78e6df"}}>Payment return received. Verify payment before sending to print.</p>}
+                  <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:10}}>
+                    <button onClick={refreshPrintJob} style={{padding:"11px 15px",borderRadius:999,border:"1px solid rgba(255,255,255,.35)",background:"transparent",color:"#fff",fontWeight:800,cursor:"pointer"}}>VERIFY PAYMENT</button>
+                    {printJob.status === "PAID_READY_TO_SUBMIT" && (
+                      <button onClick={sendToPrint} style={{padding:"11px 15px",borderRadius:999,border:0,background:"#78e6df",color:"#041117",fontWeight:900,cursor:"pointer"}}>SEND TO PRINT</button>
+                    )}
+                  </div>
+                  {printJob.providerOrderId && <p>Provider order: {printJob.providerOrderId}</p>}
                 </div>
               )}
             </section>
