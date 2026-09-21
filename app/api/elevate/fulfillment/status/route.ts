@@ -1,4 +1,4 @@
-import { printifyConfigured } from "../../../../lib/elevate-printify";
+import { printifyConfigured } from "../../../../../lib/elevate-printify";
 
 export async function GET() {
   return Response.json({
