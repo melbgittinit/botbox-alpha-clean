@@ -4,6 +4,7 @@ import { fetchWmrEntitlements } from "../../../../../lib/wmr-entitlements";
 import { fetchElevateEntitlements } from "../../../../../lib/elevate-entitlements";
 import {
   OAUTH_NONCE_COOKIE,
+  OAUTH_RETURN_COOKIE,
   OAUTH_STATE_COOKIE,
   OAUTH_VERIFIER_COOKIE,
   authConfig,
@@ -12,6 +13,7 @@ import {
   discoverOidc,
   exchangeAuthorizationCode,
   fetchShopifyCustomer,
+  safeReturnPath,
 } from "../../../../../lib/hub-auth/shopify";
 
 export async function GET(request: Request) {
@@ -20,6 +22,7 @@ export async function GET(request: Request) {
   const state = url.searchParams.get("state");
   const expectedState = getCookie(request, OAUTH_STATE_COOKIE);
   const verifier = getCookie(request, OAUTH_VERIFIER_COOKIE);
+  const requestedReturnPath = safeReturnPath(getCookie(request, OAUTH_RETURN_COOKIE));
 
   if (!code || !state || !expectedState || state !== expectedState || !verifier) {
     return Response.json({ error: "INVALID_OAUTH_RESPONSE", message: "The sign-in response could not be verified." }, { status: 400 });
@@ -103,13 +106,14 @@ export async function GET(request: Request) {
     }
 
     const sessionToken = createHubSessionToken(user.id);
-    const successPath = process.env.HUB_AUTH_SUCCESS_PATH || "/hub";
+    const successPath = requestedReturnPath || process.env.HUB_AUTH_SUCCESS_PATH || "/hub";
     const redirectTo = new URL(successPath, origin).toString();
     const headers = new Headers({ location: redirectTo, "cache-control": "no-store" });
     headers.append("set-cookie", sessionCookieHeader(sessionToken));
     headers.append("set-cookie", clearOauthCookie(OAUTH_STATE_COOKIE));
     headers.append("set-cookie", clearOauthCookie(OAUTH_VERIFIER_COOKIE));
     headers.append("set-cookie", clearOauthCookie(OAUTH_NONCE_COOKIE));
+    headers.append("set-cookie", clearOauthCookie(OAUTH_RETURN_COOKIE));
     return new Response(null, { status: 302, headers });
   } catch (error) {
     console.error("HUB auth callback failed", error);
