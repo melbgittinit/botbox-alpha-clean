@@ -225,7 +225,7 @@ export default function ElevateMeBotPage() {
     {access.entitlements.activated ? "SEND IT • 1 / 5 / 50" : "SEND IT • ACTIVATE TO USE"}
   </button>
               {access.entitlements.powerUp
-    ? <span style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE UNLOCKED ✓</span>
+    ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE THIS ✓</a>
     : <a href={checkout.power} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
               {access.entitlements.giftCreditsPurchased > 0
     ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>
@@ -255,7 +255,7 @@ export default function ElevateMeBotPage() {
             <h3>More powers. More momentum.</h3>
             <p>EXPLODE, Reach My People, Sell Something, Help Me Earn, Plan This, Remix It, and better saved-project continuity.</p>
             {access.entitlements.powerUp
-    ? <span style={{ ...button, background: "#78e6df", color: "#041117" }}>POWER UP OWNED ✓</span>
+    ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#78e6df", color: "#041117" }}>OPEN POWER UP TOOLS ✓</a>
     : <a href={checkout.power} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
           </div>
           <div style={card}>
