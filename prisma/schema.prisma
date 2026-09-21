@@ -130,6 +130,7 @@ model User {
   creatorTemplates     CreatorTemplate[]
   fastPayAccount       FastPayAccount?
   wmrProfile           WmrProfile?
+  elevateProfile       ElevateProfile?
   wmrEvents            WmrEvent[]
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
@@ -690,6 +691,19 @@ model WmrProfile {
   forReal              Boolean  @default(false)
   bwfPassport          Boolean  @default(false)
   vipMe                Boolean  @default(false)
+  entitlementCheckedAt DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ElevateProfile {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activated            Boolean  @default(false)
+  powerUp              Boolean  @default(false)
+  makeItReal           Boolean  @default(false)
+  giftCreditsPurchased Int      @default(0)
   entitlementCheckedAt DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
