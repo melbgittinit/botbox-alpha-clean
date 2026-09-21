@@ -726,6 +726,31 @@ model ElevateGift {
   @@index([claimedByUserId])
 }
 
+model ElevatePrintJob {
+  id                String   @id @default(cuid())
+  userId            String
+  format            String
+  status            String   @default("DRAFT")
+  provider          String   @default("PRINTIFY")
+  providerProductId String?
+  providerVariantId Int?
+  quantity          Int      @default(1)
+  shippingMethod    Int      @default(1)
+  quoteCents        Int?
+  retailCents       Int?
+  currency          String   @default("usd")
+  recipient         Json?
+  artworkUrl        String?
+  providerOrderId   String?
+  paymentRef        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([providerOrderId])
+}
+
 model WmrEvent {
   id        String   @id @default(cuid())
   userId    String
