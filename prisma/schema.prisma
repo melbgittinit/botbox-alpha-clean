@@ -788,3 +788,23 @@ model PgpEarnAttribution {
   @@index([keyCode, createdAt])
   @@index([providerStatus, createdAt])
 }
+
+
+model PgpLead {
+  id          String   @id @default(cuid())
+  email       String
+  displayName String?
+  source      String   @default("pgp")
+  status      String   @default("EARLY_ACCESS")
+  guideId     String?
+  naturalPower String?
+  supportingPower String?
+  expansionPower String?
+  payload     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([email, source])
+  @@index([status, createdAt])
+  @@index([source, createdAt])
+}
