@@ -227,9 +227,11 @@ export default function ElevateMeBotPage() {
               {access.entitlements.powerUp
     ? <span style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE UNLOCKED ✓</span>
     : <a href={checkout.power} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
-              <a href={checkout.gift} style={{ ...button, background: "#7d4df5", color: "#fff" }}>
-    GIFT A BOT • $1.99{access.entitlements.giftCreditsPurchased ? ` • ${access.entitlements.giftCreditsPurchased} PURCHASED` : ""}
-  </a>
+              {access.entitlements.giftCreditsPurchased > 0
+    ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>
+        USE MY GIFT CREDIT{access.entitlements.giftCreditsPurchased > 1 ? "S" : ""} • {access.entitlements.giftCreditsPurchased}
+      </a>
+    : <a href={checkout.gift} style={{ ...button, background: "#7d4df5", color: "#fff" }}>GIFT A BOT • $1.99</a>}
             </div>
           </section>
         )}
