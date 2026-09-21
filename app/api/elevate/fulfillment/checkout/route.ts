@@ -13,11 +13,11 @@ export async function POST(request: Request) {
   const jobId = String(body?.jobId || "");
   const job = await prisma.elevatePrintJob.findFirst({ where: { id: jobId, userId: user.id } });
   if (!job) return Response.json({ error: "PRINT_JOB_NOT_FOUND" }, { status: 404 });
-  if (job.status !== "QUOTED" || !job.retailCents || job.retailCents < 50) {
+  if (!["QUOTED", "PAYMENT_PENDING"].includes(job.status) || !job.retailCents || job.retailCents < 50) {
     return Response.json({ error: "PRINT_JOB_NOT_READY_FOR_PAYMENT" }, { status: 409 });
   }
 
-  if (job.paymentRef && job.status === "PAYMENT_PENDING") {
+  if (job.status === "PAYMENT_PENDING" && job.paymentRef) {
     try {
       const prior = await stripe().checkout.sessions.retrieve(job.paymentRef);
       if (prior.url) return Response.json({ ok: true, checkoutUrl: prior.url, jobId: job.id });
