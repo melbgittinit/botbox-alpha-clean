@@ -808,3 +808,24 @@ model PgpLead {
   @@index([status, createdAt])
   @@index([source, createdAt])
 }
+
+
+model HubLeaderLead {
+  id               String   @id @default(cuid())
+  lane             String
+  name             String
+  email            String
+  organization     String?
+  role             String?
+  cohort           String?
+  hardwareInterest String?
+  source           String   @default("hub-leaders")
+  status           String   @default("NEW")
+  payload          Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([email, lane])
+  @@index([lane, status, createdAt])
+  @@index([email, createdAt])
+}
