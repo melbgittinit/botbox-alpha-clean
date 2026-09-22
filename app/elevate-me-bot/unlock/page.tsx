@@ -30,11 +30,21 @@ function getElevateCycleKey() {
     const params = new URLSearchParams(window.location.search);
     const incoming = (params.get("elv") || "").trim().toUpperCase();
     if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(incoming)) {
-      localStorage.setItem("elevate_cycle_key", incoming);
+      localStorage.setItem("elevate_cycle_key", JSON.stringify({ key: incoming, at: Date.now() }));
       return incoming;
     }
-    const saved = (localStorage.getItem("elevate_cycle_key") || "").trim().toUpperCase();
-    return /^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(saved) ? saved : null;
+    const raw = localStorage.getItem("elevate_cycle_key");
+    if (!raw) return null;
+    try {
+      const saved = JSON.parse(raw);
+      const key = String(saved?.key || "").trim().toUpperCase();
+      const at = Number(saved?.at || 0);
+      if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(key) && at > 0 && Date.now() - at <= 7 * 24 * 60 * 60 * 1000) {
+        return key;
+      }
+    } catch {}
+    localStorage.removeItem("elevate_cycle_key");
+    return null;
   } catch {
     return null;
   }
