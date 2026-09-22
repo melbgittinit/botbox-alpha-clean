@@ -30,6 +30,11 @@ app.get('/api/config', (_req, res) => {
 });
 
 app.post('/api/opportunity-camera/scan', async (req, res) => {
+  const requiredSecret = process.env.PGP_CAMERA_WORKER_SECRET;
+  if (requiredSecret && req.get('x-pgp-worker-secret') !== requiredSecret) {
+    return res.status(401).json({ error: 'WORKER_AUTH_REQUIRED' });
+  }
+
   const { image_data_url: imageDataUrl } = req.body || {};
   if (!imageDataUrl || !imageDataUrl.startsWith('data:image/')) {
     return res.status(400).json({ error: 'IMAGE_REQUIRED' });
