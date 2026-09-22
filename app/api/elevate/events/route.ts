@@ -1,5 +1,6 @@
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 import { recordElevateEvent } from "../../../../lib/elevate-events";
+import { normalizeElevateCycleKey } from "../../../../lib/elevate-attribution";
 
 const allowedEvents = new Set([
   "page_view",
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
   await recordElevateEvent({
     userId: user?.id || null,
     sessionId: clean(body?.sessionId, 160),
+    cycleKey: normalizeElevateCycleKey(body?.cycleKey),
     eventType,
     surface: clean(body?.surface, 40),
     offer,
