@@ -1,5 +1,6 @@
 import { prisma } from "../../../../../../lib/prisma";
 import { resolveHubUser } from "../../../../../../lib/hub-auth/session";
+import { recordElevateEvent } from "../../../../../../lib/elevate-events";
 
 export async function POST(request: Request, context: { params: Promise<{ token: string }> }) {
   const user = await resolveHubUser(request);
@@ -45,6 +46,14 @@ export async function POST(request: Request, context: { params: Promise<{ token:
       },
     }),
   ]);
+
+  await recordElevateEvent({
+    userId: user.id,
+    eventType: "gift_claimed",
+    offer: "gift",
+    amountCents: 199,
+    success: true,
+  });
 
   return Response.json({
     ok: true,
