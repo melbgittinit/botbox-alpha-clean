@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../../../../../lib/prisma";
 import { resolveHubUser } from "../../../../../lib/hub-auth/session";
 import { recordElevateEconomicEntry } from "../../../../../lib/elevate-economics";
+import { resolveElevateCycle } from "../../../../../lib/elevate-attribution";
 import {
   printifyConfigured,
   printifyShippingQuoteCustom,
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "AUTH_REQUIRED" }, { status: 401 });
 
   const profile = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
+  const cycleKey = resolveElevateCycle(request, profile);
   if (!profile?.makeItReal) return Response.json({ error: "MAKE_IT_REAL_REQUIRED" }, { status: 403 });
   if (!printifyConfigured()) return Response.json({ error: "PRINT_PROVIDER_NOT_CONNECTED" }, { status: 503 });
 
@@ -124,6 +126,7 @@ export async function POST(request: Request) {
       artworkPayload: artworkPayload as Prisma.InputJsonValue,
       artworkToken,
       artworkUrl,
+      cycleKey,
     },
   });
 
@@ -131,6 +134,7 @@ export async function POST(request: Request) {
     recordElevateEconomicEntry({
       idempotencyKey: `print:${job.id}:provider-cost-estimate`,
       userId: user.id,
+      cycleKey,
       entryType: "ESTIMATE",
       category: "PRINT_PROVIDER_COST_ESTIMATE",
       amountCents: providerCostCents,
@@ -145,6 +149,7 @@ export async function POST(request: Request) {
     recordElevateEconomicEntry({
       idempotencyKey: `print:${job.id}:payment-fee-estimate`,
       userId: user.id,
+      cycleKey,
       entryType: "ESTIMATE",
       category: "PAYMENT_FEE_ESTIMATE",
       amountCents: pricing.estimatedPaymentFee,

@@ -708,6 +708,8 @@ model ElevateProfile {
   makeItReal           Boolean  @default(false)
   giftCreditsPurchased Int      @default(0)
   entitlementCheckedAt DateTime?
+  lastCycleKey         String?
+  lastCycleAt          DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
@@ -718,6 +720,7 @@ model ElevateGift {
   recipientEmail String
   recipientName  String?
   message        String?
+  cycleKey       String?
   token          String   @unique
   claimedByUserId String?
   claimedAt      DateTime?
@@ -750,6 +753,7 @@ model ElevatePrintJob {
   artworkPayload    Json?
   providerOrderId   String?
   paymentRef        String?
+  cycleKey          String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -899,6 +903,7 @@ model ElevateEvent {
   id          String   @id @default(cuid())
   userId      String?
   sessionId   String?
+  cycleKey    String?
   eventType   String
   surface     String?
   offer       String?
@@ -912,6 +917,7 @@ model ElevateEvent {
   @@index([eventType, createdAt])
   @@index([userId, createdAt])
   @@index([sessionId, createdAt])
+  @@index([cycleKey, createdAt])
   @@index([offer, createdAt])
 }
 
@@ -920,6 +926,7 @@ model ElevateEconomicEntry {
   idempotencyKey       String   @unique
   userId               String?
   sessionId            String?
+  cycleKey             String?
   entryType            String
   category             String
   amountCents          Int?
@@ -938,6 +945,7 @@ model ElevateEconomicEntry {
   @@index([entryType, occurredAt])
   @@index([category, occurredAt])
   @@index([userId, occurredAt])
+  @@index([cycleKey, occurredAt])
   @@index([offer, occurredAt])
   @@index([source, occurredAt])
 }

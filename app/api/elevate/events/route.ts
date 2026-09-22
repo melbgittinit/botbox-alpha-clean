@@ -1,5 +1,6 @@
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 import { recordElevateEvent } from "../../../../lib/elevate-events";
+import { normalizeElevateCycleKey } from "../../../../lib/elevate-attribution";
 
 const allowedEvents = new Set([
   "page_view",
@@ -58,10 +59,21 @@ export async function POST(request: Request) {
   const rawOffer = clean(body?.offer, 40);
   const offer = rawOffer && allowedOffers.has(rawOffer) ? rawOffer : null;
   const user = await resolveHubUser(request).catch(() => null);
+  const cycleKey = normalizeElevateCycleKey(body?.cycleKey);
+
+  if (user && cycleKey) {
+    await import("../../../../lib/prisma").then(({ prisma }) =>
+      prisma.elevateProfile.updateMany({
+        where: { userId: user.id },
+        data: { lastCycleKey: cycleKey, lastCycleAt: new Date() },
+      })
+    ).catch(() => null);
+  }
 
   await recordElevateEvent({
     userId: user?.id || null,
     sessionId: clean(body?.sessionId, 160),
+    cycleKey,
     eventType,
     surface: clean(body?.surface, 40),
     offer,

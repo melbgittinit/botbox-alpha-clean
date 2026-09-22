@@ -3,6 +3,7 @@ import { resolveHubUser } from "../../../../lib/hub-auth/session";
 import { generateElevateAction } from "../../../../lib/elevate-ai";
 import { recordElevateEvent } from "../../../../lib/elevate-events";
 import { recordElevateEconomicEntry } from "../../../../lib/elevate-economics";
+import { resolveElevateCycle } from "../../../../lib/elevate-attribution";
 
 const allowed = new Set(["make","done","reach","earn","better","next"]);
 
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "AUTH_REQUIRED" }, { status: 401 });
 
   const profile = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
+  const cycleKey = resolveElevateCycle(request, profile);
   if (!profile?.activated) return Response.json({ error: "ACTIVATE_REQUIRED" }, { status: 403 });
 
   const body = await request.json().catch(() => null);
@@ -31,6 +33,7 @@ export async function POST(request: Request) {
 
     await recordElevateEvent({
       userId: user.id,
+      cycleKey,
       eventType: "action_completed",
       success: true,
       payload: { action, resultSource: result?.source || "unknown", usage: result?.usage || null },
@@ -41,6 +44,7 @@ export async function POST(request: Request) {
       await recordElevateEconomicEntry({
         idempotencyKey: `ai:${usageId}`,
         userId: user.id,
+        cycleKey,
         entryType: "COST",
         category: "AI_INFERENCE_COST",
         amountCents: null,
@@ -57,6 +61,7 @@ export async function POST(request: Request) {
   } catch (error) {
     await recordElevateEvent({
       userId: user.id,
+      cycleKey,
       eventType: "action_failed",
       success: false,
       payload: { action, error: error instanceof Error ? error.message.slice(0, 240) : "unknown" },

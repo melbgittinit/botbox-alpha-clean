@@ -49,6 +49,7 @@ export async function POST(request: Request, context: { params: Promise<{ token:
 
   await recordElevateEvent({
     userId: user.id,
+    cycleKey: gift.cycleKey,
     eventType: "gift_claimed",
     offer: "gift",
     amountCents: 199,

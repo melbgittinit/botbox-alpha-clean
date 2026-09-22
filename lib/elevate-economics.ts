@@ -5,6 +5,7 @@ export type ElevateEconomicEntryInput = {
   idempotencyKey: string;
   userId?: string | null;
   sessionId?: string | null;
+  cycleKey?: string | null;
   entryType: "REVENUE" | "COST" | "REFUND" | "ESTIMATE" | "USAGE" | "REVERSAL_SIGNAL";
   category: string;
   amountCents?: number | null;
@@ -51,6 +52,7 @@ export async function recordElevateEconomicEntry(input: ElevateEconomicEntryInpu
         idempotencyKey: key,
         userId: clean(input.userId, 160),
         sessionId: clean(input.sessionId, 160),
+        cycleKey: clean(input.cycleKey, 80),
         entryType: input.entryType,
         category: clean(input.category, 100) || "UNKNOWN",
         amountCents,
@@ -71,6 +73,7 @@ export async function recordElevateEconomicEntry(input: ElevateEconomicEntryInpu
       id: entry.id,
       entryType: entry.entryType,
       category: entry.category,
+      cycleKey: entry.cycleKey,
       amountCents: entry.amountCents,
       currency: entry.currency,
       verified: entry.verified,
@@ -94,9 +97,10 @@ export async function recordElevateEconomicEntry(input: ElevateEconomicEntryInpu
   }
 }
 
-export async function summarizeElevateEconomics(input?: { since?: Date; until?: Date }) {
+export async function summarizeElevateEconomics(input?: { since?: Date; until?: Date; cycleKey?: string | null }) {
   const entries = await prisma.elevateEconomicEntry.findMany({
     where: {
+      cycleKey: input?.cycleKey || undefined,
       occurredAt: {
         gte: input?.since,
         lt: input?.until,

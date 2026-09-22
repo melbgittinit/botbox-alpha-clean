@@ -126,6 +126,7 @@ export async function handleStripeWebhookSafely(rawBody: string, signature: stri
           await recordElevateEconomicEntry({
             idempotencyKey: `stripe:print:${session.id}:revenue`,
             userId: elevateUserId,
+            cycleKey: job.cycleKey,
             entryType: "REVENUE",
             category: "PRINT_JOB_REVENUE",
             amountCents: job.retailCents,
@@ -158,6 +159,7 @@ export async function handleStripeWebhookSafely(rawBody: string, signature: stri
           await recordElevateEconomicEntry({
             idempotencyKey: `stripe:print:${charge.id}:refund:${charge.amount_refunded}`,
             userId: printJob.userId,
+            cycleKey: printJob.cycleKey,
             entryType: "REFUND",
             category: "PRINT_JOB_REFUND",
             amountCents: charge.amount_refunded,

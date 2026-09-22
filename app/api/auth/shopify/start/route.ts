@@ -10,6 +10,7 @@ import {
   randomUrlSafe,
   safeReturnPath,
 } from "../../../../../lib/hub-auth/shopify";
+import { elevateCycleCookie, elevateCycleFromReturnPath } from "../../../../../lib/elevate-attribution";
 
 export async function GET(request: Request) {
   try {
@@ -35,6 +36,8 @@ export async function GET(request: Request) {
     headers.append("set-cookie", oauthCookie(OAUTH_STATE_COOKIE, state));
     headers.append("set-cookie", oauthCookie(OAUTH_NONCE_COOKIE, nonce));
     headers.append("set-cookie", oauthCookie(OAUTH_RETURN_COOKIE, returnPath));
+    const cycleKey = elevateCycleFromReturnPath(returnPath);
+    if (cycleKey) headers.append("set-cookie", elevateCycleCookie(cycleKey));
     headers.append("set-cookie", oauthCookie(OAUTH_VERIFIER_COOKIE, verifier));
     return new Response(null, { status: 302, headers });
   } catch (error) {

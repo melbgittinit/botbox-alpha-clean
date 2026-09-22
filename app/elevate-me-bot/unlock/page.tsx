@@ -25,6 +25,31 @@ const offers = {
 
 type Level = keyof typeof offers;
 
+function getElevateCycleKey() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const incoming = (params.get("elv") || "").trim().toUpperCase();
+    if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(incoming)) {
+      localStorage.setItem("elevate_cycle_key", JSON.stringify({ key: incoming, at: Date.now() }));
+      return incoming;
+    }
+    const raw = localStorage.getItem("elevate_cycle_key");
+    if (!raw) return null;
+    try {
+      const saved = JSON.parse(raw);
+      const key = String(saved?.key || "").trim().toUpperCase();
+      const at = Number(saved?.at || 0);
+      if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(key) && at > 0 && Date.now() - at <= 7 * 24 * 60 * 60 * 1000) {
+        return key;
+      }
+    } catch {}
+    localStorage.removeItem("elevate_cycle_key");
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function getElevateSessionId() {
   try {
     const existing = localStorage.getItem("elevate_measurement_session");
@@ -55,6 +80,7 @@ function trackUnlockEvent(
       body: JSON.stringify({
         eventType,
         sessionId: getElevateSessionId(),
+        cycleKey: getElevateCycleKey(),
         surface,
         offer,
         success,
@@ -74,7 +100,10 @@ export default function ElevateUnlockPage() {
   const [message, setMessage] = useState("");
 
   const returnPath = useMemo(
-    () => `/elevate-me-bot/unlock?level=${level}&surface=${surface}`,
+    () => {
+      const cycleKey = typeof window !== "undefined" ? getElevateCycleKey() : null;
+      return `/elevate-me-bot/unlock?level=${level}&surface=${surface}${cycleKey ? `&elv=${encodeURIComponent(cycleKey)}` : ""}`;
+    },
     [level, surface]
   );
 

@@ -6,6 +6,7 @@ import { syncPgpPurchaseGrants } from "../../../../../lib/pgp-access";
 import { fetchElevateEntitlements } from "../../../../../lib/elevate-entitlements";
 import { recordElevateEvent } from "../../../../../lib/elevate-events";
 import { recordElevateEconomicEntry } from "../../../../../lib/elevate-economics";
+import { elevateCycleFromRequest, elevateCycleFromReturnPath } from "../../../../../lib/elevate-attribution";
 import {
   OAUTH_NONCE_COOKIE,
   OAUTH_RETURN_COOKIE,
@@ -103,6 +104,7 @@ export async function GET(request: Request) {
     }
 
     if (elevateEntitlements) {
+      const cycleKey = elevateCycleFromRequest(request) || elevateCycleFromReturnPath(requestedReturnPath);
       const existingElevate = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
       await prisma.elevateProfile.upsert({
         where: { userId: user.id },
@@ -112,6 +114,8 @@ export async function GET(request: Request) {
           makeItReal: elevateEntitlements.makeItReal,
           giftCreditsPurchased: elevateEntitlements.giftCreditsPurchased,
           entitlementCheckedAt: new Date(),
+          lastCycleKey: cycleKey || undefined,
+          lastCycleAt: cycleKey ? new Date() : undefined,
         },
         create: {
           userId: user.id,
@@ -120,11 +124,14 @@ export async function GET(request: Request) {
           makeItReal: elevateEntitlements.makeItReal,
           giftCreditsPurchased: elevateEntitlements.giftCreditsPurchased,
           entitlementCheckedAt: new Date(),
+          lastCycleKey: cycleKey || null,
+          lastCycleAt: cycleKey ? new Date() : null,
         },
       });
 
       await recordElevateEvent({
         userId: user.id,
+        cycleKey,
         eventType: "entitlement_sync",
         success: true,
         channel: "shopify",
@@ -147,6 +154,7 @@ export async function GET(request: Request) {
       for (const conversion of verified) {
         await recordElevateEvent({
           userId: user.id,
+          cycleKey,
           eventType: "purchase_verified",
           offer: conversion.offer,
           amountCents: conversion.amountCents,
@@ -160,6 +168,7 @@ export async function GET(request: Request) {
               ? `shopify:${user.id}:gift-total:${elevateEntitlements.giftCreditsPurchased}`
               : `shopify:${user.id}:${conversion.offer}:verified`,
           userId: user.id,
+          cycleKey,
           entryType: "REVENUE",
           category: "SHOPIFY_PRODUCT_REVENUE",
           amountCents: conversion.amountCents,
@@ -182,6 +191,7 @@ export async function GET(request: Request) {
       for (const offer of removed) {
         await recordElevateEvent({
           userId: user.id,
+          cycleKey,
           eventType: "entitlement_removed",
           offer,
           success: true,
@@ -192,6 +202,7 @@ export async function GET(request: Request) {
         await recordElevateEconomicEntry({
           idempotencyKey: `shopify:${user.id}:${offer}:reversal:${offer === "gift" ? elevateEntitlements.giftCreditsPurchased : "removed"}`,
           userId: user.id,
+          cycleKey,
           entryType: "REVERSAL_SIGNAL",
           category: "ENTITLEMENT_REMOVED",
           verified: false,
