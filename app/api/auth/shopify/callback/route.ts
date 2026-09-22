@@ -2,6 +2,7 @@ import { prisma } from "../../../../../lib/prisma";
 import { createHubSessionToken, getCookie, sessionCookieHeader } from "../../../../../lib/hub-auth/session";
 import { fetchWmrEntitlements } from "../../../../../lib/wmr-entitlements";
 import { fetchElevateEntitlements } from "../../../../../lib/elevate-entitlements";
+import { recordElevateEvent } from "../../../../../lib/elevate-events";
 import {
   OAUTH_NONCE_COOKIE,
   OAUTH_RETURN_COOKIE,
@@ -85,6 +86,7 @@ export async function GET(request: Request) {
     }
 
     if (elevateEntitlements) {
+      const existingElevate = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
       await prisma.elevateProfile.upsert({
         where: { userId: user.id },
         update: {
@@ -103,6 +105,57 @@ export async function GET(request: Request) {
           entitlementCheckedAt: new Date(),
         },
       });
+
+      await recordElevateEvent({
+        userId: user.id,
+        eventType: "entitlement_sync",
+        success: true,
+        channel: "shopify",
+        source: "shopify_customer_account",
+        payload: {
+          activated: elevateEntitlements.activated,
+          powerUp: elevateEntitlements.powerUp,
+          makeItReal: elevateEntitlements.makeItReal,
+          giftCreditsPurchased: elevateEntitlements.giftCreditsPurchased,
+        },
+      });
+
+      const verified: Array<{ offer: string; amountCents: number }> = [];
+      if (!existingElevate?.activated && elevateEntitlements.activated) verified.push({ offer: "activate", amountCents: 100 });
+      if (!existingElevate?.powerUp && elevateEntitlements.powerUp) verified.push({ offer: "power", amountCents: 299 });
+      if (!existingElevate?.makeItReal && elevateEntitlements.makeItReal) verified.push({ offer: "real", amountCents: 799 });
+      const giftDelta = elevateEntitlements.giftCreditsPurchased - (existingElevate?.giftCreditsPurchased || 0);
+      if (giftDelta > 0) verified.push({ offer: "gift", amountCents: 199 * giftDelta });
+
+      for (const conversion of verified) {
+        await recordElevateEvent({
+          userId: user.id,
+          eventType: "purchase_verified",
+          offer: conversion.offer,
+          amountCents: conversion.amountCents,
+          success: true,
+          channel: "shopify",
+          source: "shopify_customer_account",
+        });
+      }
+
+      const removed: string[] = [];
+      if (existingElevate?.activated && !elevateEntitlements.activated) removed.push("activate");
+      if (existingElevate?.powerUp && !elevateEntitlements.powerUp) removed.push("power");
+      if (existingElevate?.makeItReal && !elevateEntitlements.makeItReal) removed.push("real");
+      if (giftDelta < 0) removed.push("gift");
+
+      for (const offer of removed) {
+        await recordElevateEvent({
+          userId: user.id,
+          eventType: "entitlement_removed",
+          offer,
+          success: true,
+          channel: "shopify",
+          source: "shopify_customer_account",
+          payload: offer === "gift" ? { giftCreditDelta: giftDelta } : undefined,
+        });
+      }
     }
 
     const sessionToken = createHubSessionToken(user.id);
