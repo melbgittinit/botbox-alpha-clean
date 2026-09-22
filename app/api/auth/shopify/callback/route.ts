@@ -1,6 +1,8 @@
 import { prisma } from "../../../../../lib/prisma";
 import { createHubSessionToken, getCookie, sessionCookieHeader } from "../../../../../lib/hub-auth/session";
 import { fetchWmrEntitlements } from "../../../../../lib/wmr-entitlements";
+import { fetchPgpOrderGrants } from "../../../../../lib/pgp-entitlements";
+import { syncPgpPurchaseGrants } from "../../../../../lib/pgp-access";
 import { fetchElevateEntitlements } from "../../../../../lib/elevate-entitlements";
 import { recordElevateEvent } from "../../../../../lib/elevate-events";
 import {
@@ -83,6 +85,14 @@ export async function GET(request: Request) {
           entitlementCheckedAt: new Date(),
         },
       });
+    }
+
+    if (pgpGrants) {
+      try {
+        await syncPgpPurchaseGrants(user.id, pgpGrants);
+      } catch (error) {
+        console.warn("PGP purchase grant sync skipped", error);
+      }
     }
 
     if (elevateEntitlements) {
