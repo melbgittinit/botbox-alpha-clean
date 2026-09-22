@@ -1,5 +1,5 @@
 import Link from "next/link";
-import styles from "./press.module.css";
+import styles from "../press.module.css";
 
 export default function Page(){
   return <main className={styles.press}><div className={styles.wrap}>
