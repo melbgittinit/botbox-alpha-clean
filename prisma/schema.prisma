@@ -911,3 +911,61 @@ model ElevateEvent {
   @@index([sessionId, createdAt])
   @@index([offer, createdAt])
 }
+
+
+model PgpProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullDigital           Boolean  @default(false)
+  shareCards            Boolean  @default(false)
+  walkWithMe            Boolean  @default(false)
+  goldenRanch           Boolean  @default(false)
+  premiumDigital        Boolean  @default(false)
+  cameraTier            String?
+  cameraExpiresAt       DateTime?
+  cameraScansRemaining  Int      @default(0)
+  cameraScansLifetime   Int      @default(0)
+  pendingRefillScans    Int      @default(0)
+  firstLookClaimed      Boolean  @default(false)
+  opportunityBagUntil   DateTime?
+  entitlementCheckedAt  DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model PgpPurchaseGrant {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation("PgpPurchaser", fields: [userId], references: [id], onDelete: Cascade)
+  orderId     String
+  lineItemId  String
+  sku         String
+  quantity    Int           @default(1)
+  processedAt DateTime
+  grantType   String
+  scansGranted Int          @default(0)
+  expiresAt   DateTime?
+  gift        Boolean       @default(false)
+  giftCodes   PgpGiftCode[]
+  createdAt   DateTime      @default(now())
+
+  @@unique([orderId, lineItemId])
+  @@index([userId, processedAt])
+  @@index([sku])
+}
+
+model PgpGiftCode {
+  id               String           @id @default(cuid())
+  purchaseGrantId  String
+  purchaseGrant    PgpPurchaseGrant @relation(fields: [purchaseGrantId], references: [id], onDelete: Cascade)
+  ordinal          Int
+  code             String           @unique
+  redeemedByUserId String?
+  redeemedByUser   User?            @relation("PgpGiftRecipient", fields: [redeemedByUserId], references: [id], onDelete: SetNull)
+  redeemedAt       DateTime?
+  createdAt        DateTime         @default(now())
+
+  @@unique([purchaseGrantId, ordinal])
+  @@index([redeemedByUserId, redeemedAt])
+}
