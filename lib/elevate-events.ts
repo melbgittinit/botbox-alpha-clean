@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 export type ElevateEventInput = {
   userId?: string | null;
   sessionId?: string | null;
+  cycleKey?: string | null;
   eventType: string;
   surface?: string | null;
   offer?: string | null;
@@ -25,6 +26,7 @@ export async function recordElevateEvent(input: ElevateEventInput) {
       data: {
         userId: clean(input.userId, 160),
         sessionId: clean(input.sessionId, 160),
+        cycleKey: clean(input.cycleKey, 80),
         eventType: clean(input.eventType, 80) || "unknown",
         surface: clean(input.surface, 40),
         offer: clean(input.offer, 40),
@@ -41,6 +43,7 @@ export async function recordElevateEvent(input: ElevateEventInput) {
       eventType: event.eventType,
       userId: event.userId,
       sessionId: event.sessionId,
+      cycleKey: event.cycleKey,
       surface: event.surface,
       offer: event.offer,
       amountCents: event.amountCents,
