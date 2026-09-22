@@ -12,6 +12,7 @@ type Screen =
   | "save"
   | "home"
   | "spot"
+  | "camera"
   | "key"
   | "bag"
   | "guidehub"
@@ -391,6 +392,26 @@ export default function PrettyGirlPalace() {
   const [leadSaved, setLeadSaved] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [campaignSource, setCampaignSource] = useState<Record<string,string>>({});
+  const [cameraAccess, setCameraAccess] = useState<{
+    authenticated: boolean;
+    cameraActive?: boolean;
+    cameraTier?: string | null;
+    scansRemaining?: number;
+    expiresAt?: string | null;
+    error?: string;
+  } | null>(null);
+  const [cameraAccessLoading, setCameraAccessLoading] = useState(false);
+  const [cameraImage, setCameraImage] = useState<string | null>(null);
+  const [cameraScanning, setCameraScanning] = useState(false);
+  const [cameraResult, setCameraResult] = useState<{
+    result?: string;
+    headline?: string;
+    scene?: { environment?: string; confidence?: number };
+    opportunity?: { offer?: string; action?: string };
+    message?: string;
+    access?: { scansRemaining?: number; cameraTier?: string | null; expiresAt?: string | null };
+    error?: string;
+  } | null>(null);
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -463,6 +484,63 @@ export default function PrettyGirlPalace() {
     setIssue("Long line");
     setMatchResult(null);
     setScreen("spot");
+  }
+
+  async function openOpportunityCamera() {
+    setScreen("camera");
+    setCameraAccessLoading(true);
+    setCameraResult(null);
+    try {
+      const response = await fetch("/api/pgp/entitlements", { cache: "no-store" });
+      if (response.status === 401) {
+        setCameraAccess({ authenticated: false, error: "SIGN_IN_REQUIRED" });
+        return;
+      }
+      const data = await response.json();
+      setCameraAccess({
+        authenticated: true,
+        cameraActive: Boolean(data?.entitlements?.cameraActive),
+        cameraTier: data?.entitlements?.cameraTier || null,
+        scansRemaining: Number(data?.entitlements?.cameraScansRemaining || 0),
+        expiresAt: data?.entitlements?.cameraExpiresAt || null,
+      });
+    } catch {
+      setCameraAccess({ authenticated: false, error: "ACCESS_CHECK_FAILED" });
+    } finally {
+      setCameraAccessLoading(false);
+    }
+  }
+
+  async function scanOpportunityCamera() {
+    if (!cameraImage) return;
+    setCameraScanning(true);
+    setCameraResult(null);
+    try {
+      const response = await fetch("/api/pgp/camera/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_data_url: cameraImage }),
+      });
+      const data = await response.json();
+      setCameraResult(data);
+
+      if (response.ok && data?.access) {
+        setCameraAccess((previous) => ({
+          authenticated: true,
+          cameraActive: true,
+          cameraTier: data.access.cameraTier || previous?.cameraTier || null,
+          scansRemaining: Number(data.access.scansRemaining || 0),
+          expiresAt: data.access.expiresAt || previous?.expiresAt || null,
+        }));
+      }
+    } catch {
+      setCameraResult({
+        error: "CAMERA_SCAN_FAILED",
+        message: "The scan could not be completed right now.",
+      });
+    } finally {
+      setCameraScanning(false);
+    }
   }
 
   async function makeLiveKey() {
@@ -853,6 +931,7 @@ export default function PrettyGirlPalace() {
             <h3 className={styles.subhead}>My quick doors</h3>
             <div className={styles.quickGrid}>
               <button onClick={resetSpot}><span>👁️</span><strong>I Spotted Something</strong></button>
+              <button onClick={openOpportunityCamera}><span>📷</span><strong>Opportunity Camera</strong></button>
               <button onClick={() => setScreen("key")}><span>🔑</span><strong>My Palace Key</strong></button>
               <button onClick={() => setScreen("music")}><span>🎵</span><strong>Music Hall</strong></button>
               <button onClick={openBag}><span>👜</span><strong>Opportunity Bag</strong></button>
@@ -890,6 +969,146 @@ export default function PrettyGirlPalace() {
                 <span>👢</span><div><small>WALK WITH ME · PREP MODE</small><strong>I’m going somewhere.</strong></div><b>›</b>
               </button>
             </div>
+          </div>
+        )}
+
+        {screen === "camera" && (
+          <div>
+            <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <p className={styles.eyebrow}>PRETTY GIRL VISION™</p>
+            <h2 className={styles.sectionTitle}>Show me what you see.</h2>
+
+            <div className={styles.cameraHero}>
+              <img
+                src="https://cdn.shopify.com/s/files/1/1982/3607/files/pgp-vision-ui.png?v=1789834469"
+                alt="Pretty Girl Vision Opportunity Camera"
+              />
+              <div>
+                <span className={styles.fit}>OPPORTUNITY CAMERA</span>
+                <h3>Look at the business problem—not the person.</h3>
+                <p>
+                  Aim toward a storefront, sign, display, booth, menu, event table or other
+                  public-facing information. PGP should not infer private or sensitive traits
+                  about people in the image.
+                </p>
+              </div>
+            </div>
+
+            {cameraAccessLoading ? (
+              <div className={styles.cameraAccessCard}>
+                <strong>Checking your Palace access…</strong>
+              </div>
+            ) : cameraAccess?.authenticated === false ? (
+              <div className={styles.cameraAccessCard}>
+                <span className={styles.fit}>SIGN IN TO USE YOUR CAMERA</span>
+                <h3>Connect this Palace visit to your Shopify account.</h3>
+                <p>
+                  Your scan allowance and purchases live with your HUB account so they can follow you across devices.
+                </p>
+                <a className={styles.primary} href="/api/auth/shopify/start?next=/pgp">
+                  SIGN IN TO MY PALACE
+                </a>
+              </div>
+            ) : !cameraAccess?.cameraActive ? (
+              <div className={styles.cameraAccessCard}>
+                <span className={styles.fit}>CAMERA PASS NEEDED</span>
+                <h3>Start with 3 free scans.</h3>
+                <p>
+                  First Look includes 3 scans. Paid passes begin at $1.99 for 30 days / 40 scans.
+                  Camera+ includes 150 scans and Opportunity Bag support.
+                </p>
+                <a
+                  className={styles.primary}
+                  href="https://urbanspirit.biz/products/pretty-girl-vision-opportunity-camera"
+                >
+                  GET MY CAMERA PASS
+                </a>
+                <a
+                  className={styles.secondary}
+                  href="https://urbanspirit.biz/pages/opportunity-camera"
+                >
+                  SEE HOW IT WORKS
+                </a>
+              </div>
+            ) : (
+              <>
+                <div className={styles.cameraAccessBar}>
+                  <span>{cameraAccess.cameraTier || "CAMERA"}</span>
+                  <strong>{cameraAccess.scansRemaining ?? 0} scans left</strong>
+                </div>
+
+                <label className={styles.cameraCapture}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setCameraImage(String(reader.result || ""));
+                        setCameraResult(null);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  <span>📷 OPEN CAMERA / CHOOSE PHOTO</span>
+                </label>
+
+                {cameraImage && (
+                  <div className={styles.cameraPreviewWrap}>
+                    <img className={styles.cameraPreview} src={cameraImage} alt="Opportunity Camera preview" />
+                    <button
+                      className={styles.primary}
+                      disabled={cameraScanning}
+                      onClick={scanOpportunityCamera}
+                    >
+                      {cameraScanning ? "OPPORTUNITY BRAIN IS LOOKING…" : "SEE THE OPPORTUNITY"}
+                    </button>
+                  </div>
+                )}
+
+                {cameraResult && (
+                  <div className={styles.cameraResult}>
+                    <span className={styles.fit}>
+                      {(cameraResult.result || cameraResult.error || "RESULT").replaceAll("_", " ")}
+                    </span>
+                    <h3>{cameraResult.headline || "Camera result"}</h3>
+                    {cameraResult.scene?.environment && (
+                      <div>
+                        <strong>WHAT I SEE</strong>
+                        <p>{cameraResult.scene.environment.replaceAll("_", " ")}</p>
+                      </div>
+                    )}
+                    {cameraResult.opportunity?.offer && (
+                      <div>
+                        <strong>BEST MATCH</strong>
+                        <p>{cameraResult.opportunity.offer}</p>
+                      </div>
+                    )}
+                    <div>
+                      <strong>YOUR MOVE</strong>
+                      <p>{cameraResult.opportunity?.action || cameraResult.message || "Keep looking."}</p>
+                    </div>
+                    {cameraResult.error && (
+                      <p className={styles.cameraError}>
+                        This scan was not charged if the camera worker failed.
+                      </p>
+                    )}
+                    <button
+                      className={styles.secondary}
+                      onClick={() => {
+                        setCameraImage(null);
+                        setCameraResult(null);
+                      }}
+                    >
+                      SCAN ANOTHER
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -1126,6 +1345,9 @@ export default function PrettyGirlPalace() {
             <div className={styles.guideHubGrid}>
               <button onClick={resetSpot}>
                 <span>👁️</span><strong>I SAW SOMETHING</strong><small>Help me figure out whether it is really an opportunity.</small>
+              </button>
+              <button onClick={openOpportunityCamera}>
+                <span>📷</span><strong>SHOW ME WHAT YOU SEE</strong><small>Use Opportunity Camera on a storefront, sign, booth, display or other public-facing scene.</small>
               </button>
               <button onClick={() => setScreen("prepare")}>
                 <span>👢</span><strong>I’M GOING SOMEWHERE</strong><small>Prepare my eye before I get there.</small>
