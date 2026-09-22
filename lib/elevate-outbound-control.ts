@@ -14,6 +14,8 @@ export type ElevateCycleEvidence = {
   supportIssue?: boolean | null;
   knownChannelCostCents?: number | null;
   channelCostVerified?: boolean;
+  sendProvider?: string | null;
+  sendEvidenceRefs?: string[];
   notes?: string[];
 };
 
@@ -247,6 +249,8 @@ export async function evaluateElevateOutboundCycle(input: {
       eventCount: events.length,
       economicEntryCount: economics.entryCount,
       channelCostVerified: Boolean(evidence.channelCostVerified),
+      sendProvider: String(evidence.sendProvider || "").slice(0, 80) || null,
+      sendEvidenceRefs: (evidence.sendEvidenceRefs || []).map(x => String(x).slice(0, 220)).slice(0, 50),
       priorVerifiedSends,
       notes: (evidence.notes || []).slice(0, 20),
     },
