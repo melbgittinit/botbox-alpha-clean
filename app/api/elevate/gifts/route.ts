@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
+import { recordElevateEvent } from "../../../../lib/elevate-events";
 
 function cleanEmail(value: unknown) {
   const email = String(value || "").trim().toLowerCase();
@@ -38,6 +39,14 @@ export async function POST(request: Request) {
       message,
       token,
     },
+  });
+
+  await recordElevateEvent({
+    userId: user.id,
+    eventType: "gift_created",
+    offer: "gift",
+    amountCents: 199,
+    success: true,
   });
 
   const origin = new URL(request.url).origin;
