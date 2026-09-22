@@ -149,6 +149,7 @@ export async function POST(request: Request) {
     recordElevateEconomicEntry({
       idempotencyKey: `print:${job.id}:payment-fee-estimate`,
       userId: user.id,
+      cycleKey,
       entryType: "ESTIMATE",
       category: "PAYMENT_FEE_ESTIMATE",
       amountCents: pricing.estimatedPaymentFee,
