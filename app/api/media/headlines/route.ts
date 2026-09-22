@@ -6,7 +6,7 @@ export async function POST(req: Request){
  const body=await req.json();
  const story=stories.find(s=>s.id===body.story_id) || stories[0];
  const headline=headlineFor(story, body.format || "Straight News", body.beat || "General");
- recordInteraction("HEADLINE", story.bot, body.beat || "General");
+ recordInteraction("HEADLINE", story.bot, body.beat || "General", story.id);
  return NextResponse.json({
    headline,
    subhead:story.summary,
