@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { prisma } from "../prisma";
 import { FastPayError, stripe } from "./core";
+import { markElevatePrintPaid } from "../elevate-fulfillment";
+import { recordElevateEconomicEntry } from "../elevate-economics";
 
 async function grantCheckout(session: Stripe.Checkout.Session) {
   const transactionId = session.metadata?.fastPayTransactionId;
@@ -110,7 +112,34 @@ export async function handleStripeWebhookSafely(rawBody: string, signature: stri
 
   try {
     if (event.type === "checkout.session.completed") {
-      await grantCheckout(event.data.object as Stripe.Checkout.Session);
+      const session = event.data.object as Stripe.Checkout.Session;
+      await grantCheckout(session);
+
+      const elevatePrintJobId = session.metadata?.elevatePrintJobId;
+      const elevateUserId = session.metadata?.elevateUserId;
+      if (elevatePrintJobId && elevateUserId) {
+        const paymentIntentId = typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
+        const job = await markElevatePrintPaid(elevatePrintJobId, session.id, paymentIntentId || null);
+        if (job?.retailCents) {
+          await recordElevateEconomicEntry({
+            idempotencyKey: `stripe:print:${session.id}:revenue`,
+            userId: elevateUserId,
+            entryType: "REVENUE",
+            category: "PRINT_JOB_REVENUE",
+            amountCents: job.retailCents,
+            currency: job.currency,
+            verified: true,
+            contributionEligible: true,
+            offer: "real",
+            channel: "stripe",
+            source: "stripe_checkout",
+            referenceType: "ELEVATE_PRINT_JOB",
+            referenceId: job.id,
+          });
+        }
+      }
     } else if (event.type === "checkout.session.expired") {
       const session = event.data.object as Stripe.Checkout.Session;
       const transactionId = session.metadata?.fastPayTransactionId;
@@ -122,6 +151,27 @@ export async function handleStripeWebhookSafely(rawBody: string, signature: stri
       const paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
       const isFullRefund = charge.amount_refunded >= charge.amount;
       if (paymentIntentId && isFullRefund) await revokeByPaymentIntent(paymentIntentId, "REFUNDED");
+
+      if (paymentIntentId) {
+        const printJob = await prisma.elevatePrintJob.findFirst({ where: { paymentRef: paymentIntentId } });
+        if (printJob && charge.amount_refunded > 0) {
+          await recordElevateEconomicEntry({
+            idempotencyKey: `stripe:print:${charge.id}:refund:${charge.amount_refunded}`,
+            userId: printJob.userId,
+            entryType: "REFUND",
+            category: "PRINT_JOB_REFUND",
+            amountCents: charge.amount_refunded,
+            currency: charge.currency,
+            verified: true,
+            contributionEligible: true,
+            offer: "real",
+            channel: "stripe",
+            source: "stripe_charge_refund",
+            referenceType: "ELEVATE_PRINT_JOB",
+            referenceId: printJob.id,
+          });
+        }
+      }
     } else if (event.type === "charge.dispute.created") {
       const dispute = event.data.object as Stripe.Dispute;
       const paymentIntentId = typeof dispute.payment_intent === "string" ? dispute.payment_intent : dispute.payment_intent?.id;
