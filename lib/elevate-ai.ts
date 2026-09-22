@@ -46,6 +46,7 @@ function fallbackResult(input: ElevateAiInput) {
     source: "structured" as const,
     title: "Your next Elevation",
     steps: fallback[input.action](mission),
+    usage: undefined,
   };
 }
 
@@ -115,6 +116,12 @@ Rules:
       title: String(parsed.title || "Your next Elevation").slice(0, 120),
       steps: parsed.steps.slice(0, 3).map((x: unknown) => String(x).slice(0, 900)),
       result: parsed.result ? String(parsed.result).slice(0, 4000) : undefined,
+      usage: payload?.usage ? {
+        inputTokens: Number(payload.usage.input_tokens || 0),
+        outputTokens: Number(payload.usage.output_tokens || 0),
+        totalTokens: Number(payload.usage.total_tokens || 0),
+        model: process.env.ELEVATE_AI_MODEL || "gpt-5.6-luna",
+      } : undefined,
     };
   } catch {
     return fallbackResult(input);
