@@ -22,6 +22,48 @@ const checkout = {
   real: "https://urbanspirit.biz/products/elevate-me-bot-activation-power-levels?variant=53879074423077",
 };
 
+function getElevateSessionId() {
+  try {
+    const existing = localStorage.getItem("elevate_measurement_session");
+    if (existing) return existing;
+    const created = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `elevate-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem("elevate_measurement_session", created);
+    return created;
+  } catch {
+    return null;
+  }
+}
+
+function trackElevateEvent(
+  eventType: string,
+  surface: Surface,
+  offer?: "activate" | "gift" | "power" | "real",
+  payload?: Record<string, string | number | boolean | null>
+) {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    void fetch("/api/elevate/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        eventType,
+        sessionId: getElevateSessionId(),
+        surface,
+        offer,
+        channel: params.get("utm_medium") || "direct",
+        source: params.get("utm_source") || "direct",
+        payload: {
+          utm_campaign: params.get("utm_campaign"),
+          ...payload,
+        },
+      }),
+    });
+  } catch {}
+}
+
 const needs: { id: Need; label: string }[] = [
   { id: "make", label: "Make Something" },
   { id: "done", label: "Get It Done" },
@@ -107,6 +149,7 @@ export default function ElevateMeBotPage() {
     const params = new URLSearchParams(window.location.search);
     const entrySurface: Surface = params.get("surface") === "botstores" ? "botstores" : "hub";
     setSurface(entrySurface);
+    trackElevateEvent("page_view", entrySurface, undefined, { path: window.location.pathname });
     fetch("/api/elevate/entitlements", { cache: "no-store" })
       .then(async response => {
         if (!response.ok) throw new Error("NOT_AUTHENTICATED");
@@ -136,6 +179,7 @@ export default function ElevateMeBotPage() {
 
   async function saveAndRun(n: Need = need, preview = false) {
     if (!preview && !access.entitlements.activated) {
+      trackElevateEvent("activation_gate_hit", surface, "activate", { action: n });
       window.location.href = signInUrl();
       return;
     }
@@ -148,6 +192,7 @@ export default function ElevateMeBotPage() {
     setNeed(n);
 
     if (preview) {
+      trackElevateEvent("preview_run", surface, undefined, { action: n });
       setResultTitle("Preview Elevation");
       setResultSource("local");
       setResultExtra(null);
@@ -239,7 +284,7 @@ export default function ElevateMeBotPage() {
             <button onClick={() => saveAndRun(need, true)} style={{ ...button, background: "#f3c969", color: "#111" }}>PREVIEW MY FIRST ELEVATION</button>
             {access.entitlements.activated
     ? <span style={{ ...button, background: "#78e6df", color: "#041117" }}>ACTIVATED ✓</span>
-    : <a href={`/elevate-me-bot/unlock?level=activate&surface=${surface}`} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
+    : <a onClick={() => trackElevateEvent("unlock_open", surface, "activate")} href={`/elevate-me-bot/unlock?level=activate&surface=${surface}`} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
   {!access.entitlements.activated && (
     <a href={signInUrl()} style={{ ...button, background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.45)" }}>I ALREADY PURCHASED • VERIFY</a>
   )}
@@ -264,7 +309,7 @@ export default function ElevateMeBotPage() {
     ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>
         USE MY GIFT CREDIT{access.entitlements.giftCreditsPurchased > 1 ? "S" : ""} • {access.entitlements.giftCreditsPurchased}
       </a>
-    : <a href={checkout.gift} style={{ ...button, background: "#7d4df5", color: "#fff" }}>GIFT A BOT • $1.99</a>}
+    : <a onClick={() => trackElevateEvent("checkout_intent", surface, "gift")} href={checkout.gift} style={{ ...button, background: "#7d4df5", color: "#fff" }}>GIFT A BOT • $1.99</a>}
             </div>
           </section>
         )}
@@ -289,7 +334,7 @@ export default function ElevateMeBotPage() {
             <p>EXPLODE, Reach My People, Sell Something, Help Me Earn, Plan This, Remix It, and better saved-project continuity.</p>
             {access.entitlements.powerUp
     ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#78e6df", color: "#041117" }}>OPEN POWER UP TOOLS ✓</a>
-    : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
+    : <a onClick={() => trackElevateEvent("unlock_open", surface, "power")} href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
           </div>
           <div style={card}>
             <div style={{ color: "#f3c969", fontWeight: 800 }}>$7.99 MAKE IT REAL</div>
@@ -297,7 +342,7 @@ export default function ElevateMeBotPage() {
             <p>Print My Stuff, HUB merch access, physical promo pathways, order/ship connections, and Creator College Freshman.</p>
             {access.entitlements.makeItReal
     ? <a href="/elevate-me-bot/make-it-real" style={{ ...button, background: "#f3c969", color: "#111" }}>PRINT MY STUFF ✓</a>
-    : <a href={`/elevate-me-bot/unlock?level=real&surface=${surface}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
+    : <a onClick={() => trackElevateEvent("unlock_open", surface, "real")} href={`/elevate-me-bot/unlock?level=real&surface=${surface}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
           </div>
         </section>
 
