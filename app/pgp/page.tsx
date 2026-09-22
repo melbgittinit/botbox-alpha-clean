@@ -390,6 +390,7 @@ export default function PrettyGirlPalace() {
   const [leadSaving, setLeadSaving] = useState(false);
   const [leadSaved, setLeadSaved] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [campaignSource, setCampaignSource] = useState<Record<string,string>>({});
 
   const combination = useMemo(() => {
     const score = new Map<PowerId, number>();
@@ -413,6 +414,17 @@ export default function PrettyGirlPalace() {
   useEffect(() => {
     const now = new Date();
     setPalaceDay(now.getDay());
+
+    const params = new URLSearchParams(window.location.search);
+    const source = {
+      utm_source: params.get("utm_source") || "",
+      utm_medium: params.get("utm_medium") || "",
+      utm_campaign: params.get("utm_campaign") || "",
+      utm_content: params.get("utm_content") || "",
+      src: params.get("src") || "",
+    };
+    setCampaignSource(source);
+    window.localStorage.setItem("pgp-alpha-campaign-source", JSON.stringify(source));
 
     const rawCount = Number(window.localStorage.getItem("pgp-alpha-visit-count") || "0");
     const previousVisit = window.localStorage.getItem("pgp-alpha-last-visit");
@@ -586,7 +598,7 @@ export default function PrettyGirlPalace() {
             <small>Pretty Girl Palace</small>
           </span>
         </button>
-        <span className={styles.alpha}>ALPHA</span>
+        <span className={styles.alpha}>PUBLIC BETA</span>
       </header>
 
       <section className={styles.stage}>
@@ -758,7 +770,12 @@ export default function PrettyGirlPalace() {
                         naturalPower: combination[0],
                         supportingPower: combination[1],
                         expansionPower: combination[2],
-                        payload: { visitCount, publicBeta: true },
+                        payload: {
+                          visitCount,
+                          publicBeta: true,
+                          campaignSource,
+                          landingReferrer: document.referrer || null,
+                        },
                       }),
                     }
                   );
