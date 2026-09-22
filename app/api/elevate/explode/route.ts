@@ -1,6 +1,7 @@
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 import { recordElevateEvent } from "../../../../lib/elevate-events";
+import { resolveElevateCycle } from "../../../../lib/elevate-attribution";
 
 function clean(value: unknown, max = 2000) {
   return String(value || "").trim().slice(0, max);
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "AUTH_REQUIRED" }, { status: 401 });
 
   const profile = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
+  const cycleKey = resolveElevateCycle(request, profile);
   if (!profile?.powerUp) {
     return Response.json({ error: "POWER_UP_REQUIRED" }, { status: 403 });
   }
@@ -27,6 +29,7 @@ export async function POST(request: Request) {
 
   await recordElevateEvent({
     userId: user.id,
+    cycleKey,
     eventType: "power_up_used",
     offer: "power",
     amountCents: 299,
