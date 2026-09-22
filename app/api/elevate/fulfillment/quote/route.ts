@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../../../../lib/prisma";
 import { resolveHubUser } from "../../../../../lib/hub-auth/session";
+import { recordElevateEconomicEntry } from "../../../../../lib/elevate-economics";
 import {
   printifyConfigured,
   printifyShippingQuoteCustom,
@@ -125,6 +126,36 @@ export async function POST(request: Request) {
       artworkUrl,
     },
   });
+
+  await Promise.all([
+    recordElevateEconomicEntry({
+      idempotencyKey: `print:${job.id}:provider-cost-estimate`,
+      userId: user.id,
+      entryType: "ESTIMATE",
+      category: "PRINT_PROVIDER_COST_ESTIMATE",
+      amountCents: providerCostCents,
+      verified: false,
+      contributionEligible: false,
+      offer: "real",
+      source: "printify_quote",
+      referenceType: "ELEVATE_PRINT_JOB",
+      referenceId: job.id,
+      payload: { productionCents, shippingCents, format, quantity },
+    }),
+    recordElevateEconomicEntry({
+      idempotencyKey: `print:${job.id}:payment-fee-estimate`,
+      userId: user.id,
+      entryType: "ESTIMATE",
+      category: "PAYMENT_FEE_ESTIMATE",
+      amountCents: pricing.estimatedPaymentFee,
+      verified: false,
+      contributionEligible: false,
+      offer: "real",
+      source: "pricing_model",
+      referenceType: "ELEVATE_PRINT_JOB",
+      referenceId: job.id,
+    }),
+  ]);
 
   return Response.json({
     ok: true,
