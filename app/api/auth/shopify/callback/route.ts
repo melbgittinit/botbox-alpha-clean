@@ -5,6 +5,7 @@ import { fetchPgpOrderGrants } from "../../../../../lib/pgp-entitlements";
 import { syncPgpPurchaseGrants } from "../../../../../lib/pgp-access";
 import { fetchElevateEntitlements } from "../../../../../lib/elevate-entitlements";
 import { recordElevateEvent } from "../../../../../lib/elevate-events";
+import { recordElevateEconomicEntry } from "../../../../../lib/elevate-economics";
 import {
   OAUTH_NONCE_COOKIE,
   OAUTH_RETURN_COOKIE,
@@ -153,6 +154,23 @@ export async function GET(request: Request) {
           channel: "shopify",
           source: "shopify_customer_account",
         });
+        await recordElevateEconomicEntry({
+          idempotencyKey:
+            conversion.offer === "gift"
+              ? `shopify:${user.id}:gift-total:${elevateEntitlements.giftCreditsPurchased}`
+              : `shopify:${user.id}:${conversion.offer}:verified`,
+          userId: user.id,
+          entryType: "REVENUE",
+          category: "SHOPIFY_PRODUCT_REVENUE",
+          amountCents: conversion.amountCents,
+          verified: true,
+          contributionEligible: true,
+          offer: conversion.offer,
+          channel: "shopify",
+          source: "shopify_customer_account",
+          referenceType: "ELEVATE_ENTITLEMENT_SYNC",
+          referenceId: user.id,
+        });
       }
 
       const removed: string[] = [];
@@ -170,6 +188,22 @@ export async function GET(request: Request) {
           channel: "shopify",
           source: "shopify_customer_account",
           payload: offer === "gift" ? { giftCreditDelta: giftDelta } : undefined,
+        });
+        await recordElevateEconomicEntry({
+          idempotencyKey: `shopify:${user.id}:${offer}:reversal:${offer === "gift" ? elevateEntitlements.giftCreditsPurchased : "removed"}`,
+          userId: user.id,
+          entryType: "REVERSAL_SIGNAL",
+          category: "ENTITLEMENT_REMOVED",
+          verified: false,
+          contributionEligible: false,
+          offer,
+          channel: "shopify",
+          source: "shopify_customer_account",
+          referenceType: "ELEVATE_ENTITLEMENT_SYNC",
+          referenceId: user.id,
+          payload: offer === "gift"
+            ? { giftCreditDelta: giftDelta, expectedValueCents: Math.abs(giftDelta) * 199 }
+            : { expectedValueCents: offer === "activate" ? 100 : offer === "power" ? 299 : 799 },
         });
       }
     }

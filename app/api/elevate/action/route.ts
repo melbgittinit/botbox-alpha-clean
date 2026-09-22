@@ -2,6 +2,7 @@ import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 import { generateElevateAction } from "../../../../lib/elevate-ai";
 import { recordElevateEvent } from "../../../../lib/elevate-events";
+import { recordElevateEconomicEntry } from "../../../../lib/elevate-economics";
 
 const allowed = new Set(["make","done","reach","earn","better","next"]);
 
@@ -32,8 +33,25 @@ export async function POST(request: Request) {
       userId: user.id,
       eventType: "action_completed",
       success: true,
-      payload: { action, resultSource: result?.source || "unknown" },
+      payload: { action, resultSource: result?.source || "unknown", usage: result?.usage || null },
     });
+
+    if (result?.source === "ai") {
+      const usageId = `${user.id}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+      await recordElevateEconomicEntry({
+        idempotencyKey: `ai:${usageId}`,
+        userId: user.id,
+        entryType: "COST",
+        category: "AI_INFERENCE_COST",
+        amountCents: null,
+        verified: false,
+        contributionEligible: false,
+        source: "openai_api",
+        referenceType: "ELEVATE_ACTION",
+        referenceId: usageId,
+        payload: { action, ...(result?.usage || {}) },
+      });
+    }
 
     return Response.json({ ok: true, result }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
