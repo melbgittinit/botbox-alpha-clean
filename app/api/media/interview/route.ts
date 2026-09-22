@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { authorizedAnswer, truthFacts } from "../../../press/media";
+import { authorizedAnswer, truthFacts, violatesTruthGuard } from "../../../press/media";
 import { makeId, mediaState, recordInteraction } from "../../../press/store";
 
 export async function POST(req: Request){
  const body=await req.json();
- const question=String(body.question||"");
- const topic=String(body.topic||"The Bot Stores");
- const seconds=Number(body.target_length||30);
+ const question=String(body.question||"").trim();
+ const topic=String(body.topic||"The Bot Stores").trim();
+ const requested=Number(body.target_length||30);
+ const seconds=[15,30,60,120].includes(requested)?requested:30;
  const receiptId=makeId("BTS-MEDIA");
- const blocked=/(revenue|profit|investor|valuation|lawsuit|private customer|unannounced partnership|acquisition)/i.test(question);
+ const blocked=/(revenue|profit|investor|valuation|lawsuit|private customer|unannounced partnership|acquisition|security vulnerability|confidential|contract negotiation|founder personal)/i.test(question);
+
+ if(!question) return NextResponse.json({error:"A media question is required."},{status:400});
 
  if(blocked) {
    recordInteraction("INTERVIEW", topic, "HUMAN RESPONSE REQUIRED");
@@ -22,6 +25,18 @@ export async function POST(req: Request){
  }
 
  const response=authorizedAnswer(question,topic,seconds);
+ const violation=violatesTruthGuard(response);
+ if(violation){
+   recordInteraction("INTERVIEW", topic, "TRUTH GUARD BLOCK");
+   return NextResponse.json({
+     authorization_status:"HUMAN RESPONSE REQUIRED",
+     response:"This answer requires human review before media use.",
+     truth_fact_ids:[],
+     receipt_id:receiptId,
+     escalation_required:true
+   });
+ }
+
  const factIds=truthFacts.map(f=>f.id);
  const receipt={
    id:receiptId,
