@@ -47,6 +47,7 @@ export async function POST(req: Request) {
   }));
 
   recordInteraction("PITCH", coverage.slice(0,80), matches.length ? matches.map(x=>x.bot).join(", ") : "NO STRONG FIT");
+  for(const match of matches) recordInteraction("MATCH", match.bot, "Reverse Pitch match", match.id);
   return NextResponse.json({
     coverage,
     strong_fit: matches.length>0,
