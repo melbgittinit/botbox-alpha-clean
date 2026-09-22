@@ -6,11 +6,20 @@ export async function POST(req: Request) {
   const name = String(body.name || "").trim();
   const outlet = String(body.outlet || "").trim();
   const role = String(body.role || "").trim();
-  const email = String(body.email || "").trim();
+  const email = String(body.email || "").trim().toLowerCase();
   const beat = String(body.beat || "General").trim();
 
   if (!name || !outlet || !role || !email || !email.includes("@")) {
     return NextResponse.json({ error: "Name, outlet, role and a valid work email are required." }, { status: 400 });
+  }
+
+  const existing=mediaState.passes.find(p=>p.email===email && p.status==="PENDING REVIEW");
+  if(existing){
+    return NextResponse.json({
+      pass_id:existing.id,
+      status:existing.status,
+      message:"A Media Pass request for this email is already pending review."
+    });
   }
 
   const pass = {
