@@ -11,6 +11,9 @@ export type MediaStory = {
   straight: string;
   feature: string;
   fun: string;
+  newsTrigger: string;
+  productStatus: string;
+  limitations: string[];
 };
 
 export const stories: MediaStory[] = [
@@ -18,7 +21,7 @@ export const stories: MediaStory[] = [
     id: "golden-goose",
     ding: "0047",
     title: "Golden Goose Bot enters the showroom",
-    summary: "A purpose-built concept bot organizes, pressures-tests and develops business ideas instead of acting as a general assistant.",
+    summary: "A purpose-built concept bot organizes, pressure-tests and develops business ideas instead of acting as a general assistant.",
     why: "It gives reporters a simple way to examine the larger Bot Stores thesis: people may prefer different AI workers for different jobs.",
     zone: "STORE",
     bot: "Golden Goose Bot",
@@ -26,7 +29,10 @@ export const stories: MediaStory[] = [
     beat: ["AI", "Business", "Entrepreneurship", "Culture"],
     straight: "The Bot Stores Adds a Purpose-Built AI Agent for Business-Idea Development",
     feature: "Will People Shop for Specialized AI Workers Instead of One General Assistant?",
-    fun: "This Golden Goose Does Not Lay Eggs. It Lays Business Ideas."
+    fun: "This Golden Goose Does Not Lay Eggs. It Lays Business Ideas.",
+    newsTrigger: "Showroom concept milestone",
+    productStatus: "Concept / pre-launch",
+    limitations: ["Does not guarantee a profitable business.", "Does not replace legal, tax or financial advice.", "Does not spend money or launch a business without human action."]
   },
   {
     id: "contract-radar",
@@ -40,7 +46,10 @@ export const stories: MediaStory[] = [
     beat: ["Business", "Government", "Small Business", "AI"],
     straight: "The Bot Stores Develops Specialized AI Radar for Government Opportunity Discovery",
     feature: "Can a Purpose-Built AI Bot Make Public Contract Discovery Easier for Small Businesses?",
-    fun: "A Bot Built to Hunt Public Contract Opportunities"
+    fun: "A Bot Built to Hunt Public Contract Opportunities",
+    newsTrigger: "Prepared-product milestone",
+    productStatus: "In development",
+    limitations: ["Does not guarantee eligibility, selection or an award.", "Does not submit binding materials without human approval.", "Public opportunity data can change and must be verified at the source."]
   },
   {
     id: "brandbridge",
@@ -54,7 +63,10 @@ export const stories: MediaStory[] = [
     beat: ["Enterprise", "Brands", "AI", "Technology"],
     straight: "The Bot Stores Adds an Executive Layer for Brand-Specific AI Systems",
     feature: "What Happens When a Bot Store Moves Upstairs to Enterprise?",
-    fun: "There Is an Executive Floor Inside The Bot Stores"
+    fun: "There Is an Executive Floor Inside The Bot Stores",
+    newsTrigger: "Executive Floor concept milestone",
+    productStatus: "Concept demonstrations",
+    limitations: ["Concept demonstrations are not client relationships.", "Brand names in demos do not imply endorsement or partnership.", "Production deployments require separate scoping and authorization."]
   }
 ];
 
@@ -95,9 +107,16 @@ export const headlineFor = (story: MediaStory, style: string, beat: string) => {
   return story.straight;
 };
 
+function trimWords(text: string, maxWords: number) {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text.trim();
+  return words.slice(0, maxWords).join(" ").replace(/[,:;\-]+$/, "") + "…";
+}
+
 export function authorizedAnswer(question: string, topic: string, seconds: number) {
   const q = `${topic} ${question}`.toLowerCase();
   const site = "TheBotStores.com";
+  const target = seconds <= 15 ? 38 : seconds <= 30 ? 78 : seconds <= 60 ? 145 : 285;
   let core =
     "The Bot Stores is being developed as a store, showroom and factory for purpose-built bots, with different bots focused on different jobs rather than asking one assistant to be everything.";
 
@@ -111,8 +130,18 @@ export function authorizedAnswer(question: string, topic: string, seconds: numbe
     core = "I am the Bot Stores Official Information Director, an AI media representative. I provide short authorized responses from approved Bot Stores information and I should not be quoted as Mel Banks II.";
   }
 
-  if (seconds <= 15) return `${core} Explore the concept at ${site}.`;
-  if (seconds <= 30) return `${core} The goal is to make the job and the bot easier to understand before asking a user to learn the underlying technology. Reporters can explore the current concept at ${site}.`;
-  if (seconds <= 60) return `${core} The system separates the public showroom, the Bot Factory creation layer and an Executive Floor for larger organizational concepts. Each public media statement is intended to come from approved information rather than improvised claims. You can see the current experience at ${site}.`;
-  return `${core} The broader idea is that a person or organization may not want one AI assistant to do every job. The Bot Stores organizes specialized bots around recognizable needs, while the Bot Factory handles creation and the Executive Floor handles larger organizational concepts. Public demonstrations, product status and authorized media statements are kept distinct so concept demos are not mistaken for customer relationships or completed capabilities. The current experience can be explored at ${site}.`;
+  const body = seconds <= 15
+    ? `${core} Explore it at ${site}.`
+    : seconds <= 30
+      ? `${core} The aim is to make the job and the bot understandable before asking a user to learn the underlying technology. Explore the current concept at ${site}.`
+      : seconds <= 60
+        ? `${core} The system separates the public showroom, the Bot Factory creation layer and an Executive Floor for larger organizational concepts. Public media statements are drawn from approved information rather than improvised claims. The current experience is at ${site}.`
+        : `${core} The broader idea is that a person or organization may not want one AI assistant to do every job. The Bot Stores organizes specialized bots around recognizable needs, while the Bot Factory handles creation and the Executive Floor handles larger organizational concepts. Public demonstrations, product status and authorized media statements are kept distinct so concept demos are not mistaken for customer relationships or completed capabilities. Explore the current experience at ${site}.`;
+
+  return trimWords(body, target);
+}
+
+export function violatesTruthGuard(text: string) {
+  const lower = text.toLowerCase();
+  return truthFacts.flatMap(f => f.prohibited).find(p => lower.includes(p.toLowerCase())) || null;
 }
