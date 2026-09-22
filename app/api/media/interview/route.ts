@@ -14,7 +14,7 @@ export async function POST(req: Request){
  if(!question) return NextResponse.json({error:"A media question is required."},{status:400});
 
  if(blocked) {
-   recordInteraction("INTERVIEW", topic, "HUMAN RESPONSE REQUIRED");
+   recordInteraction("INTERVIEW", topic, "HUMAN RESPONSE REQUIRED", undefined);
    return NextResponse.json({
      authorization_status:"HUMAN RESPONSE REQUIRED",
      response:"I do not have authorization to speak to that topic. I can provide approved public information or route the question for a human response.",
@@ -27,7 +27,7 @@ export async function POST(req: Request){
  const response=authorizedAnswer(question,topic,seconds);
  const violation=violatesTruthGuard(response);
  if(violation){
-   recordInteraction("INTERVIEW", topic, "TRUTH GUARD BLOCK");
+   recordInteraction("INTERVIEW", topic, "TRUTH GUARD BLOCK", undefined);
    return NextResponse.json({
      authorization_status:"HUMAN RESPONSE REQUIRED",
      response:"This answer requires human review before media use.",
@@ -54,7 +54,8 @@ export async function POST(req: Request){
  };
  mediaState.receipts.push(receipt);
  if(mediaState.receipts.length>500) mediaState.receipts.splice(0,mediaState.receipts.length-500);
- recordInteraction("INTERVIEW", topic, `${seconds}s authorized response`);
+ const matchedStory=(await import("../../../press/media")).stories.find(s=>s.bot.toLowerCase()===topic.toLowerCase());
+ recordInteraction("INTERVIEW", topic, `${seconds}s authorized response`, matchedStory?.id);
 
  return NextResponse.json({
    authorization_status:"AUTHORIZED MEDIA RESPONSE",
