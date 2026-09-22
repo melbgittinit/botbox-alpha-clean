@@ -47,11 +47,17 @@ export async function GET(request: Request) {
     });
     const identity = await fetchShopifyCustomer(customerApi.graphql_api, token.access_token);
     let wmrEntitlements: Awaited<ReturnType<typeof fetchWmrEntitlements>> | null = null;
+    let pgpGrants: Awaited<ReturnType<typeof fetchPgpOrderGrants>> | null = null;
     let elevateEntitlements: Awaited<ReturnType<typeof fetchElevateEntitlements>> | null = null;
     try {
       wmrEntitlements = await fetchWmrEntitlements(customerApi.graphql_api, token.access_token);
     } catch (error) {
       console.warn("WMR entitlement refresh skipped", error);
+    }
+    try {
+      pgpGrants = await fetchPgpOrderGrants(customerApi.graphql_api, token.access_token);
+    } catch (error) {
+      console.warn("PGP entitlement refresh skipped", error);
     }
     try {
       elevateEntitlements = await fetchElevateEntitlements(customerApi.graphql_api, token.access_token);
