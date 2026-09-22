@@ -915,6 +915,33 @@ model ElevateEvent {
   @@index([offer, createdAt])
 }
 
+model ElevateEconomicEntry {
+  id                   String   @id @default(cuid())
+  idempotencyKey       String   @unique
+  userId               String?
+  sessionId            String?
+  entryType            String
+  category             String
+  amountCents          Int?
+  currency             String   @default("usd")
+  verified             Boolean  @default(false)
+  contributionEligible Boolean  @default(false)
+  offer                String?
+  channel              String?
+  source               String
+  referenceType        String?
+  referenceId          String?
+  payload              Json?
+  occurredAt           DateTime @default(now())
+  createdAt            DateTime @default(now())
+
+  @@index([entryType, occurredAt])
+  @@index([category, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([offer, occurredAt])
+  @@index([source, occurredAt])
+}
+
 
 model PgpProfile {
   id                    String   @id @default(cuid())
