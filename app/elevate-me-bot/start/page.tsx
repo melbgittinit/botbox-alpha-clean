@@ -40,6 +40,28 @@ const card: React.CSSProperties = {
 export default function ElevateSalesLanding() {
   const [cycleKey, setCycleKey] = useState("");
 
+  function track(eventType: string, offer?: "activate"|"gift"|"power"|"real") {
+    try {
+      const sessionId = localStorage.getItem("elevate_measurement_session") || `elevate-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem("elevate_measurement_session", sessionId);
+      void fetch("/api/elevate/events", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          eventType,
+          sessionId,
+          cycleKey: cycleKey || null,
+          surface: "hub",
+          offer,
+          channel: "landing_page",
+          source: "elevate_sales_landing",
+          payload: { path: window.location.pathname },
+        }),
+      });
+    } catch {}
+  }
+
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -57,6 +79,10 @@ export default function ElevateSalesLanding() {
       if (key && at > 0 && Date.now() - at <= 7 * 24 * 60 * 60 * 1000) setCycleKey(key);
     } catch {}
   }, []);
+
+  useEffect(() => {
+    track("page_view");
+  }, [cycleKey]);
 
   const links = useMemo(() => ({
     preview: withCycle("/elevate-me-bot?surface=hub", cycleKey),
@@ -86,7 +112,7 @@ export default function ElevateSalesLanding() {
         </p>
         <div style={{display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap",marginTop:26}}>
           <a href={links.preview} style={{padding:"15px 22px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>TRY THE FREE PREVIEW</a>
-          <a href={links.activate} style={{padding:"15px 22px",borderRadius:999,background:"#fff",color:"#111",textDecoration:"none",fontWeight:900}}>ACTIVATE FOR $1</a>
+          <a onClick={() => track("checkout_intent","activate")} href={links.activate} style={{padding:"15px 22px",borderRadius:999,background:"#fff",color:"#111",textDecoration:"none",fontWeight:900}}>ACTIVATE FOR $1</a>
         </div>
         <p style={{margin:"14px auto 0",maxWidth:700,color:"#bdb6cf",fontSize:13,lineHeight:1.5}}>
           One-time prepaid levels. No forced subscription. Start with the smallest useful step.
@@ -127,7 +153,7 @@ export default function ElevateSalesLanding() {
               <div style={{fontSize:32,fontWeight:900,color:"#f3c969"}}>{price}</div>
               <h3 style={{margin:"6px 0 8px",fontSize:21}}>{title}</h3>
               <p style={{margin:"0 0 16px",color:"#d7d0e4",lineHeight:1.5,fontSize:14}}>{copy}</p>
-              <a href={href} style={{display:"inline-flex",padding:"11px 15px",borderRadius:999,border:"1px solid rgba(255,255,255,.36)",color:"#fff",textDecoration:"none",fontWeight:800,fontSize:12}}>CHOOSE {title}</a>
+              <a onClick={() => track("checkout_intent", title === "ACTIVATE" ? "activate" : title === "GIFT A BOT" ? "gift" : title === "POWER UP" ? "power" : "real")} href={href} style={{display:"inline-flex",padding:"11px 15px",borderRadius:999,border:"1px solid rgba(255,255,255,.36)",color:"#fff",textDecoration:"none",fontWeight:800,fontSize:12}}>CHOOSE {title}</a>
             </article>
           ))}
         </div>
@@ -157,7 +183,7 @@ export default function ElevateSalesLanding() {
         <p style={{maxWidth:650,margin:"0 auto",color:"#ddd7e8",fontSize:17,lineHeight:1.6}}>Use the free preview to see the experience. Activate only if you want the working Bot.</p>
         <div style={{display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap",marginTop:22}}>
           <a href={links.preview} style={{padding:"14px 21px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>TRY MY PREVIEW</a>
-          <a href={links.activate} style={{padding:"14px 21px",borderRadius:999,border:"1px solid rgba(255,255,255,.45)",color:"#fff",textDecoration:"none",fontWeight:900}}>ACTIVATE FOR $1</a>
+          <a onClick={() => track("checkout_intent","activate")} href={links.activate} style={{padding:"14px 21px",borderRadius:999,border:"1px solid rgba(255,255,255,.45)",color:"#fff",textDecoration:"none",fontWeight:900}}>ACTIVATE FOR $1</a>
         </div>
       </section>
     </main>
