@@ -1,5 +1,6 @@
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
+import { recordElevateEvent } from "../../../../lib/elevate-events";
 
 function clean(value: unknown, max = 3000) {
   return String(value || "").trim().slice(0, max);
@@ -58,6 +59,15 @@ export async function POST(request: Request) {
   }
 
   const spec = formatMap[format];
+
+  await recordElevateEvent({
+    userId: user.id,
+    eventType: "make_it_real_used",
+    offer: "real",
+    amountCents: 799,
+    success: true,
+    payload: { format },
+  });
 
   return Response.json({
     ok: true,
