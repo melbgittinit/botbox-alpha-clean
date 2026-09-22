@@ -1,4 +1,4 @@
-import { recordElevateOutboundCycle } from "../../../../../lib/elevate-outbound-control";
+import { recordElevateOutboundCycle } from "../../../../lib/elevate-outbound-control";
 
 export async function GET() {
   const cycle = await recordElevateOutboundCycle({
