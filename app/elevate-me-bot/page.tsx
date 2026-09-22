@@ -22,6 +22,21 @@ const checkout = {
   real: "https://urbanspirit.biz/products/elevate-me-bot-activation-power-levels?variant=53879074423077",
 };
 
+function getElevateCycleKey() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const incoming = (params.get("elv") || "").trim().toUpperCase();
+    if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(incoming)) {
+      localStorage.setItem("elevate_cycle_key", incoming);
+      return incoming;
+    }
+    const saved = (localStorage.getItem("elevate_cycle_key") || "").trim().toUpperCase();
+    return /^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(saved) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 function getElevateSessionId() {
   try {
     const existing = localStorage.getItem("elevate_measurement_session");
@@ -51,6 +66,7 @@ function trackElevateEvent(
       body: JSON.stringify({
         eventType,
         sessionId: getElevateSessionId(),
+        cycleKey: getElevateCycleKey(),
         surface,
         offer,
         channel: params.get("utm_medium") || "direct",
@@ -174,7 +190,10 @@ export default function ElevateMeBotPage() {
   }, []);
 
   function signInUrl() {
-    return `/api/auth/shopify/start?next=${encodeURIComponent(`/elevate-me-bot?surface=${surface}`)}`;
+    const cycleKey = getElevateCycleKey();
+    const qs = new URLSearchParams({ surface });
+    if (cycleKey) qs.set("elv", cycleKey);
+    return `/api/auth/shopify/start?next=${encodeURIComponent(`/elevate-me-bot?${qs.toString()}`)}`;
   }
 
   async function saveAndRun(n: Need = need, preview = false) {
@@ -284,7 +303,7 @@ export default function ElevateMeBotPage() {
             <button onClick={() => saveAndRun(need, true)} style={{ ...button, background: "#f3c969", color: "#111" }}>PREVIEW MY FIRST ELEVATION</button>
             {access.entitlements.activated
     ? <span style={{ ...button, background: "#78e6df", color: "#041117" }}>ACTIVATED ✓</span>
-    : <a onClick={() => trackElevateEvent("unlock_open", surface, "activate")} href={`/elevate-me-bot/unlock?level=activate&surface=${surface}`} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
+    : <a onClick={() => trackElevateEvent("unlock_open", surface, "activate")} href={`/elevate-me-bot/unlock?level=activate&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
   {!access.entitlements.activated && (
     <a href={signInUrl()} style={{ ...button, background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.45)" }}>I ALREADY PURCHASED • VERIFY</a>
   )}
@@ -304,7 +323,7 @@ export default function ElevateMeBotPage() {
   </button>
               {access.entitlements.powerUp
     ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE THIS ✓</a>
-    : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
+    : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
               {access.entitlements.giftCreditsPurchased > 0
     ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>
         USE MY GIFT CREDIT{access.entitlements.giftCreditsPurchased > 1 ? "S" : ""} • {access.entitlements.giftCreditsPurchased}
@@ -342,7 +361,7 @@ export default function ElevateMeBotPage() {
             <p>Print My Stuff, HUB merch access, physical promo pathways, order/ship connections, and Creator College Freshman.</p>
             {access.entitlements.makeItReal
     ? <a href="/elevate-me-bot/make-it-real" style={{ ...button, background: "#f3c969", color: "#111" }}>PRINT MY STUFF ✓</a>
-    : <a onClick={() => trackElevateEvent("unlock_open", surface, "real")} href={`/elevate-me-bot/unlock?level=real&surface=${surface}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
+    : <a onClick={() => trackElevateEvent("unlock_open", surface, "real")} href={`/elevate-me-bot/unlock?level=real&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
           </div>
         </section>
 
