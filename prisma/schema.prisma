@@ -943,6 +943,52 @@ model ElevateEconomicEntry {
 }
 
 
+model ElevateOutboundCycle {
+  id                           String   @id @default(cuid())
+  cycleKey                     String   @unique
+  windowStart                  DateTime
+  windowEnd                    DateTime
+  previousCycleId              String?
+  permissionedAudienceSize     Int?
+  verifiedSends                Int?
+  sendEvidenceComplete         Boolean  @default(false)
+  delivered                    Int?
+  bounced                      Int?
+  unsubscribes                 Int?
+  complaints                   Int?
+  visits                       Int      @default(0)
+  activations                  Int      @default(0)
+  giftPurchases                Int      @default(0)
+  giftClaims                   Int      @default(0)
+  powerUps                     Int      @default(0)
+  makeItReal                   Int      @default(0)
+  repeatUsers                  Int      @default(0)
+  failures                     Int      @default(0)
+  reversalSignals              Int      @default(0)
+  verifiedRevenueCents         Int      @default(0)
+  verifiedCostCents            Int      @default(0)
+  verifiedRefundCents          Int      @default(0)
+  knownContributionCents       Int?
+  contributionMarginBps        Int?
+  economicsComplete            Boolean  @default(false)
+  incompleteEconomicSignals    Int      @default(0)
+  materialDeliverabilityIssue  Boolean  @default(false)
+  materialRefundIssue          Boolean  @default(false)
+  materialSupportIssue         Boolean  @default(false)
+  governorState                String
+  allowedGrowthPct             Int      @default(0)
+  maxNextSends                 Int      @default(0)
+  nextAction                   String
+  reasons                      Json?
+  sourceSnapshot               Json?
+  createdAt                    DateTime @default(now())
+
+  @@index([windowEnd])
+  @@index([governorState, windowEnd])
+  @@index([economicsComplete, windowEnd])
+}
+
+
 model PgpProfile {
   id                    String   @id @default(cuid())
   userId                String   @unique
