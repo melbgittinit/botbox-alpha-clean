@@ -1,10 +1,7 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import FactoryNav from "../components/FactoryNav";
-import FacePass from "../components/FacePass";
-import ShowroomHero from "../components/ShowroomHero";
 import RevenueTracker from "../components/RevenueTracker";
-import IdentityBridge from "../components/IdentityBridge";
+import SiteChrome from "../components/SiteChrome";
 
 export const metadata = {
   title: "THE BOT FACTORY",
@@ -25,11 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <RevenueTracker />
-        <FactoryNav />
-        <FacePass />
-        <ShowroomHero />
-        {children}
-        <IdentityBridge />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );
