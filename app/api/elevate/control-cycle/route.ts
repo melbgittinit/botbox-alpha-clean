@@ -68,6 +68,10 @@ export async function POST(request: Request) {
           : null,
       knownChannelCostCents: maybeInt(body?.evidence?.knownChannelCostCents),
       channelCostVerified: body?.evidence?.channelCostVerified === true,
+      sendProvider: String(body?.evidence?.sendProvider || "").slice(0, 80) || null,
+      sendEvidenceRefs: Array.isArray(body?.evidence?.sendEvidenceRefs)
+        ? body.evidence.sendEvidenceRefs.map((x: unknown) => String(x).slice(0, 220)).slice(0, 50)
+        : [],
       notes: Array.isArray(body?.evidence?.notes)
         ? body.evidence.notes.map((x: unknown) => String(x).slice(0, 300)).slice(0, 20)
         : [],
