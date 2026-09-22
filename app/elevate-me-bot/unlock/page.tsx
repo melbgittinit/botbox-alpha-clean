@@ -25,6 +25,47 @@ const offers = {
 
 type Level = keyof typeof offers;
 
+function getElevateSessionId() {
+  try {
+    const existing = localStorage.getItem("elevate_measurement_session");
+    if (existing) return existing;
+    const created = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `elevate-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem("elevate_measurement_session", created);
+    return created;
+  } catch {
+    return null;
+  }
+}
+
+function trackUnlockEvent(
+  eventType: string,
+  level: Level,
+  surface: "hub" | "botstores",
+  success?: boolean
+) {
+  const offer = level === "power" ? "power" : level === "real" ? "real" : "activate";
+  try {
+    const params = new URLSearchParams(window.location.search);
+    void fetch("/api/elevate/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        eventType,
+        sessionId: getElevateSessionId(),
+        surface,
+        offer,
+        success,
+        channel: params.get("utm_medium") || "direct",
+        source: params.get("utm_source") || "direct",
+        payload: { utm_campaign: params.get("utm_campaign") },
+      }),
+    });
+  } catch {}
+}
+
 export default function ElevateUnlockPage() {
   const [level, setLevel] = useState<Level>("activate");
   const [surface, setSurface] = useState<"hub"|"botstores">("hub");
@@ -50,13 +91,16 @@ export default function ElevateUnlockPage() {
       if (owns) {
         setState("unlocked");
         setMessage(offer.unlocked);
+        trackUnlockEvent("unlock_verify", level, surface, true);
       } else {
         setState("locked");
         setMessage("We do not see that purchase on this Shopify customer account yet.");
+        trackUnlockEvent("unlock_verify", level, surface, false);
       }
     } catch {
       setState("error");
       setMessage("We could not verify the purchase right now.");
+      trackUnlockEvent("client_error", level, surface, false);
     }
   }
 
@@ -64,8 +108,10 @@ export default function ElevateUnlockPage() {
     const search = new URLSearchParams(window.location.search);
     const nextLevel = (search.get("level") || "activate") as Level;
     const nextSurface = search.get("surface") === "botstores" ? "botstores" : "hub";
-    setLevel(offers[nextLevel] ? nextLevel : "activate");
+    const safeLevel = offers[nextLevel] ? nextLevel : "activate";
+    setLevel(safeLevel);
     setSurface(nextSurface);
+    trackUnlockEvent("unlock_open", safeLevel, nextSurface);
   }, []);
 
   useEffect(() => {
@@ -84,7 +130,7 @@ export default function ElevateUnlockPage() {
 
         <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",margin:"24px 0"}}>
           {state !== "unlocked" && (
-            <a href={offer.href} style={{display:"inline-block",padding:"14px 20px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>BUY {offer.label.toUpperCase()}</a>
+            <a onClick={() => trackUnlockEvent("checkout_intent", level, surface)} href={offer.href} style={{display:"inline-block",padding:"14px 20px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>BUY {offer.label.toUpperCase()}</a>
           )}
           <button onClick={verify} style={{padding:"14px 20px",borderRadius:999,border:"1px solid rgba(255,255,255,.45)",background:"transparent",color:"#fff",fontWeight:800,cursor:"pointer"}}>VERIFY MY PURCHASE</button>
         </div>
