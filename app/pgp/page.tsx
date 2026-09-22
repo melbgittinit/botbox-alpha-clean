@@ -180,6 +180,55 @@ const musicMoods: Record<string, Array<{title:string; mood:string; status:string
 };
 
 
+type LaneId =
+  | "power"
+  | "vision"
+  | "camera"
+  | "guide"
+  | "key"
+  | "bag"
+  | "walk"
+  | "eye"
+  | "music"
+  | "ranch"
+  | "velvet";
+
+const laneIdentities: Record<LaneId, {
+  name: string;
+  monogram: string;
+  tagline: string;
+  logoUrl?: string | null;
+}> = {
+  power: { name: "Pretty Power™", monogram: "PP", tagline: "Discover what you bring.", logoUrl: null },
+  vision: { name: "Pretty Girl Vision™", monogram: "PGV", tagline: "Notice. Understand. Match.", logoUrl: null },
+  camera: { name: "Opportunity Camera™", monogram: "OC", tagline: "Show PGP what you see.", logoUrl: null },
+  guide: { name: "Palace Guide™", monogram: "PG", tagline: "What are we doing, girl?", logoUrl: null },
+  key: { name: "Palace Key™", monogram: "PK", tagline: "Open the right door.", logoUrl: null },
+  bag: { name: "Opportunity Bag™", monogram: "OB", tagline: "Keep what matters. Leave the rest.", logoUrl: null },
+  walk: { name: "Walk With Me™", monogram: "WWM", tagline: "Prepare your eye before you arrive.", logoUrl: null },
+  eye: { name: "Teach My Eye™", monogram: "TME", tagline: "Learn the signal before the pitch.", logoUrl: null },
+  music: { name: "Music Hall™", monogram: "MH", tagline: "The Palace has a sound.", logoUrl: null },
+  ranch: { name: "Golden Ranch™", monogram: "GR", tagline: "Crowns & Cowboy Boots.", logoUrl: null },
+  velvet: { name: "Velvet Room™", monogram: "VR", tagline: "Nothing to prove in here.", logoUrl: null },
+};
+
+function LaneMark({ lane }: { lane: LaneId }) {
+  const identity = laneIdentities[lane];
+  return (
+    <div className={styles.laneMark} data-lane={lane}>
+      {identity.logoUrl ? (
+        <img src={identity.logoUrl} alt={identity.name} />
+      ) : (
+        <span className={styles.laneMonogram}>{identity.monogram}</span>
+      )}
+      <div>
+        <strong>{identity.name}</strong>
+        <small>{identity.tagline}</small>
+      </div>
+    </div>
+  );
+}
+
 const powers: Record<PowerId, { name: string; icon: string; word: string }> = {
   connector: { name: "Golden Connector", icon: "✨", word: "Connection" },
   builder: { name: "Queen Builder", icon: "👑", word: "Leadership" },
@@ -772,6 +821,7 @@ export default function PrettyGirlPalace() {
               src="https://cdn.shopify.com/s/files/1/1982/3607/files/pgp-discover-your-power.png?v=1789834458"
               alt="Pretty Girl Palace Pretty Power result"
             />
+            <LaneMark lane="power" />
             <p className={styles.eyebrow}>YOUR PALACE COMBINATION</p>
             <div className={styles.powerHero}>
               <span>{powers[combination[0]].icon}</span>
@@ -975,6 +1025,7 @@ export default function PrettyGirlPalace() {
         {screen === "camera" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="camera" />
             <p className={styles.eyebrow}>PRETTY GIRL VISION™</p>
             <h2 className={styles.sectionTitle}>Show me what you see.</h2>
 
@@ -1115,6 +1166,7 @@ export default function PrettyGirlPalace() {
         {screen === "spot" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="vision" />
             <p className={styles.eyebrow}>PRETTY GIRL VISION™</p>
             <h2 className={styles.sectionTitle}>I spotted something.</h2>
 
@@ -1229,8 +1281,9 @@ export default function PrettyGirlPalace() {
         {screen === "key" && (
           <div className={styles.keyScreen}>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="key" />
             <p className={styles.eyebrow}>MY PALACE KEY™</p>
-            <h2>Tanya’s {place} Key</h2>
+            <h2>{leadName || "My"} {place} Key</h2>
             <p>
               Opening: <strong>{issue}</strong> · Showing: <strong>{matchResult?.productName || "Best-fit HUB solution"}</strong>
             </p>
@@ -1273,7 +1326,8 @@ export default function PrettyGirlPalace() {
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
             <div className={styles.bagHeader}>
               <div>
-                <p className={styles.eyebrow}>OPPORTUNITY BAG™</p>
+                <LaneMark lane="bag" />
+            <p className={styles.eyebrow}>OPPORTUNITY BAG™</p>
                 <h2 className={styles.sectionTitle}>What’s in my bag?</h2>
               </div>
               <button className={styles.refreshButton} onClick={openBag} disabled={bagLoading}>
@@ -1331,6 +1385,7 @@ export default function PrettyGirlPalace() {
         {screen === "guidehub" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="guide" />
             <p className={styles.eyebrow}>YOUR PALACE GUIDE</p>
             <h2 className={styles.sectionTitle}>What are we doing, girl?</h2>
 
@@ -1369,6 +1424,7 @@ export default function PrettyGirlPalace() {
         {screen === "hunt" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("guidehub")}>← My Guide</button>
+            <LaneMark lane="eye" />
             <p className={styles.eyebrow}>TEACH MY EYE™</p>
             <h2 className={styles.sectionTitle}>What kind of opportunity are you looking for?</h2>
 
@@ -1428,6 +1484,7 @@ export default function PrettyGirlPalace() {
         {screen === "prepare" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="walk" />
             <p className={styles.eyebrow}>WALK WITH ME™</p>
             <h2 className={styles.sectionTitle}>I’m going somewhere.</h2>
             <p className={styles.prepIntro}>
@@ -1479,6 +1536,7 @@ export default function PrettyGirlPalace() {
         {screen === "music" && (
           <div>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="music" />
             <p className={styles.eyebrow}>PGP MUSIC HALL</p>
             <h2 className={styles.sectionTitle}>The Palace has a sound.</h2>
 
@@ -1542,6 +1600,7 @@ export default function PrettyGirlPalace() {
         {screen === "west" && (
           <div className={styles.westWing}>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="ranch" />
             <p className={styles.eyebrow}>PRETTY GIRL PALACE · WEST WING</p>
             <div className={styles.westHero}>
               <img
@@ -1572,6 +1631,7 @@ export default function PrettyGirlPalace() {
         {screen === "velvet" && (
           <div className={styles.velvet}>
             <button className={styles.back} onClick={() => setScreen("home")}>← My Palace</button>
+            <LaneMark lane="velvet" />
             <div className={styles.velvetCurtain}>✦</div>
             <p className={styles.eyebrow}>THE VELVET ROOM™</p>
             <h2>Girl, come sit down.</h2>
