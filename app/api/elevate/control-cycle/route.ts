@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { recordElevateOutboundCycle } from "../../../../../lib/elevate-outbound-control";
+import { recordElevateOutboundCycle } from "../../../../lib/elevate-outbound-control";
 
 function authorized(request: Request) {
   const configured = process.env.ELEVATE_CONTROL_TOKEN;
