@@ -1,5 +1,6 @@
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
+import { recordElevateEvent } from "../../../../lib/elevate-events";
 
 function clean(value: unknown, max = 2000) {
   return String(value || "").trim().slice(0, max);
@@ -23,6 +24,14 @@ export async function POST(request: Request) {
 
   const short = source.length > 180 ? source.slice(0, 177) + "…" : source;
   const headline = mission.length > 70 ? mission.slice(0, 67) + "…" : mission;
+
+  await recordElevateEvent({
+    userId: user.id,
+    eventType: "power_up_used",
+    offer: "power",
+    amountCents: 299,
+    success: true,
+  });
 
   return Response.json({
     ok: true,
