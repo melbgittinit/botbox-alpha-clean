@@ -477,7 +477,7 @@ export default function PrettyGirlPalace() {
                         : "/k/pgp-tanya-action-signs";
 
       const response = await fetch(
-        "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/keys",
+        "/api/pgp-alpha/keys",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -507,7 +507,7 @@ export default function PrettyGirlPalace() {
     setBagLoading(true);
     try {
       const response = await fetch(
-        "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/opportunities?memberKey=alpha-tanya",
+        "/api/pgp-alpha/opportunities?memberKey=alpha-tanya",
         { cache: "no-store" }
       );
       const data = await response.json();
@@ -535,7 +535,7 @@ export default function PrettyGirlPalace() {
       if (data.fit !== "NOT_THIS_ONE") {
         try {
           const saved = await fetch(
-            "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/opportunities",
+            "/api/pgp-alpha/opportunities",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -746,7 +746,7 @@ export default function PrettyGirlPalace() {
                 setLeadSaving(true);
                 try {
                   const response = await fetch(
-                    "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/leads",
+                    "/api/pgp-alpha/leads",
                     {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
