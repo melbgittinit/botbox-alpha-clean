@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../press.module.css";
 import { stories } from "../media";
+
 export default function Headlines(){
  const [storyId,setStoryId]=useState(stories[0].id),[beat,setBeat]=useState("AI"),[format,setFormat]=useState("Straight News"),[result,setResult]=useState<any>(null),[loading,setLoading]=useState(false);
- async function run(){setLoading(true);const r=await fetch("/api/media/headlines",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({story_id:storyId,beat,format})});setResult(await r.json());setLoading(false);}
+ useEffect(()=>{const p=new URLSearchParams(window.location.search);const id=p.get("story");if(id&&stories.some(s=>s.id===id))setStoryId(id);},[]);
+ async function run(){setLoading(true);try{const r=await fetch("/api/media/headlines",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({story_id:storyId,beat,format})});setResult(await r.json());}finally{setLoading(false);}}
  return <main className={styles.press}><div className={styles.wrap}><nav className={styles.nav}><Link className={styles.brand} href="/press">THE BOT STORES • MEDIA FLOOR</Link><div className={styles.navlinks}><Link href="/press/fresh">Fresh Dings</Link><Link href="/press/interview">Information Director</Link></div></nav>
  <section className={styles.hero}><div className={styles.eyebrow}>📰 HEADLINE BELL™</div><h1>FIND YOUR ANGLE.</h1><p>Tailored headlines grounded in the current approved media story.</p></section>
  <section className={styles.panel}><div className={styles.form}>
