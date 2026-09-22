@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { prisma } from "../../../../lib/prisma";
 import { resolveHubUser } from "../../../../lib/hub-auth/session";
 import { recordElevateEvent } from "../../../../lib/elevate-events";
+import { resolveElevateCycle } from "../../../../lib/elevate-attribution";
 
 function cleanEmail(value: unknown) {
   const email = String(value || "").trim().toLowerCase();
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "AUTH_REQUIRED" }, { status: 401 });
 
   const profile = await prisma.elevateProfile.findUnique({ where: { userId: user.id } });
+  const cycleKey = resolveElevateCycle(request, profile);
   if (!profile || profile.giftCreditsPurchased <= 0) {
     return Response.json({ error: "NO_GIFT_CREDITS" }, { status: 403 });
   }
@@ -37,12 +39,14 @@ export async function POST(request: Request) {
       recipientEmail,
       recipientName,
       message,
+      cycleKey,
       token,
     },
   });
 
   await recordElevateEvent({
     userId: user.id,
+    cycleKey,
     eventType: "gift_created",
     offer: "gift",
     amountCents: 199,
