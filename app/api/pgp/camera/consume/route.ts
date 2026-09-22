@@ -1,5 +1,5 @@
-import { prisma } from "../../../../lib/prisma";
-import { resolveHubUser } from "../../../../lib/hub-auth/session";
+import { prisma } from "../../../../../lib/prisma";
+import { resolveHubUser } from "../../../../../lib/hub-auth/session";
 
 export async function POST(request: Request) {
   const user = await resolveHubUser(request);
