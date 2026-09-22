@@ -890,3 +890,24 @@ model HubLeaderLead {
   @@index([lane, status, createdAt])
   @@index([email, createdAt])
 }
+
+
+model ElevateEvent {
+  id          String   @id @default(cuid())
+  userId      String?
+  sessionId   String?
+  eventType   String
+  surface     String?
+  offer       String?
+  amountCents Int?
+  success     Boolean?
+  channel     String?
+  source      String?
+  payload     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([userId, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([offer, createdAt])
+}
