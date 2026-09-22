@@ -5,9 +5,10 @@ export async function GET(
   context: { params: Promise<{ code: string }> }
 ) {
   const { code } = await context.params;
-  const api =
-    "https://hub-core-alpha-staging.onrender.com/api/pgp-alpha/keys?code=" +
-    encodeURIComponent(code);
+  const api = new URL(
+    "/api/pgp-alpha/keys?code=" + encodeURIComponent(code),
+    request.url
+  ).toString();
 
   try {
     const response = await fetch(api, { cache: "no-store" });
