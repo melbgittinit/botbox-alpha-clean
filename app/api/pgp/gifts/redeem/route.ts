@@ -1,5 +1,5 @@
-import { resolveHubUser } from "../../../../lib/hub-auth/session";
-import { redeemPgpGift } from "../../../../lib/pgp-access";
+import { resolveHubUser } from "../../../../../lib/hub-auth/session";
+import { redeemPgpGift } from "../../../../../lib/pgp-access";
 
 export async function POST(request: Request) {
   const user = await resolveHubUser(request);
