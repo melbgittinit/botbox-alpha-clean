@@ -33,6 +33,7 @@ function pct(numerator: number, denominator: number) {
 }
 
 export async function evaluateElevateOutboundCycle(input: {
+  cycleKey?: string | null;
   windowStart: Date;
   windowEnd: Date;
   evidence?: ElevateCycleEvidence;
@@ -40,7 +41,10 @@ export async function evaluateElevateOutboundCycle(input: {
   const evidence = input.evidence || {};
   const [events, economics, previousCycle] = await Promise.all([
     prisma.elevateEvent.findMany({
-      where: { createdAt: { gte: input.windowStart, lt: input.windowEnd } },
+      where: {
+        cycleKey: input.cycleKey || undefined,
+        createdAt: { gte: input.windowStart, lt: input.windowEnd },
+      },
       select: {
         userId: true,
         sessionId: true,
@@ -51,7 +55,7 @@ export async function evaluateElevateOutboundCycle(input: {
       },
       orderBy: { createdAt: "asc" },
     }),
-    summarizeElevateEconomics({ since: input.windowStart, until: input.windowEnd }),
+    summarizeElevateEconomics({ since: input.windowStart, until: input.windowEnd, cycleKey: input.cycleKey || undefined }),
     prisma.elevateOutboundCycle.findFirst({
       where: { windowEnd: { lte: input.windowStart } },
       orderBy: { windowEnd: "desc" },
@@ -239,6 +243,7 @@ export async function evaluateElevateOutboundCycle(input: {
     nextAction,
     reasons,
     sourceSnapshot: {
+      cycleKey: input.cycleKey || null,
       eventCount: events.length,
       economicEntryCount: economics.entryCount,
       channelCostVerified: Boolean(evidence.channelCostVerified),
@@ -257,7 +262,12 @@ export async function recordElevateOutboundCycle(input: {
   const cycleKey = String(input.cycleKey || "").trim().slice(0, 160);
   if (!cycleKey) throw new Error("ELEVATE_CYCLE_KEY_REQUIRED");
 
-  const evaluation = await evaluateElevateOutboundCycle(input);
+  const evaluation = await evaluateElevateOutboundCycle({
+    cycleKey,
+    windowStart: input.windowStart,
+    windowEnd: input.windowEnd,
+    evidence: input.evidence,
+  });
 
   return prisma.elevateOutboundCycle.upsert({
     where: { cycleKey },
