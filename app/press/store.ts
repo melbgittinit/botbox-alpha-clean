@@ -26,16 +26,30 @@ export type MediaReceipt = {
 
 export type MediaInteraction = {
   id: string;
-  type: "HEADLINE" | "INTERVIEW" | "PITCH" | "PASS";
+  type: "HEADLINE" | "INTERVIEW" | "PITCH" | "MATCH" | "PASS" | "OUTREACH" | "PRESS_VISIT" | "FOUNDER_REQUEST";
   topic: string;
+  storyId?: string;
   detail?: string;
   createdAt: string;
+};
+
+export type MediaCoverage = {
+  id: string;
+  storyId: string;
+  outlet: string;
+  title?: string;
+  url: string;
+  publishedAt: string;
+  verifiedAt: string;
+  verification: "VERIFIED";
+  source: "COVERAGE_BOT" | "HUMAN";
 };
 
 type MediaFloorState = {
   passes: MediaPass[];
   receipts: MediaReceipt[];
   interactions: MediaInteraction[];
+  coverage: MediaCoverage[];
 };
 
 const g = globalThis as typeof globalThis & { __mediaFloorState?: MediaFloorState };
@@ -46,19 +60,23 @@ export const mediaState: MediaFloorState =
     passes: [],
     receipts: [],
     interactions: [],
+    coverage: [],
   });
+
+if (!mediaState.coverage) mediaState.coverage = [];
 
 export function makeId(prefix: string) {
   return prefix + "-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
 }
 
-export function recordInteraction(type: MediaInteraction["type"], topic: string, detail?: string) {
+export function recordInteraction(type: MediaInteraction["type"], topic: string, detail?: string, storyId?: string) {
   mediaState.interactions.push({
     id: makeId("INT"),
     type,
     topic,
+    storyId,
     detail,
     createdAt: new Date().toISOString(),
   });
-  if (mediaState.interactions.length > 500) mediaState.interactions.splice(0, mediaState.interactions.length - 500);
+  if (mediaState.interactions.length > 1000) mediaState.interactions.splice(0, mediaState.interactions.length - 1000);
 }
