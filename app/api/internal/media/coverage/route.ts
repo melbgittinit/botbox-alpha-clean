@@ -13,7 +13,7 @@ export async function POST(req:Request){
  const url=String(body.url||"").trim();
  const title=String(body.title||"").trim();
  const publishedAt=String(body.published_at||"").trim();
- const source=body.source==="COVERAGE_BOT"?"COVERAGE_BOT":"HUMAN";
+ const source: "COVERAGE_BOT" | "HUMAN" = body.source==="COVERAGE_BOT" ? "COVERAGE_BOT" : "HUMAN";
 
  if(!stories.some(s=>s.id===storyId)) return NextResponse.json({error:"Unknown Ding/story."},{status:400});
  if(!outlet||!url||!/^https?:\/\//i.test(url)||!publishedAt) return NextResponse.json({error:"story_id, outlet, valid URL and published_at are required."},{status:400});
