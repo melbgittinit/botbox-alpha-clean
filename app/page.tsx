@@ -17,6 +17,15 @@ type Bot = {
   demo: string;
 };
 
+type TrustProfile = {
+  identity: string;
+  access: string;
+  autonomous: string;
+  approval: string;
+  spending: string;
+  limits: string[];
+};
+
 type Build = {
   job: string;
   forWhom: string;
@@ -56,6 +65,76 @@ const bots: Bot[] = [
 const heroes: Record<string,string[]> = {
   all:["mebot","zipper","creator"], me:["mebot","fam","wbells"], business:["zipper","impostr","tvme"], creators:["creator","impostr","tvme"], organization:["fundus","tracking","tvme"], opportunity:["freemoney","register","elevate"], specialty:["ufo"]
 };
+
+const trustProfiles: Record<string,TrustProfile> = {
+  elevate:{
+    identity:"Growth and opportunity-ranking assistant.",
+    access:"Uses information you provide and only approved public sources when live research is connected.",
+    autonomous:"Can analyze, organize and rank suggestions. It does not publish, message, buy or commit on your behalf.",
+    approval:"Human approval is required before any external action or commitment.",
+    spending:"No spending authority.",
+    limits:["Recommendations are not guaranteed outcomes.","High-stakes financial, legal or contractual decisions require independent review."]
+  },
+  ufo:{
+    identity:"UAP/UFO research and archive assistant.",
+    access:"Uses user-provided material plus approved public/report archives when connected.",
+    autonomous:"Can organize claims, sources and case status. It does not present an unverified report as fact.",
+    approval:"Human review is required before publishing or sharing a case externally.",
+    spending:"No spending authority.",
+    limits:["Reported does not mean verified.","Disputed, unresolved and unconfirmed material must stay visibly labeled."]
+  },
+  freemoney:{
+    identity:"Opportunity discovery assistant for grants, scholarships, programs and work opportunities.",
+    access:"Uses user criteria and approved public opportunity sources when connected.",
+    autonomous:"Can organize and compare opportunities. It does not guarantee eligibility, awards or employment.",
+    approval:"Human approval is required before any application, submission or external communication.",
+    spending:"No spending authority.",
+    limits:["Deadlines and eligibility can change.","Every opportunity should be verified at the original source before action."]
+  },
+  tvme:{
+    identity:"Media-angle and interview-preparation assistant.",
+    access:"Uses material you provide plus approved public media information when connected.",
+    autonomous:"Can draft angles, talking points and pitch preparation. It does not contact media automatically in this alpha.",
+    approval:"Human approval is required before outreach, quotes or external submissions.",
+    spending:"No spending authority.",
+    limits:["Does not promise coverage.","Does not fabricate reporter interest, exclusives or relationships."]
+  },
+  zipper:{
+    identity:"Lead discovery and prospecting assistant.",
+    access:"Uses approved business information and user-provided targeting criteria.",
+    autonomous:"Can identify prospect types and prepare outreach. It does not send messages without permission.",
+    approval:"Human approval is required before outreach or CRM changes.",
+    spending:"No spending authority.",
+    limits:["A lead is not a guaranteed buyer.","Respect opt-outs, consent and channel rules."]
+  },
+  fam:{
+    identity:"Family history and memory assistant.",
+    access:"Uses family material intentionally provided to the experience.",
+    autonomous:"Can organize and draft family-memory entries. It does not publish private family information on its own.",
+    approval:"Human approval is required before sharing family material externally.",
+    spending:"No spending authority.",
+    limits:["Family memories may conflict or be incomplete.","Sensitive personal information should be handled carefully."]
+  },
+  wbells:{
+    identity:"Wedding planning and coordination assistant.",
+    access:"Uses planning information you provide and approved vendor/public information when connected.",
+    autonomous:"Can organize decisions, tasks and options. It does not book, pay or sign for you.",
+    approval:"Human approval is required before vendor contact, booking, payment or commitment.",
+    spending:"No spending authority.",
+    limits:["Vendor availability and pricing can change.","Contracts and payments remain human decisions."]
+  }
+};
+
+function trustFor(bot: Bot): TrustProfile {
+  return trustProfiles[bot.id] || {
+    identity:`${bot.name} is a purpose-built assistant for the job described on this card.`,
+    access:"Uses information you intentionally provide and only approved connected sources.",
+    autonomous:"Can analyze, organize and generate recommendations inside its defined job. It does not take consequential external action by default.",
+    approval:"Human approval is required before messages, submissions, purchases, publishing or commitments.",
+    spending:"No spending authority unless a future product explicitly states otherwise and requests approval.",
+    limits:["Outputs should be reviewed before consequential use.","Capabilities shown in this alpha may be staged or not yet connected to live services."]
+  };
+}
 
 const districts: {id:District; title:string; copy:string}[] = [
   {id:"me",title:"FOR ME",copy:"Life, family, decisions, celebrations and everyday support."},
@@ -143,6 +222,7 @@ export default function Home(){
         <div className={styles.eyebrow}>THE BOT FACTORY</div>
         <h1>Build one. Pick one.<br/><span>Put it to work.</span></h1>
         <p>A people-first showroom for useful AI agents. Build around your need, or choose one already ready to try.</p>
+        <div className={styles.trustPromise}><b>KNOW WHAT YOUR BOT DOES.</b><span>Know what it can access. Know where its authority stops.</span></div>
         <div className={styles.actions}><button className={`${styles.btn} ${styles.primary}`} onClick={()=>{setBase(undefined);go("build")}}>BUILD MY BOT</button><button className={`${styles.btn} ${styles.light}`} onClick={()=>go("lot")}>SHOP PREBUILT BOTS</button></div>
         <div className={styles.levels}><span>ONE BOT</span><b>→</b><span>MY BOT CREW</span><b>→</b><span>BOT FORCE</span><b>→</b><span>BOT EARN MODE</span></div>
       </header>
@@ -164,7 +244,7 @@ export default function Home(){
           <div className={styles.filters}>{["all","me","business","creators","organization","opportunity","specialty"].map(f=><button key={f} className={`${styles.filter} ${filter===f?styles.filterOn:""}`} onClick={()=>setFilter(f)}>{f==="all"?"ALL":f.toUpperCase()}</button>)}</div>
           <div className={styles.note}><b>ALPHA TRY-IT RULE:</b> every demo returns a contained proof example. These outputs are scripted for interface testing; live AI is not connected yet.</div>
           <div className={styles.grid}>{visible.map(bot=><article key={bot.id} className={`${styles.card} ${(heroes[filter]||[]).includes(bot.id)?styles.cardHero:""}`}>
-            <div className={styles.mark}>{bot.mark}</div><div className={styles.meta}>{bot.primary.replace("me","for me")}</div><h3>{bot.name}</h3><p className={styles.promise}>{bot.promise}</p><p className={styles.desc}>{bot.desc}</p><div className={styles.price}>Starter <b>{bot.price}</b> · provisional</div>
+            <div className={styles.mark}>{bot.mark}</div><div className={styles.meta}>{bot.primary.replace("me","for me")}</div><h3>{bot.name}</h3><p className={styles.promise}>{bot.promise}</p><p className={styles.desc}>{bot.desc}</p><div className={styles.trustStrip}><span>BOT TRUST CARD™</span><b>Human approval before consequential external action</b></div><div className={styles.price}>Starter <b>{bot.price}</b> · provisional</div>
             <div className={styles.cardActions}><button onClick={()=>{setModalBot(bot);setDemoResult("");setDemoPrompt("")}}>TRY IT</button><button onClick={()=>notify("Checkout + ownership entitlement are intentionally not connected in this alpha.")}>TAKE THIS BOT</button><button onClick={()=>customize(bot)}>CUSTOMIZE IT</button><button onClick={()=>notify("Gift recipient data is not being collected yet. Gift flow connects after purchase is verified.")}>GIFT THIS BOT</button></div>
           </article>)}</div>
         </>}
@@ -193,7 +273,7 @@ export default function Home(){
       <footer className={styles.footer}><div><b>THE BOT FACTORY</b><div className={styles.muted}>People first. Bots for real life.</div></div><div><button onClick={()=>setModalInfo("executive")}>Executive Suite</button><button onClick={()=>setModalInfo("robots")}>Looking for an actual robot? The Back Door →</button></div></footer>
     </div>
 
-    {(modalBot || modalInfo) && <div className={styles.modal}><div className={styles.shade} onClick={()=>{setModalBot(undefined);setModalInfo(undefined)}}/><div className={styles.dialog}><button className={styles.close} onClick={()=>{setModalBot(undefined);setModalInfo(undefined)}}>×</button>{modalBot ? <><span className={styles.eyebrow}>TRY {modalBot.name}</span><h2>{modalBot.promise}</h2><p className={styles.muted}>Give the scripted alpha demo a short example. This is not live AI.</p><input className={styles.demoInput} value={demoPrompt} onChange={e=>setDemoPrompt(e.target.value)} placeholder="Type a short example…"/><button className={`${styles.btn} ${styles.primary}`} onClick={()=>setDemoResult(demoFor(modalBot,demoPrompt))}>RUN ALPHA TEST</button>{demoResult && <><div className={styles.result}>{demoResult}</div><div className={styles.saveRow}><button className={`${styles.btn} ${styles.light}`} onClick={()=>{const b=modalBot;setModalBot(undefined);customize(b)}}>CUSTOMIZE THIS BOT</button><button className={styles.btn} onClick={()=>notify("Checkout + entitlement are intentionally not connected in this alpha.")}>TAKE THIS BOT</button></div></>}</> : modalInfo==="robots" ? <><span className={styles.eyebrow}>THE BACK DOOR</span><h2>Real robots. Real machines.</h2><p className={styles.muted}>The separate physical-robot showroom remains an adjacent credibility and commerce lane. It does not redefine the main AI-agent Factory.</p></> : <><span className={styles.eyebrow}>EXECUTIVE SUITE</span><h2>Private institutional lane</h2><p className={styles.muted}>A small room for BrandBridge demonstrations and the Executive Agent. It remains secondary to the main Factory.</p></>}</div></div>}
+    {(modalBot || modalInfo) && <div className={styles.modal}><div className={styles.shade} onClick={()=>{setModalBot(undefined);setModalInfo(undefined)}}/><div className={styles.dialog}><button className={styles.close} onClick={()=>{setModalBot(undefined);setModalInfo(undefined)}}>×</button>{modalBot ? <><span className={styles.eyebrow}>TRY {modalBot.name}</span><h2>{modalBot.promise}</h2><p className={styles.muted}>Give the scripted alpha demo a short example. This is not live AI.</p><div className={styles.trustCard}><div className={styles.trustHead}><span>BOT TRUST CARD™</span><b>{trustFor(modalBot).identity}</b></div><div className={styles.trustGrid}><div><span>ACCESS</span><p>{trustFor(modalBot).access}</p></div><div><span>CAN ACT ALONE?</span><p>{trustFor(modalBot).autonomous}</p></div><div><span>HUMAN APPROVAL</span><p>{trustFor(modalBot).approval}</p></div><div><span>SPENDING</span><p>{trustFor(modalBot).spending}</p></div></div><div className={styles.trustLimits}><span>LIMITS</span>{trustFor(modalBot).limits.map(limit=><p key={limit}>• {limit}</p>)}</div></div><input className={styles.demoInput} value={demoPrompt} onChange={e=>setDemoPrompt(e.target.value)} placeholder="Type a short example…"/><button className={`${styles.btn} ${styles.primary}`} onClick={()=>setDemoResult(demoFor(modalBot,demoPrompt))}>RUN ALPHA TEST</button>{demoResult && <><div className={styles.result}>{demoResult}</div><div className={styles.saveRow}><button className={`${styles.btn} ${styles.light}`} onClick={()=>{const b=modalBot;setModalBot(undefined);customize(b)}}>CUSTOMIZE THIS BOT</button><button className={styles.btn} onClick={()=>notify("Checkout + entitlement are intentionally not connected in this alpha.")}>TAKE THIS BOT</button></div></>}</> : modalInfo==="robots" ? <><span className={styles.eyebrow}>THE BACK DOOR</span><h2>Real robots. Real machines.</h2><p className={styles.muted}>The separate physical-robot showroom remains an adjacent credibility and commerce lane. It does not redefine the main AI-agent Factory.</p></> : <><span className={styles.eyebrow}>EXECUTIVE SUITE</span><h2>Private institutional lane</h2><p className={styles.muted}>A small room for BrandBridge demonstrations and the Executive Agent. It remains secondary to the main Factory.</p></>}</div></div>}
     {toast && <div className={styles.toast}>{toast}</div>}
   </main>;
 }
