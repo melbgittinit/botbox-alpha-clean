@@ -100,23 +100,44 @@ export default function ElevateSalesLanding() {
       fontFamily:"Arial,sans-serif",
       padding:"0 16px 72px"
     }}>
-      <section style={{maxWidth:1160,margin:"0 auto",padding:"78px 0 44px",textAlign:"center"}}>
-        <div style={{display:"inline-flex",gap:8,alignItems:"center",padding:"8px 13px",border:"1px solid rgba(120,230,223,.45)",borderRadius:999,background:"rgba(120,230,223,.08)",color:"#78e6df",fontSize:11,fontWeight:900,letterSpacing:".14em"}}>
-          LIVE IN THE HUB
+      <section style={{maxWidth:1160,margin:"0 auto",padding:"44px 0 44px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:32,alignItems:"center"}}>
+          <div style={{textAlign:"left"}}>
+            <div style={{display:"inline-flex",gap:8,alignItems:"center",padding:"8px 13px",border:"1px solid rgba(120,230,223,.45)",borderRadius:999,background:"rgba(120,230,223,.08)",color:"#78e6df",fontSize:11,fontWeight:900,letterSpacing:".14em"}}>
+              LIVE IN THE HUB
+            </div>
+            <h1 style={{fontSize:"clamp(54px,8vw,96px)",lineHeight:.9,margin:"20px 0 16px",letterSpacing:"-.04em"}}>
+              ELEVATE<br/>ME BOT
+            </h1>
+            <p style={{maxWidth:660,margin:0,fontSize:"clamp(19px,2vw,25px)",lineHeight:1.45,color:"#e4def4"}}>
+              Tell it what you need. Get a useful next move. Then level up only when you want more power.
+            </p>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:26}}>
+              <a href={links.preview} style={{padding:"15px 22px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>TRY THE FREE PREVIEW</a>
+              <a onClick={() => track("checkout_intent","activate")} href={links.activate} style={{padding:"15px 22px",borderRadius:999,background:"#fff",color:"#111",textDecoration:"none",fontWeight:900}}>ACTIVATE FOR $1</a>
+            </div>
+            <p style={{margin:"14px 0 0",maxWidth:650,color:"#bdb6cf",fontSize:13,lineHeight:1.5}}>
+              One-time prepaid levels. No forced subscription. Start with the smallest useful step.
+            </p>
+          </div>
+
+          <div style={{display:"flex",justifyContent:"center"}}>
+            <img
+              src="https://cdn.shopify.com/s/files/1/1982/3607/files/Elevate_Me_Bot__A_Brighter_You_1.jpg?v=1790122086"
+              alt="Elevate Me Bot black edition — Live in The HUB"
+              loading="eager"
+              style={{
+                display:"block",
+                width:"100%",
+                maxWidth:560,
+                height:"auto",
+                borderRadius:28,
+                border:"1px solid rgba(243,201,105,.32)",
+                boxShadow:"0 28px 90px rgba(0,0,0,.42)"
+              }}
+            />
+          </div>
         </div>
-        <h1 style={{fontSize:"clamp(54px,9vw,104px)",lineHeight:.9,margin:"20px 0 16px",letterSpacing:"-.04em"}}>
-          ELEVATE<br/>ME BOT
-        </h1>
-        <p style={{maxWidth:800,margin:"0 auto",fontSize:"clamp(19px,2.1vw,26px)",lineHeight:1.45,color:"#e4def4"}}>
-          Tell it what you need. Get a useful next move. Then level up only when you want more power.
-        </p>
-        <div style={{display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap",marginTop:26}}>
-          <a href={links.preview} style={{padding:"15px 22px",borderRadius:999,background:"#f3c969",color:"#111",textDecoration:"none",fontWeight:900}}>TRY THE FREE PREVIEW</a>
-          <a onClick={() => track("checkout_intent","activate")} href={links.activate} style={{padding:"15px 22px",borderRadius:999,background:"#fff",color:"#111",textDecoration:"none",fontWeight:900}}>ACTIVATE FOR $1</a>
-        </div>
-        <p style={{margin:"14px auto 0",maxWidth:700,color:"#bdb6cf",fontSize:13,lineHeight:1.5}}>
-          One-time prepaid levels. No forced subscription. Start with the smallest useful step.
-        </p>
       </section>
 
       <section style={{maxWidth:1160,margin:"0 auto 22px",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:14}}>
