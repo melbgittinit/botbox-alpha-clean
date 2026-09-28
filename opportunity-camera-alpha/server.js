@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ENVIRONMENTS, evaluateOpportunity, getKnowledgeSummary } from './knowledgeBase.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -17,6 +18,10 @@ app.get('/health', (_req, res) => {
     visionConfigured: Boolean(process.env.OPENAI_API_KEY),
     commerceConfigured: Boolean(process.env.SHOPIFY_ADMIN_TOKEN)
   });
+});
+
+app.get('/api/opportunity-camera/knowledge', (_req, res) => {
+  res.json(getKnowledgeSummary());
 });
 
 app.get('/api/config', (_req, res) => {
@@ -128,30 +133,54 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
       });
     }
 
-    const demoMap = {
-      church: ['Women of the Bible for Women of Color', 'prepare', 'Ask for the appropriate ministry or resource leader.'],
-      beauty_salon: ['Women of Color — The Network', 'go', 'Ask whether you may display your personal QR.'],
-      bookstore: ['Women of Color Books & Bibles', 'prepare', 'Ask for the buyer or resource manager.'],
-      community_event: ['Earn Mode / HUB campaign', 'go', 'Find the organizer or approved display area.'],
-      vendor_market: ['The Bot Stores / HUB Merch', 'go', 'Check the vendor or QR-sharing opportunity.'],
-      womens_organization: ['Women of Color — The Network', 'go', 'Offer the group resource QR.'],
-      school_learning: ['Creator College', 'prepare', 'Approach an adult organizer or administrator.'],
-      coffee_cafe: ['Community QR opportunity', 'prepare', 'Check for a community board or manager-approved display.'],
-      retail_store: ['WOC Books / Merch', 'prepare', 'Ask for the buyer or manager.'],
-      community_center: ['Creator College', 'prepare', 'Ask about program or resource partnerships.'],
-      senior_organization: ['WOC Books & Devotionals', 'prepare', 'Ask the program/resource coordinator.'],
-      professional_office: ['Agent X', 'prepare', 'Prepare a short business-use demo before approaching.'],
-      apartment_community: ['Creator College / Community programs', 'prepare', 'Ask the leasing or resident-events team.'],
-      conference_venue: ['Bot Stores / Earn Mode', 'prepare', 'Identify the event organizer or vendor opportunity.']
-    };
+    const readiness = ['new','active','advanced'].includes(req.body?.member_readiness)
+      ? req.body.member_readiness
+      : 'new';
 
-    const [offer, state, action] = demoMap[scene.environment] || ['No approved match yet', 'keep_looking', 'Keep looking.'];
+    const match = evaluateOpportunity({
+      environment: scene.environment,
+      confidence: scene.confidence,
+      readiness
+    });
+
+    if (match.result === 'keep_looking') {
+      return res.json({
+        result: 'keep_looking',
+        headline: match.headline,
+        message: match.message,
+        scene: {
+          ...scene,
+          label: ENVIRONMENTS[scene.environment]?.label || ENVIRONMENTS.other_unknown.label
+        },
+        alternatives: []
+      });
+    }
+
+    const primary = match.primary;
 
     return res.json({
-      result: state,
-      headline: state === 'go' ? "There's one." : state === 'prepare' ? 'Good opportunity — prepare first.' : 'Keep looking.',
-      scene,
-      opportunity: { offer, action },
+      result: match.result,
+      headline: match.headline,
+      scene: {
+        ...scene,
+        label: ENVIRONMENTS[scene.environment]?.label || ENVIRONMENTS.other_unknown.label
+      },
+      opportunity: {
+        pathKey: primary.pathKey,
+        name: primary.name,
+        offerKey: primary.offerKey,
+        offer: primary.offerName,
+        category: primary.category,
+        difficulty: primary.difficulty,
+        score: primary.score,
+        action: primary.action,
+        why: primary.why,
+        scripts: primary.scripts,
+        guardrail: primary.guardrail,
+        trainingKey: primary.trainingKey,
+        commerce: primary.commerce || null
+      },
+      alternatives: match.alternatives,
       money: {
         status: 'not_verified_in_alpha',
         message: 'Price and commission will appear only after Shopify and Earn Mode commission sources are connected.'
