@@ -1,10 +1,24 @@
 const $ = (s) => document.querySelector(s);
 let imageDataUrl = null;
 let currentOpportunity = null;
+const BAG_KEY = 'earn_mode_opportunity_bag_alpha_v1';
+
+function loadBag(){ try{return JSON.parse(localStorage.getItem(BAG_KEY)||'[]')}catch{return []} }
+function writeBag(items){ localStorage.setItem(BAG_KEY,JSON.stringify(items)); renderBag(); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderBag(){
+  const items=loadBag();
+  const el=$('#bagList');
+  if(!el) return;
+  if(!items.length){ el.innerHTML='<div class="actionCard"><strong>No saved opportunities yet.</strong><p class="hint">Scan something useful, then tap Save to My Bag.</p></div>'; return; }
+  el.innerHTML=items.map((x,i)=>`<div class="actionCard"><span>${esc(x.environmentLabel||x.environment||'Opportunity')}</span><strong>${esc(x.offer||'Saved opportunity')}</strong><p class="hint">${esc(x.action||'')}</p><div class="micro">Saved ${esc(new Date(x.savedAt).toLocaleString())}</div><button class="ghost bagRemove" data-index="${i}" style="margin-top:10px">Remove</button></div>`).join('');
+  document.querySelectorAll('.bagRemove').forEach(btn=>btn.onclick=()=>{const items=loadBag();items.splice(Number(btn.dataset.index),1);writeBag(items)});
+}
 
 async function boot() {
   const config = await fetch('/api/config').then(r => r.json());
   $('#heroImage').src = config.heroUrl;
+  renderBag();
 }
 
 $('#openCamera').onclick = () => $('#cameraPanel').classList.remove('hidden');
@@ -112,4 +126,28 @@ $('#makeQr').onclick = async () => {
     $('#makeQr').disabled = false;
     $('#makeQr').textContent = 'Make My QR';
   }
+};
+
+$('#saveBag').onclick = () => {
+  if (!currentOpportunity?.pathKey) return;
+  const items = loadBag();
+  const exists = items.some(x => x.pathKey === currentOpportunity.pathKey && x.offer === currentOpportunity.offer);
+  if (!exists) {
+    items.unshift({
+      pathKey: currentOpportunity.pathKey,
+      offer: currentOpportunity.offer,
+      action: currentOpportunity.action,
+      difficulty: currentOpportunity.difficulty,
+      environment: $('#sceneLabel').textContent,
+      environmentLabel: $('#sceneLabel').textContent,
+      savedAt: new Date().toISOString()
+    });
+    writeBag(items.slice(0,50));
+  }
+  $('#bagPanel').scrollIntoView({behavior:'smooth'});
+};
+
+$('#clearBag').onclick = () => {
+  localStorage.removeItem(BAG_KEY);
+  renderBag();
 };
