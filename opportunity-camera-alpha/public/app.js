@@ -47,6 +47,17 @@ $('#scanButton').onclick = async () => {
     $('#sceneLabel').textContent = (data.scene?.environment || 'Unknown').replaceAll('_',' ');
     $('#offerLabel').textContent = data.opportunity?.offer || 'No approved match yet';
     $('#actionLabel').textContent = data.opportunity?.action || data.message || 'Keep looking.';
+    $('#whyLabel').textContent = data.opportunity?.why || data.message || 'The Brain did not find a strong approved match.';
+    $('#difficultyLabel').textContent = data.opportunity?.difficulty || '—';
+    $('#scoreLabel').textContent = Number.isFinite(data.opportunity?.score) ? data.opportunity.score + '/100' : '—';
+    $('#scriptLabel').textContent = data.opportunity?.scripts?.friendly || data.opportunity?.scripts?.quick || 'No script needed yet.';
+    const alternatives = Array.isArray(data.alternatives) ? data.alternatives : [];
+    if (alternatives.length) {
+      $('#alternativesLabel').textContent = alternatives.map(x => x.offerName).join(' • ');
+      $('#alternativesCard').classList.remove('hidden');
+    } else {
+      $('#alternativesCard').classList.add('hidden');
+    }
     $('#moneyLabel').textContent = data.money?.message || 'Verified amounts appear only from live commerce + commission data.';
     $('#resultPanel').classList.remove('hidden');
     $('#resultPanel').scrollIntoView({behavior:'smooth'});
@@ -63,6 +74,7 @@ $('#scanAgain').onclick = () => {
   $('#preview').classList.add('hidden');
   $('#scanButton').classList.add('hidden');
   $('#resultPanel').classList.add('hidden');
+  $('#alternativesCard')?.classList.add('hidden');
   $('#cameraPanel').classList.remove('hidden');
   $('#cameraPanel').scrollIntoView({behavior:'smooth'});
 };
