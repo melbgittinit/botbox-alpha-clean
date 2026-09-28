@@ -31,7 +31,9 @@ export const OPPORTUNITY_PATHS = [
       professional:'I’m exploring an approved community-resource placement. Who is the right person to ask about a small QR display?'
     },
     guardrail:'Do not infer customer demographics from appearance. The opportunity comes from the public business context, not the people present.',
-    trainingKey:'community-qr-placement'
+    trainingKey:'community-qr-placement',
+    destinationUrl:'https://womenofcolorstudybibles.com/',
+    commerce:{source:'community',kind:'network',priceCents:null,currency:'USD'}
   },
   {
     pathKey:'CHURCH_BIBLE_001',name:'Church Resource Introduction',environment:'church',
@@ -46,7 +48,8 @@ export const OPPORTUNITY_PATHS = [
     },
     guardrail:'Do not interrupt worship, prayer, funerals, counseling, or private ministry moments.',
     trainingKey:'church-resource-introduction',
-    commerce:{source:'shopify',productGid:'gid://shopify/Product/104959049744',variantGid:'gid://shopify/ProductVariant/687494070288',handle:'women-of-the-bible-for-women-of-color'}
+    destinationUrl:'https://urbanspirit.biz/products/women-of-the-bible-for-women-of-color',
+    commerce:{source:'shopify',productGid:'gid://shopify/Product/104959049744',variantGid:'gid://shopify/ProductVariant/687494070288',variantNumericId:'687494070288',handle:'women-of-the-bible-for-women-of-color',snapshot:{priceCents:1299,currency:'USD',inventory:688,verifiedAt:'2026-09-27'}}
   },
   {
     pathKey:'BOOKSTORE_WOC_001',name:'Retail Resource Conversation',environment:'bookstore',
@@ -61,7 +64,8 @@ export const OPPORTUNITY_PATHS = [
     },
     guardrail:'Do not imply an existing store relationship, stocking commitment, or guaranteed demand.',
     trainingKey:'retail-buyer-introduction',
-    commerce:{source:'shopify',productGid:'gid://shopify/Product/6846844010595',variantGid:'gid://shopify/ProductVariant/40099382362211',handle:'women-of-color-study-bible-paperback-edition'}
+    destinationUrl:'https://urbanspirit.biz/products/women-of-color-study-bible-paperback-edition',
+    commerce:{source:'shopify',productGid:'gid://shopify/Product/6846844010595',variantGid:'gid://shopify/ProductVariant/40099382362211',variantNumericId:'40099382362211',handle:'women-of-color-study-bible-paperback-edition',snapshot:{priceCents:2999,currency:'USD',inventory:3084,verifiedAt:'2026-09-27'}}
   },
   {
     pathKey:'EVENT_EARN_001',name:'Community Event Connection',environment:'community_event',
