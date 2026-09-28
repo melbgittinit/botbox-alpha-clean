@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ENVIRONMENTS, evaluateOpportunity, getKnowledgeSummary } from './knowledgeBase.js';
+import { ENVIRONMENTS, OPPORTUNITY_PATHS, evaluateOpportunity, getKnowledgeSummary } from './knowledgeBase.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -22,6 +22,33 @@ app.get('/health', (_req, res) => {
 
 app.get('/api/opportunity-camera/knowledge', (_req, res) => {
   res.json(getKnowledgeSummary());
+});
+
+app.get('/api/opportunity-camera/paths', (_req, res) => {
+  res.json({
+    paths: OPPORTUNITY_PATHS.map(path => ({
+      pathKey: path.pathKey,
+      name: path.name,
+      environment: path.environment,
+      environmentLabel: ENVIRONMENTS[path.environment]?.label || path.environment,
+      offerKey: path.offerKey,
+      offerName: path.offerName,
+      category: path.category,
+      status: path.status,
+      cameraApproved: path.cameraApproved,
+      difficulty: path.difficulty,
+      baseFit: path.baseFit,
+      minConfidence: path.minConfidence,
+      minReadiness: path.minReadiness,
+      recommendedState: path.recommendedState,
+      action: path.action,
+      why: path.why,
+      scripts: path.scripts,
+      guardrail: path.guardrail,
+      trainingKey: path.trainingKey,
+      commerce: path.commerce || null
+    }))
+  });
 });
 
 app.get('/api/config', (_req, res) => {
