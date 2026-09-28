@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#06110b"><title>Opportunity Brain Beta Center</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+.adminWrap{max-width:1180px;margin:auto;padding:26px 18px 70px}.adminTop{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:22px}.adminTop h1{font-family:Georgia,serif;font-size:clamp(38px,6vw,64px);margin:7px 0}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 28px}.metric{padding:18px;border-radius:20px;background:#0b1811;border:1px solid rgba(255,255,255,.08)}.metric b{display:block;font-size:27px;color:#f3d88f}.metric span{color:#9ca9a1;font-size:12px;text-transform:uppercase;letter-spacing:.1em}.pathList{display:grid;gap:14px}.pathCard{padding:20px;border-radius:24px;background:rgba(12,24,17,.94);border:1px solid rgba(255,255,255,.09)}.pathHeader{display:flex;justify-content:space-between;gap:12px}.pathHeader h2{margin:4px 0 8px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.chip{font-size:11px;padding:6px 9px;border-radius:999px;background:#18281e;color:#d8e3db}.chip.gold{background:#463a1c;color:#f3d88f}.detail{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.detail div{padding:14px;border-radius:16px;background:#08130d}.detail span{display:block;color:#829188;font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}.detail strong{line-height:1.4}.script{margin-top:12px;padding:14px;border-left:3px solid #d8af58;background:#09140e}.guard{color:#b8c2bb;font-size:13px;margin-top:10px}.back{color:#f3d88f;text-decoration:none;font-weight:800}@media(max-width:700px){.summary,.detail{grid-template-columns:1fr}.adminTop{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body><main class="adminWrap">
+<div class="adminTop"><div><div class="eyebrow">EARN MODE • OWNER VIEW</div><h1>Opportunity Brain Beta Center</h1><p class="hint">The living knowledge base behind Opportunity Camera.</p></div><a class="back" href="/">← Camera</a></div>
+<div id="summary" class="summary"></div>
+<div id="paths" class="pathList"></div>
+</main><script>
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+(async()=>{
+ const [summary,registry]=await Promise.all([
+   fetch('/api/opportunity-camera/knowledge').then(r=>r.json()),
+   fetch('/api/opportunity-camera/paths').then(r=>r.json())
+ ]);
+ document.querySelector('#summary').innerHTML=[
+  ['Environments',summary.environments],
+  ['Opportunity Paths',summary.opportunityPaths],
+  ['Ready',summary.statuses?.ready||0],
+  ['Testing / Review',(summary.statuses?.testing||0)+(summary.statuses?.review||0)]
+ ].map(([k,v])=>'<div class="metric"><b>'+esc(v)+'</b><span>'+esc(k)+'</span></div>').join('');
+ document.querySelector('#paths').innerHTML=registry.paths.map(p=>`
+  <article class="pathCard">
+   <div class="pathHeader"><div><div class="eyebrow">${esc(p.pathKey)}</div><h2>${esc(p.name)}</h2></div><div class="chip gold">${esc(p.status.toUpperCase())}</div></div>
+   <div class="chips"><span class="chip">${esc(p.environmentLabel)}</span><span class="chip">${esc(p.category)}</span><span class="chip">${esc(p.difficulty)}</span><span class="chip">Fit ${esc(p.baseFit)}/100</span><span class="chip">${esc(p.recommendedState.toUpperCase())}</span></div>
+   <div class="detail"><div><span>Approved offer</span><strong>${esc(p.offerName)}</strong></div><div><span>Recommended action</span><strong>${esc(p.action)}</strong></div><div><span>Why this fits</span><strong>${esc(p.why)}</strong></div><div><span>Training</span><strong>${esc(p.trainingKey)}</strong></div></div>
+   <div class="script"><span>Friendly script</span><br><strong>“${esc(p.scripts?.friendly||p.scripts?.quick)}”</strong></div>
+   <div class="guard"><b>Guardrail:</b> ${esc(p.guardrail)}</div>
+  </article>`).join('');
+})().catch(()=>{document.querySelector('#paths').textContent='Beta Center data could not be loaded.'});
+</script></body></html>
