@@ -1,5 +1,6 @@
 const $ = (s) => document.querySelector(s);
 let imageDataUrl = null;
+let currentOpportunity = null;
 
 async function boot() {
   const config = await fetch('/api/config').then(r => r.json());
@@ -41,6 +42,8 @@ $('#scanButton').onclick = async () => {
       return;
     }
 
+    currentOpportunity = data.opportunity || null;
+    $('#qrCard')?.classList.add('hidden');
     $('#resultState').textContent = String(data.result || '').replace('_',' ').toUpperCase();
     $('#resultState').dataset.state = data.result || '';
     $('#resultHeadline').textContent = data.headline || 'Opportunity result';
@@ -80,3 +83,33 @@ $('#scanAgain').onclick = () => {
 };
 
 boot();
+$('#makeQr').onclick = async () => {
+  if (!currentOpportunity?.pathKey) return;
+  $('#makeQr').disabled = true;
+  $('#makeQr').textContent = 'Creating QR…';
+  try {
+    const response = await fetch('/api/opportunity-camera/create-action-link', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pathKey:currentOpportunity.pathKey})
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      $('#qrNote').textContent = data.message || 'This opportunity is not ready for tracked sharing yet.';
+      $('#qrCard').classList.remove('hidden');
+      return;
+    }
+    $('#qrImage').src = data.qrDataUrl;
+    $('#trackedLink').href = data.trackedUrl;
+    $('#trackedLink').textContent = data.trackedUrl;
+    $('#qrNote').textContent = data.note || 'Tracked Opportunity QR ready.';
+    $('#qrCard').classList.remove('hidden');
+    $('#qrCard').scrollIntoView({behavior:'smooth',block:'center'});
+  } catch {
+    $('#qrNote').textContent = 'QR creation is temporarily unavailable.';
+    $('#qrCard').classList.remove('hidden');
+  } finally {
+    $('#makeQr').disabled = false;
+    $('#makeQr').textContent = 'Make My QR';
+  }
+};
