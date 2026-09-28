@@ -74,6 +74,7 @@
     <div class="actions">
       <button id="scanAgain">Scan Another</button>
       <button id="makeQr" class="secondary">Make My QR</button>
+      <button id="saveBag" class="secondary">Save to My Bag</button>
     </div>
     <div id="qrCard" class="actionCard hidden">
       <span>My tracked Opportunity QR</span>
@@ -81,6 +82,15 @@
       <a id="trackedLink" href="#" target="_blank" rel="noopener" style="color:#f3d88f;word-break:break-all"></a>
       <p id="qrNote" class="hint"></p>
     </div>
+  </section>
+
+  <section id="bagPanel" class="panel">
+    <div class="panelHead">
+      <div><div class="eyebrow">MY OPPORTUNITY BAG</div><h2>Saved Opportunities</h2></div>
+      <button id="clearBag" class="ghost">Clear</button>
+    </div>
+    <p class="hint">Alpha note: these saves stay only in this browser on this device until Earn Mode account sync is connected.</p>
+    <div id="bagList"></div>
   </section>
 
   <section class="why">
