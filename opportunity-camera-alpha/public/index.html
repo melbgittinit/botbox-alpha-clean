@@ -73,7 +73,13 @@
     </div>
     <div class="actions">
       <button id="scanAgain">Scan Another</button>
-      <button class="secondary" disabled>Make My QR — next connection</button>
+      <button id="makeQr" class="secondary">Make My QR</button>
+    </div>
+    <div id="qrCard" class="actionCard hidden">
+      <span>My tracked Opportunity QR</span>
+      <img id="qrImage" alt="Tracked Opportunity QR" style="width:min(280px,100%);display:block;margin:14px auto;border-radius:16px;background:white;padding:10px">
+      <a id="trackedLink" href="#" target="_blank" rel="noopener" style="color:#f3d88f;word-break:break-all"></a>
+      <p id="qrNote" class="hint"></p>
     </div>
   </section>
 
