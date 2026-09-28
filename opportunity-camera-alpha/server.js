@@ -1,4 +1,6 @@
 import express from 'express';
+import crypto from 'node:crypto';
+import QRCode from 'qrcode';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENVIRONMENTS, OPPORTUNITY_PATHS, evaluateOpportunity, getKnowledgeSummary } from './knowledgeBase.js';
@@ -49,6 +51,114 @@ app.get('/api/opportunity-camera/paths', (_req, res) => {
       commerce: path.commerce || null
     }))
   });
+});
+
+
+function moneyFromPath(pathDef) {
+  const snapshot = pathDef?.commerce?.snapshot;
+  const trustedRate = Number(process.env.ALPHA_MEMBER_COMMISSION_RATE || '');
+  if (!snapshot?.priceCents) {
+    return {
+      status: pathDef?.commerce?.kind === 'network' ? 'community_path' : 'unavailable',
+      message: pathDef?.commerce?.kind === 'network'
+        ? 'This is a tracked community-growth path, not a direct product commission path.'
+        : 'No verified commerce price is available for this path.'
+    };
+  }
+
+  const base = {
+    status: Number.isFinite(trustedRate) && trustedRate >= 0 && trustedRate <= 1 ? 'snapshot_verified_with_trusted_rate' : 'snapshot_verified_price_only',
+    priceCents: snapshot.priceCents,
+    currency: snapshot.currency || 'USD',
+    verifiedAt: snapshot.verifiedAt,
+    inventorySnapshot: snapshot.inventory ?? null,
+    priceLabel: new Intl.NumberFormat('en-US',{style:'currency',currency:snapshot.currency || 'USD'}).format(snapshot.priceCents/100)
+  };
+
+  if (!Number.isFinite(trustedRate) || trustedRate < 0 || trustedRate > 1) {
+    return {
+      ...base,
+      message: `Verified store price snapshot: ${base.priceLabel} (checked ${snapshot.verifiedAt}). Connect a trusted Earn Mode rate to display potential commission.`
+    };
+  }
+
+  const commissionCents = Math.round(snapshot.priceCents * trustedRate);
+  return {
+    ...base,
+    commissionRate: trustedRate,
+    commissionCents,
+    commissionLabel: new Intl.NumberFormat('en-US',{style:'currency',currency:snapshot.currency || 'USD'}).format(commissionCents/100),
+    message: `Store price snapshot ${base.priceLabel} • trusted staging rate ${(trustedRate*100).toFixed(0)}% • potential qualifying commission ${new Intl.NumberFormat('en-US',{style:'currency',currency:snapshot.currency || 'USD'}).format(commissionCents/100)}.`
+  };
+}
+
+function actionLinkSecret() {
+  return process.env.OPPORTUNITY_LINK_SECRET || '';
+}
+
+function signOpportunityPayload(payload) {
+  const secret = actionLinkSecret();
+  if (!secret) return null;
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function verifyOpportunityToken(token) {
+  const secret = actionLinkSecret();
+  if (!secret || !token || !token.includes('.')) return null;
+  const [body,sig] = token.split('.');
+  const expected = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a,b)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body,'base64url').toString('utf8'));
+    if (!payload?.pathKey || !payload?.destinationUrl) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+app.post('/api/opportunity-camera/create-action-link', async (req, res) => {
+  const { pathKey } = req.body || {};
+  const pathDef = OPPORTUNITY_PATHS.find(p => p.pathKey === pathKey && p.cameraApproved);
+  if (!pathDef) return res.status(404).json({ error:'PATH_NOT_FOUND' });
+  if (!pathDef.destinationUrl) return res.status(409).json({ error:'DESTINATION_NOT_READY', message:'This opportunity is not ready for tracked sharing yet.' });
+  if (!actionLinkSecret()) return res.status(503).json({ error:'LINK_SIGNING_NOT_CONFIGURED' });
+
+  const payload = {
+    pathKey:pathDef.pathKey,
+    offerKey:pathDef.offerKey,
+    destinationUrl:pathDef.destinationUrl,
+    createdAt:new Date().toISOString()
+  };
+  const token = signOpportunityPayload(payload);
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const trackedUrl = `${baseUrl}/go/${token}`;
+  const qrDataUrl = await QRCode.toDataURL(trackedUrl,{margin:1,width:480,errorCorrectionLevel:'M'});
+
+  res.json({
+    pathKey:pathDef.pathKey,
+    offer:pathDef.offerName,
+    trackedUrl,
+    qrDataUrl,
+    money:moneyFromPath(pathDef),
+    note:'This alpha link tracks the Opportunity Camera pathway. Production member attribution will be added when Earn Mode authentication is connected.'
+  });
+});
+
+app.get('/go/:token', (req,res) => {
+  const payload = verifyOpportunityToken(req.params.token);
+  if (!payload) return res.status(400).send('Invalid or expired Opportunity Camera link.');
+  console.log(JSON.stringify({
+    event:'opportunity_link_click',
+    pathKey:payload.pathKey,
+    offerKey:payload.offerKey,
+    at:new Date().toISOString()
+  }));
+  return res.redirect(302,payload.destinationUrl);
 });
 
 app.get('/api/config', (_req, res) => {
@@ -208,10 +318,7 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
         commerce: primary.commerce || null
       },
       alternatives: match.alternatives,
-      money: {
-        status: 'not_verified_in_alpha',
-        message: 'Price and commission will appear only after Shopify and Earn Mode commission sources are connected.'
-      }
+      money: moneyFromPath(primary)
     });
   } catch (error) {
     console.error(error);
