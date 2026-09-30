@@ -24,6 +24,9 @@ export default function AgentXCommandCenterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState('');
+  const opportunities = data
+    ? Array.from(new Set(data.reports.flatMap(report => report.recommendations))).slice(0, 8)
+    : [];
 
   const load = async () => {
     const organizationId = new URLSearchParams(window.location.search).get('organization_id');
@@ -68,9 +71,10 @@ export default function AgentXCommandCenterPage() {
 
   return <main style={{minHeight:'100vh',background:'#05070a',color:'#f5f7fb',fontFamily:'Arial, Helvetica, sans-serif',padding:'42px 22px 70px'}}>
     <div style={{maxWidth:1180,margin:'0 auto'}}>
-      <div style={{fontSize:12,letterSpacing:'.24em',fontWeight:800,color:'#79b8ff'}}>AGENT X · COMMAND CENTER</div>
+      <div style={{fontSize:12,letterSpacing:'.24em',fontWeight:800,color:'#79b8ff'}}>AGENT X · COMMAND CENTER · STAGING PREVIEW</div>
       <h1 style={{fontSize:'clamp(42px,7vw,78px)',letterSpacing:'-.045em',margin:'12px 0 8px'}}>Today’s Intelligence Brief</h1>
       <p style={{color:'#9fb0c4',fontSize:18,maxWidth:760,lineHeight:1.55,marginTop:0}}>Who is helping, what is happening, what happened, and what needs your approval next.</p>
+      <div style={{display:'inline-flex',alignItems:'center',gap:8,marginTop:14,padding:'8px 11px',borderRadius:999,border:'1px solid rgba(121,184,255,.28)',background:'#0a1420',color:'#9fbfe8',fontSize:12,fontWeight:800,letterSpacing:'.08em'}}>STAGING ONLY · NOT PUBLISHED TO THE BOT STORES</div>
 
       {loading && <div style={{...panel,marginTop:26}}>Loading your Agent X workspace…</div>}
       {error && <div style={{...panel,marginTop:26,border:'1px solid rgba(255,120,120,.35)',color:'#ffb4b4'}}>{error}</div>}
@@ -81,12 +85,13 @@ export default function AgentXCommandCenterPage() {
           <div style={panel}><div style={{fontSize:12,color:'#79b8ff',fontWeight:800}}>ACTIVE AGENTS</div><div style={{fontSize:38,fontWeight:900,marginTop:8}}>{data.workforce?.agents.length || 0}</div><div style={{color:'#8fa0b5'}}>{data.workforce?.name || 'No workforce'}</div></div>
           <div style={panel}><div style={{fontSize:12,color:'#79b8ff',fontWeight:800}}>MISSIONS</div><div style={{fontSize:38,fontWeight:900,marginTop:8}}>{data.missions.length}</div><div style={{color:'#8fa0b5'}}>Ready + active</div></div>
           <div style={panel}><div style={{fontSize:12,color:'#79b8ff',fontWeight:800}}>REPORTS</div><div style={{fontSize:38,fontWeight:900,marginTop:8}}>{data.reports.length}</div><div style={{color:'#8fa0b5'}}>Intelligence briefs</div></div>
+          <div style={panel}><div style={{fontSize:12,color:'#79b8ff',fontWeight:800}}>OPPORTUNITIES</div><div style={{fontSize:38,fontWeight:900,marginTop:8}}>{opportunities.length}</div><div style={{color:'#8fa0b5'}}>Suggested next moves</div></div>
         </section>
 
         <section style={{marginTop:24}}>
           <div style={{fontSize:12,letterSpacing:'.18em',fontWeight:800,color:'#79b8ff',marginBottom:12}}>MY WORKFORCE</div>
           <div style={{...panel,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12}}>
-            {data.workforce?.agents.map(agent => <div key={agent.id} style={{padding:15,borderRadius:13,background:'#0d1420'}}><strong>{agent.name}</strong><div style={{fontSize:13,color:'#8ea0b8',marginTop:6}}>{agent.category}</div><div style={{fontSize:12,color:'#6fd6a7',marginTop:7}}>Permission: {agent.permission_level.replaceAll('_',' ')}</div></div>)}
+            {data.workforce?.agents.map(agent => <div key={agent.id} style={{padding:15,borderRadius:13,background:'#0d1420'}}><strong>{agent.name}</strong><div style={{fontSize:13,color:'#8ea0b8',marginTop:6}}>{agent.category}</div><div style={{fontSize:12,color:'#6fd6a7',marginTop:7}}>Permission: {agent.permission_level.replaceAll('_',' ')}</div><div style={{fontSize:12,color:'#7f91a7',marginTop:5}}>Status: {agent.status.replaceAll('_',' ')}</div></div>)}
           </div>
         </section>
 
@@ -96,8 +101,18 @@ export default function AgentXCommandCenterPage() {
             <div style={{display:'flex',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}><div><div style={{fontSize:12,fontWeight:800,color:mission.status==='active'?'#62e0a1':'#79b8ff'}}>{mission.status.toUpperCase()}</div><h2 style={{fontSize:28,margin:'8px 0'}}>{mission.name}</h2></div>{mission.status==='ready' && <button onClick={()=>approve(mission.id)} disabled={approving===mission.id} style={{alignSelf:'flex-start',background:'#eef6ff',color:'#07111d',border:0,borderRadius:999,padding:'12px 17px',fontWeight:900,cursor:'pointer'}}>{approving===mission.id?'APPROVING…':'APPROVE MISSION'}</button>}</div>
             <p style={{color:'#b6c3d3',lineHeight:1.55,maxWidth:820}}>{mission.objective}</p>
             <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:12}}>{mission.agents.map(agent=><span key={agent.id} style={{fontSize:13,padding:'7px 10px',borderRadius:999,background:'#0d1420',color:'#afbdce'}}>{agent.name} · {agent.status}</span>)}</div>
-            <div style={{fontSize:12,color:'#8fa0b5',marginTop:14}}>Human review required before activation.</div>
+            <div style={{fontSize:12,color:'#8fa0b5',marginTop:14}}>{mission.status === 'ready' ? 'Human review required before activation.' : 'Mission approved. Execution remains limited to configured permissions and may require additional approvals.'}</div>
           </div>)}</div>
+        </section>
+
+        <section style={{marginTop:24}}>
+          <div style={{fontSize:12,letterSpacing:'.18em',fontWeight:800,color:'#79b8ff',marginBottom:12}}>MY OPPORTUNITIES</div>
+          <div style={panel}>
+            {opportunities.length > 0 ? <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(230px,1fr))',gap:12}}>
+              {opportunities.map((opportunity,index)=><div key={opportunity} style={{padding:15,borderRadius:13,background:'#0d1420'}}><div style={{fontSize:11,fontWeight:900,letterSpacing:'.12em',color:'#79b8ff'}}>OPPORTUNITY {String(index+1).padStart(2,'0')}</div><div style={{marginTop:8,color:'#c7d3e2',lineHeight:1.5}}>{opportunity}</div></div>)}
+            </div> : <div style={{color:'#8fa0b5'}}>Opportunities will appear here as Agent X reports generate recommended next moves.</div>}
+            <div style={{fontSize:12,color:'#7f91a7',marginTop:14}}>These are recommendations for human review—not guarantees, commitments, or automatic actions.</div>
+          </div>
         </section>
 
         <section style={{marginTop:24}}>
