@@ -6,6 +6,8 @@
     "postgres health passes",
     "voice connection passes",
     "review alert passes",
+    "media request and protected dashboard workflow pass",
+    "media request retention and expiry verified",
     "desktop and iPhone browser checks pass"
   ],
   "behavior_gates": [

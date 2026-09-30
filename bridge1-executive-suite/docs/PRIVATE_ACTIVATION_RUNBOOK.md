@@ -60,3 +60,13 @@ Pause activation immediately if the agent invents a relationship, mentions the p
 ## Launch authority
 
 Technical readiness, executive-behavior readiness and owner approval are three separate approvals. All three must be affirmative. No automated system may grant final launch authority.
+# Media request acceptance
+
+Before enabling public access to `/media.html`:
+
+1. Submit a test request through the media-access form.
+2. Confirm the request appears in the protected Review Room without exposing contact details publicly.
+3. Confirm the alert contains no business email address and directs the reviewer to the protected dashboard.
+4. Test every media status action: approve to schedule, invitation issued, completed and declined.
+5. Confirm no invitation code or voice-room access is issued automatically.
+6. Confirm the database removes expired media requests after the 90-day retention window.

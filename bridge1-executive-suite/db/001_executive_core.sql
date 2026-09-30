@@ -68,3 +68,15 @@ create table if not exists bridge_session_snapshots (
 
 create index if not exists bridge_session_snapshots_review_idx on bridge_session_snapshots (status, updated_at desc);
 create index if not exists bridge_session_snapshots_expiry_idx on bridge_session_snapshots (expires_at);
+
+create table if not exists bridge_media_requests (
+  id uuid primary key,
+  status text not null default 'pending-media-review',
+  request jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  expires_at timestamptz not null
+);
+
+create index if not exists bridge_media_requests_status_idx on bridge_media_requests (status, created_at desc);
+create index if not exists bridge_media_requests_expiry_idx on bridge_media_requests (expires_at);

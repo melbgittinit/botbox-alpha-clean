@@ -15,6 +15,12 @@
       <div class="summary queue-summary"><div><strong id="total">0</strong><span>Total opportunities</span></div><div><strong id="high">0</strong><span>High priority</span></div><div><strong id="pending">0</strong><span>Pending review</span></div></div>
       <div class="toolbar"><h2>Executive opportunities</h2><button id="refresh">Refresh</button></div>
       <div id="queue" class="queue"></div>
+      <section class="media-review" aria-labelledby="mediaReviewTitle">
+        <div class="toolbar"><div><p class="section-kicker">CONTROLLED MEDIA ACCESS</p><h2 id="mediaReviewTitle">Media preview requests</h2></div></div>
+        <div class="summary media-summary"><div><strong id="mediaTotal">0</strong><span>Total requests</span></div><div><strong id="mediaPending">0</strong><span>Pending review</span></div><div><strong id="mediaApproved">0</strong><span>Approved to schedule</span></div><div><strong id="mediaInvited">0</strong><span>Invitations issued</span></div></div>
+        <p class="privacy-note">No invitation is issued automatically. Contact details are shown only inside this protected dashboard.</p>
+        <div id="mediaQueue" class="queue media-queue"></div>
+      </section>
       <p id="dashboardError" role="alert"></p>
     </section>
   </main>

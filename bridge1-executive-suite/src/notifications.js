@@ -26,3 +26,32 @@ export async function sendReviewAlert(queueItem) {
   });
   return response.ok ? { status:"sent" } : { status:"failed", code:response.status };
 }
+
+export function buildMediaAccessAlert(request) {
+  return {
+    subject: `BRIDGE-1 media access request: ${request.outlet}`,
+    text: [
+      "A BRIDGE-1 media access request is ready for authorized human review.",
+      `Outlet: ${request.outlet}`,
+      `Request type: ${request.request_type}`,
+      `Reporting focus: ${request.reporting_focus}`,
+      `Request ID: ${request.id}`,
+      "Open the protected BRIDGE-1 review dashboard for permitted contact details and approval actions.",
+      "No invitation has been issued automatically."
+    ].join("\n")
+  };
+}
+
+export async function sendMediaAccessAlert(request) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.REVIEW_EMAIL;
+  const from = process.env.ALERT_FROM_EMAIL;
+  if (!apiKey || !to || !from) return { status:"not_configured" };
+  const alert = buildMediaAccessAlert(request);
+  const response = await fetch("https://api.resend.com/emails", {
+    method:"POST",
+    headers:{ "Authorization":`Bearer ${apiKey}`, "Content-Type":"application/json" },
+    body:JSON.stringify({ from, to:[to], subject:alert.subject, text:alert.text })
+  });
+  return response.ok ? { status:"sent" } : { status:"failed", code:response.status };
+}

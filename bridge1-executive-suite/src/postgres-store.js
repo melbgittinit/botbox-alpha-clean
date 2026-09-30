@@ -12,6 +12,18 @@ create index if not exists bridge_session_snapshots_review_idx
   on bridge_session_snapshots (status, updated_at desc);
 create index if not exists bridge_session_snapshots_expiry_idx
   on bridge_session_snapshots (expires_at);
+create table if not exists bridge_media_requests (
+  id uuid primary key,
+  status text not null,
+  request jsonb not null,
+  created_at timestamptz not null,
+  updated_at timestamptz not null,
+  expires_at timestamptz not null
+);
+create index if not exists bridge_media_requests_status_idx
+  on bridge_media_requests (status, created_at desc);
+create index if not exists bridge_media_requests_expiry_idx
+  on bridge_media_requests (expires_at);
 `;
 
 export async function createPostgresStore(connectionString = process.env.DATABASE_URL) {
@@ -43,6 +55,22 @@ export async function createPostgresStore(connectionString = process.env.DATABAS
     },
     async deleteExpired() {
       const result = await pool.query(`delete from bridge_session_snapshots where expires_at <= now()`);
+      return result.rowCount;
+    },
+    async saveMediaRequest(request) {
+      await pool.query(
+        `insert into bridge_media_requests (id,status,request,created_at,updated_at,expires_at)
+         values ($1,$2,$3,$4,$5,$6)
+         on conflict (id) do update set status=excluded.status,request=excluded.request,updated_at=excluded.updated_at,expires_at=excluded.expires_at`,
+        [request.id, request.status, request, request.created_at, request.updated_at, request.expires_at]
+      );
+    },
+    async loadMediaRequests() {
+      const result = await pool.query(`select request from bridge_media_requests where expires_at > now() order by created_at asc limit 500`);
+      return result.rows.map(row => row.request);
+    },
+    async deleteExpiredMediaRequests() {
+      const result = await pool.query(`delete from bridge_media_requests where expires_at <= now()`);
       return result.rowCount;
     },
     async health() {

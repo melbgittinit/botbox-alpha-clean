@@ -23,9 +23,15 @@ Browser-first voice agent for the BrandBridge Executive Demonstration Suite at T
 - Rate limits for invitation attempts and voice-session creation
 - End-to-end acceptance simulator and deployment environment audit
 - Durable session-completion outcomes and a protected aggregate executive funnel integrated into the human-review dashboard
+- Accessible media experience at `/media.html` with an editorial-lens preview, press facts, approved copy and print-ready briefing
+- Lens-responsive sample opportunity brief showing the decision-ready output that reaches human review
+- Consent-based media access requests with rate limiting, 90-day expiry and no automatic invitation issuance
+- Protected media-request review queue with approve, invitation-issued, complete and decline states
+- Journalist FAQ distinguishing the public briefing, supervised pilot and live voice-room requirements
 
 See `docs/EXECUTIVE_ARCHITECTURE.md` for the governing architecture and minimum private-beta gate.
 See `docs/PRIVATE_ACTIVATION_RUNBOOK.md` and `docs/SUPERVISED_VOICE_ACCEPTANCE.md` before any hosted activation.
+See `docs/MEDIA_EXPERIENCE.md` for the approved media description, facts and disclosure language.
 
 ## Local verification
 

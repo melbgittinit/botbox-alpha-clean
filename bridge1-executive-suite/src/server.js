@@ -5,7 +5,8 @@ import { fileURLToPath } from "node:url";
 import { BRIDGE1_PROMPT } from "./bridge1-prompt.js";
 import { REALTIME_TOOLS } from "./realtime-tools.js";
 import { closeExecutivePersistence, completeExecutiveSession, configureExecutivePersistence, createExecutiveSession, executeCoreTool, executivePersistenceHealth, executivePersistenceMode, getExecutiveMetrics, getExecutiveSession, hydrateExecutiveSessions, listReviewQueue, updateHandoffStatus } from "./executive-core.js";
-import { sendReviewAlert } from "./notifications.js";
+import { configureMediaAccessPersistence, getMediaAccessMetrics, hydrateMediaAccessRequests, listMediaAccessRequests, pruneExpiredMediaAccessRequests, submitMediaAccessRequest, updateMediaAccessStatus } from "./media-access.js";
+import { sendMediaAccessAlert, sendReviewAlert } from "./notifications.js";
 import { createPostgresStore } from "./postgres-store.js";
 import { issueInviteToken, parseCookie, rateLimit, verifyInviteCode, verifyInviteToken } from "./access-control.js";
 
@@ -18,8 +19,9 @@ const reviewToken = process.env.REVIEW_TOKEN || "";
 const bridgeActive = process.env.BRIDGE1_ACTIVE !== "false";
 const inviteRequired = process.env.INVITE_REQUIRED === "true";
 const signingSecret = process.env.SESSION_SIGNING_SECRET || "";
+let mediaPruneTimer;
 
-const types = { ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".css":"text/css; charset=utf-8", ".svg":"image/svg+xml" };
+const types = { ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".css":"text/css; charset=utf-8", ".svg":"image/svg+xml", ".png":"image/png", ".jpg":"image/jpeg", ".jpeg":"image/jpeg", ".webp":"image/webp" };
 
 function json(res, status, body, origin) {
   if (origin && allowedOrigins.has(origin)) {
@@ -117,6 +119,18 @@ const server = http.createServer(async (req, res) => {
       res.setHeader("Set-Cookie",`bridge1_invite=${token}; Max-Age=14400; Path=/; HttpOnly; Secure; SameSite=None`);
       return json(res,200,{invited:true},req.headers.origin);
     }
+    if (req.method === "POST" && req.url === "/api/media-access") {
+      const attempt=rateLimit(`media:${clientKey(req)}`,{limit:5,windowMs:60*60*1000});
+      if(!attempt.allowed){res.setHeader("Retry-After",attempt.retryAfter);return json(res,429,{error:"Please wait before submitting another media request."},req.headers.origin);}
+      try {
+        const result=await submitMediaAccessRequest(await readJson(req));
+        if(result.request_id){const item=listMediaAccessRequests().find(entry=>entry.id===result.request_id);if(item)sendMediaAccessAlert(item).catch(error=>console.error("Media alert failed",error));}
+        return json(res,202,result,req.headers.origin);
+      } catch(error) {
+        const messages={MEDIA_CONSENT_REQUIRED:"Permission to use your details for this request is required.",MEDIA_REQUIRED_FIELDS:"Complete every required media-request field.",MEDIA_INVALID_EMAIL:"Enter a valid business email address."};
+        return json(res,400,{error:messages[error.message]||"The media request could not be submitted."},req.headers.origin);
+      }
+    }
     if (protectedRoute(req) && !hasInvite(req)) return json(res,403,{error:"A private invitation is required."},req.headers.origin);
     if ((req.url === "/api/core/sessions" || req.url.startsWith("/api/realtime-token")) && req.method === "POST") {
       const attempt=rateLimit(`session:${clientKey(req)}`,{limit:12,windowMs:15*60*1000});
@@ -152,10 +166,24 @@ const server = http.createServer(async (req, res) => {
       if (!reviewToken || req.headers.authorization !== `Bearer ${reviewToken}`) return json(res, 401, { error:"Unauthorized" });
       return json(res, 200, getExecutiveMetrics());
     }
+    if (req.method === "GET" && req.url === "/api/media-requests") {
+      if (!reviewToken || req.headers.authorization !== `Bearer ${reviewToken}`) return json(res, 401, { error:"Unauthorized" });
+      return json(res, 200, { requests:listMediaAccessRequests() });
+    }
+    if (req.method === "GET" && req.url === "/api/media-metrics") {
+      if (!reviewToken || req.headers.authorization !== `Bearer ${reviewToken}`) return json(res, 401, { error:"Unauthorized" });
+      return json(res, 200, getMediaAccessMetrics());
+    }
     if (req.method === "POST" && req.url.startsWith("/api/review-queue/")) {
       if (!reviewToken || req.headers.authorization !== `Bearer ${reviewToken}`) return json(res, 401, { error:"Unauthorized" });
       const sessionId = req.url.split("/")[3];
       try { return json(res, 200, await updateHandoffStatus(sessionId, (await readJson(req)).status)); }
+      catch (error) { return json(res, 400, { error:error.message }); }
+    }
+    if (req.method === "POST" && /^\/api\/media-requests\/[^/]+$/.test(req.url)) {
+      if (!reviewToken || req.headers.authorization !== `Bearer ${reviewToken}`) return json(res, 401, { error:"Unauthorized" });
+      const requestId = req.url.split("/")[3];
+      try { return json(res, 200, await updateMediaAccessStatus(requestId, (await readJson(req)).status)); }
       catch (error) { return json(res, 400, { error:error.message }); }
     }
     if (req.method === "POST" && req.url.startsWith("/api/realtime-token")) return await createRealtimeSecret(req, res);
@@ -170,11 +198,15 @@ const server = http.createServer(async (req, res) => {
 async function bootstrap() {
   const store = await createPostgresStore();
   configureExecutivePersistence(store);
-  const restored = await hydrateExecutiveSessions();
-  server.listen(port, "0.0.0.0", () => console.log(`BRIDGE-1 listening on ${port}; persistence=${executivePersistenceMode()}; restored=${restored}`));
+  configureMediaAccessPersistence(store);
+  const [restored,mediaRestored] = await Promise.all([hydrateExecutiveSessions(),hydrateMediaAccessRequests()]);
+  mediaPruneTimer=setInterval(()=>pruneExpiredMediaAccessRequests().catch(error=>console.error("Media request pruning failed",error)),6*60*60*1000);
+  mediaPruneTimer.unref();
+  server.listen(port, "0.0.0.0", () => console.log(`BRIDGE-1 listening on ${port}; persistence=${executivePersistenceMode()}; sessions=${restored}; media_requests=${mediaRestored}`));
 }
 
 async function shutdown() {
+  if(mediaPruneTimer)clearInterval(mediaPruneTimer);
   server.close(async () => { await closeExecutivePersistence(); process.exit(0); });
 }
 process.on("SIGTERM", shutdown);
