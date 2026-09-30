@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07090d">
+  <title>BRIDGE-1 Executive Voice Room</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/invite.css">
+</head>
+<body>
+  <main>
+    <section class="entrance" aria-labelledby="entranceTitle">
+      <img src="/bridge1-possibility-to-approval.png" alt="BRIDGE-1 turning executive possibilities into a human-approved path forward">
+      <div class="entrance__veil"></div>
+      <div class="entrance__copy">
+        <p class="eyebrow">BOT FACTORY · BRANDBRIDGE · PRIVATE EXECUTIVE SUITE</p>
+        <h1 id="entranceTitle">From executive possibility to a <span>human-approved path forward.</span></h1>
+        <p>BRIDGE-1 listens, diagnoses, designs and qualifies trained-agent opportunities—then prepares the right opportunity for authorized human review.</p>
+        <div class="entrance__actions"><a class="primary link-button" href="#private-room">Enter the private demonstration</a><a class="text-link" href="#at-work">See BRIDGE-1 at work</a></div>
+        <p class="independent">Independent BOT FACTORY executive concept. Demonstration examples do not imply company affiliation or endorsement.</p>
+      </div>
+    </section>
+
+    <section class="at-work" id="at-work" aria-labelledby="workTitle">
+      <div class="at-work__image"><img src="/bridge1-voice-to-human-review.png" alt="An executive speaking with BRIDGE-1 while a human strategist reviews the resulting executive brief" loading="lazy"></div>
+      <div class="at-work__copy">
+        <p class="eyebrow">BRIDGE-1 AT WORK</p>
+        <h2 id="workTitle">A real conversation becomes a decision-ready opportunity.</h2>
+        <p>The executive speaks naturally. BRIDGE-1 identifies the business gap, designs the opportunity, shapes a responsible pilot and prepares a concise non-binding brief. A human strategist makes the final commercial decision.</p>
+        <ol class="function-path"><li><strong>Listen & Diagnose</strong><span>Find the consequential business need.</span></li><li><strong>Design the Opportunity</strong><span>Turn the need into a useful trained-agent concept.</span></li><li><strong>Demonstrate the Concept</strong><span>Make the possibility understandable and specific.</span></li><li><strong>Qualify & Brief</strong><span>Define users, value, pilot and success measures.</span></li><li><strong>Human Review & Handoff</strong><span>Move qualified interest to an authorized person.</span></li></ol>
+      </div>
+    </section>
+
+    <section class="private-room" id="private-room" aria-labelledby="privateRoomTitle">
+      <div class="private-room__intro"><p class="eyebrow">INVITATION-ONLY PREVIEW</p><h2 id="privateRoomTitle">Experience the executive conversation.</h2><p>Use an approved invitation to enter. BRIDGE-1 can explore and prepare an opportunity, but cannot bind pricing, contracts, guarantees or deployment commitments.</p></div>
+      <div class="room">
+    <section id="inviteGate" class="invite" hidden>
+      <p class="eyebrow">PRIVATE EXECUTIVE ACCESS</p>
+      <h2>Enter your invitation</h2>
+      <p>This demonstration room is currently available by invitation for supervised executive previews.</p>
+      <form id="inviteForm"><input id="inviteCode" type="password" autocomplete="off" required placeholder="Private invitation code"><button class="primary">Enter Executive Suite</button></form>
+      <p id="inviteError" role="alert"></p>
+    </section>
+    <div id="voiceRoom">
+    <section class="identity" aria-labelledby="title">
+      <p class="eyebrow">BOT FACTORY · BRANDBRIDGE VOICE ROOM</p>
+      <h1 id="title">Speak with <span>BRIDGE-1</span></h1>
+      <p class="lede">A private executive voice consultation for finding, shaping and advancing trained-agent opportunities.</p>
+      <div class="trust"><span>Voice first</span><span>Human-approved terms</span><span>Audio not recorded</span></div>
+    </section>
+
+    <section class="console" aria-label="BRIDGE-1 voice controls">
+      <div class="orb" id="orb" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p id="status" class="status" role="status">Ready for a private conversation</p>
+      <button id="start" class="primary">Start private conversation</button>
+      <div class="controls" hidden id="controls">
+        <button id="mute">Mute</button>
+        <button id="end">End conversation</button>
+      </div>
+      <details class="consent">
+        <summary>Privacy and authority</summary>
+        <p>BRIDGE-1 is an AI voice agent representing BOT FACTORY. A temporary transcript may support this live session. Nothing discussed is a binding proposal, contract or guarantee. Contact information is requested only with permission.</p>
+      </details>
+    </section>
+
+    <section class="starter" aria-labelledby="starter-title">
+      <h2 id="starter-title">You might begin with…</h2>
+      <div class="prompts">
+        <button data-prompt="Help me find the most valuable agent opportunity in my organization.">Find an opportunity</button>
+        <button data-prompt="Show me an executive-level industry demonstration.">See a demonstration</button>
+        <button data-prompt="Explain what a six-figure institutional pilot would include.">Explore a pilot</button>
+        <button data-prompt="How could a trained agent improve revenue without becoming a generic chatbot?">Ask BRIDGE-1</button>
+      </div>
+    </section>
+    </div>
+      </div>
+    </section>
+  </main>
+  <audio id="remoteAudio" autoplay></audio>
+  <script type="module" src="/voice.js"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+{% liquid
+  assign room_url = section.settings.room_url | strip
+%}
+
+<section class="bb-voice" id="bridge1-voice-{{ section.id }}">
+  <div class="bb-voice__hero">
+    {% if section.settings.hero_image != blank %}
+      {{ section.settings.hero_image | image_url: width: 2400 | image_tag: class: 'bb-voice__hero-image', loading: 'eager', widths: '750, 1100, 1500, 2000, 2400', sizes: '100vw' }}
+    {% endif %}
+    <div class="bb-voice__hero-veil"></div>
+    <div class="bb-voice__hero-copy">
+      <p class="bb-voice__eyebrow">{{ section.settings.eyebrow }}</p>
+      <h2>{{ section.settings.reason_heading }}</h2>
+      <p>{{ section.settings.reason_description }}</p>
+      <a class="bb-voice__button" href="#bridge1-conversation-{{ section.id }}">{{ section.settings.cta_label }}</a>
+      <small>{{ section.settings.independence_notice }}</small>
+    </div>
+  </div>
+
+  <div class="bb-voice__proof">
+    <div class="bb-voice__proof-image">
+      {% if section.settings.human_image != blank %}
+        {{ section.settings.human_image | image_url: width: 1800 | image_tag: loading: 'lazy', widths: '600, 900, 1200, 1500, 1800', sizes: '(min-width: 900px) 58vw, 100vw' }}
+      {% endif %}
+    </div>
+    <div class="bb-voice__proof-copy">
+      <p class="bb-voice__eyebrow">{{ section.settings.proof_eyebrow }}</p>
+      <h3>{{ section.settings.proof_heading }}</h3>
+      <p>{{ section.settings.proof_description }}</p>
+      <ol>
+        <li>{{ section.settings.function_1 }}</li>
+        <li>{{ section.settings.function_2 }}</li>
+        <li>{{ section.settings.function_3 }}</li>
+        <li>{{ section.settings.function_4 }}</li>
+        <li>{{ section.settings.function_5 }}</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="bb-voice__conversation" id="bridge1-conversation-{{ section.id }}">
+  <div class="bb-voice__copy">
+    <p class="bb-voice__eyebrow">{{ section.settings.conversation_eyebrow }}</p>
+    <h2>{{ section.settings.heading }}</h2>
+    <p>{{ section.settings.description }}</p>
+    <ul aria-label="Voice room assurances">
+      <li>Natural executive conversation</li>
+      <li>Concept demonstration and pilot guidance</li>
+      <li>Final scope, pricing and agreements require human approval</li>
+    </ul>
+  </div>
+
+  <div class="bb-voice__stage">
+    {% if room_url != blank %}
+      <iframe
+        src="{{ room_url | escape }}"
+        title="BRIDGE-1 executive voice room"
+        allow="microphone"
+        loading="eager"
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    {% else %}
+      <div class="bb-voice__standby">
+        <span aria-hidden="true"></span>
+        <strong>BRIDGE-1 voice activation pending</strong>
+        <p>The demonstration suite is ready to receive the secure voice-service address.</p>
+      </div>
+    {% endif %}
+  </div>
+  </div>
+</section>
+
+{% style %}
+  #bridge1-voice-{{ section.id }}{color:#f7f5ed;background:#050609}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero{position:relative;min-height:min(880px,92vh);display:flex;align-items:end;overflow:hidden}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero-veil{position:absolute;inset:0;background:linear-gradient(90deg,#050609f2 0,#050609b5 45%,#05060920 76%),linear-gradient(0deg,#050609e8 0,transparent 55%)}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero-copy{position:relative;width:min(1280px,92vw);margin:0 auto;padding:clamp(5rem,10vw,9rem) 0}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero-copy h2{max-width:900px;font-size:clamp(3rem,7vw,6.7rem);line-height:.92;letter-spacing:-.04em;margin:.25em 0;font-family:Georgia,serif}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero-copy>p:not(.bb-voice__eyebrow){max-width:720px;color:#d1d6df;font-size:clamp(1.05rem,2vw,1.35rem)}
+  #bridge1-voice-{{ section.id }} .bb-voice__hero-copy small{display:block;max-width:680px;margin-top:1.25rem;color:#969eab}
+  #bridge1-voice-{{ section.id }} .bb-voice__button{display:inline-flex;margin-top:1.25rem;padding:1rem 1.35rem;border-radius:999px;background:#e7c978;color:#17130a;text-decoration:none;font-weight:750}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:clamp(2rem,5vw,5rem);align-items:center;width:min(1380px,92vw);margin:0 auto;padding:clamp(5rem,9vw,9rem) 0}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof-image{border:1px solid #394354;border-radius:28px;overflow:hidden;box-shadow:0 35px 90px #000a}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof-image img{display:block;width:100%;height:auto}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof-copy h3{font-size:clamp(2.2rem,5vw,4.5rem);line-height:.98;margin:.3em 0;font-family:Georgia,serif}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof-copy>p:not(.bb-voice__eyebrow){color:#b7bdc8}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof-copy ol{padding-left:1.4rem}
+  #bridge1-voice-{{ section.id }} .bb-voice__proof-copy li{padding:.55rem 0;border-top:1px solid #29313e;color:#d8dce3}
+  #bridge1-voice-{{ section.id }} .bb-voice__conversation{display:grid;grid-template-columns:minmax(260px,.75fr) minmax(360px,1.25fr);gap:clamp(1.5rem,4vw,4rem);align-items:center;padding:clamp(3rem,7vw,7rem) max(5vw,1.25rem);background:radial-gradient(circle at 80% 20%,#222b3c 0,#090c12 45%,#050609 100%)}
+  #bridge1-voice-{{ section.id }} .bb-voice__eyebrow{color:#e7c978;letter-spacing:.2em;font-size:.75rem;font-weight:700}
+  #bridge1-voice-{{ section.id }} h2{font-size:clamp(2.2rem,5vw,4.6rem);line-height:.98;margin:.35em 0;font-family:Georgia,serif}
+  #bridge1-voice-{{ section.id }} .bb-voice__copy>p:not(.bb-voice__eyebrow),#bridge1-voice-{{ section.id }} li{color:#c4cad4}
+  #bridge1-voice-{{ section.id }} ul{padding-left:1.2rem}
+  #bridge1-voice-{{ section.id }} .bb-voice__stage{min-height:690px;border:1px solid #374154;border-radius:28px;overflow:hidden;background:#080b10;box-shadow:0 30px 80px #0009}
+  #bridge1-voice-{{ section.id }} iframe{display:block;width:100%;height:690px;border:0;background:#080b10}
+  #bridge1-voice-{{ section.id }} .bb-voice__standby{height:690px;display:grid;place-content:center;text-align:center;padding:2rem;color:#cbd0d9}
+  #bridge1-voice-{{ section.id }} .bb-voice__standby span{display:block;width:120px;height:120px;margin:0 auto 1.5rem;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff7,transparent 20%),radial-gradient(circle,#e7c978,#735e2c 38%,#161d28 70%);box-shadow:0 0 70px #e7c97844}
+  @media(max-width:800px){#bridge1-voice-{{ section.id }} .bb-voice__hero{min-height:760px}#bridge1-voice-{{ section.id }} .bb-voice__hero-veil{background:linear-gradient(0deg,#050609fa 0,#0506099c 68%,#05060944)}#bridge1-voice-{{ section.id }} .bb-voice__proof,#bridge1-voice-{{ section.id }} .bb-voice__conversation{grid-template-columns:1fr}#bridge1-voice-{{ section.id }} .bb-voice__stage,#bridge1-voice-{{ section.id }} iframe,#bridge1-voice-{{ section.id }} .bb-voice__standby{min-height:650px;height:650px}}
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "BRIDGE-1 voice room",
+  "tag": "section",
+  "class": "section-bridge1-voice",
+  "settings": [
+    { "type": "image_picker", "id": "hero_image", "label": "Purpose hero image" },
+    { "type": "image_picker", "id": "human_image", "label": "BRIDGE-1 at work image" },
+    { "type": "text", "id": "eyebrow", "label": "Hero eyebrow", "default": "BOT FACTORY · BRANDBRIDGE · PRIVATE EXECUTIVE SUITE" },
+    { "type": "text", "id": "reason_heading", "label": "Reason for being", "default": "From executive possibility to a human-approved path forward." },
+    { "type": "textarea", "id": "reason_description", "label": "Purpose description", "default": "BRIDGE-1 listens, diagnoses, designs and qualifies trained-agent opportunities—then prepares the right opportunity for authorized human review." },
+    { "type": "text", "id": "cta_label", "label": "Entrance button", "default": "Enter the private demonstration" },
+    { "type": "textarea", "id": "independence_notice", "label": "Independence notice", "default": "Independent BOT FACTORY executive concept. Demonstration examples do not imply company affiliation or endorsement." },
+    { "type": "text", "id": "proof_eyebrow", "label": "Proof eyebrow", "default": "BRIDGE-1 AT WORK" },
+    { "type": "text", "id": "proof_heading", "label": "Proof heading", "default": "A real conversation becomes a decision-ready opportunity." },
+    { "type": "textarea", "id": "proof_description", "label": "Proof description", "default": "The executive speaks naturally. BRIDGE-1 organizes the need, shapes a pilot and prepares a concise non-binding brief for authorized human review." },
+    { "type": "text", "id": "function_1", "label": "Function 1", "default": "Listen & Diagnose" },
+    { "type": "text", "id": "function_2", "label": "Function 2", "default": "Design the Opportunity" },
+    { "type": "text", "id": "function_3", "label": "Function 3", "default": "Demonstrate the Concept" },
+    { "type": "text", "id": "function_4", "label": "Function 4", "default": "Qualify & Brief" },
+    { "type": "text", "id": "function_5", "label": "Function 5", "default": "Human Review & Handoff" },
+    { "type": "text", "id": "conversation_eyebrow", "label": "Conversation eyebrow", "default": "INVITATION-ONLY PREVIEW" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Speak with BRIDGE-1" },
+    { "type": "textarea", "id": "description", "label": "Description", "default": "Enter a private executive voice consultation to identify and shape a trained-agent opportunity for your organization." },
+    { "type": "url", "id": "room_url", "label": "Secure voice room URL" }
+  ],
+  "presets": [{ "name": "BRIDGE-1 voice room" }]
+}
+{% endschema %}

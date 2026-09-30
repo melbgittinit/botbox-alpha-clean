@@ -1,0 +1,8 @@
+import assert from "node:assert/strict";
+import { createExecutiveSession,prepareBrief,requestHumanReview,updateOpportunity } from "../src/executive-core.js";
+const session=await createExecutiveSession({sampler:"fresh-enterprise-opportunity"});
+await updateOpportunity(session.id,{organization:"Private Demonstration Company",role:"Chief Customer Officer",business_gap:"Campaign interest is not converted into an owned continuity relationship.",recommended_agent:"Commerce and Opportunity Intelligence Agent",primary_users:["customers","customer strategy team"],commercial_value:["qualified continuity","better handoffs"],pilot_scope:"One audience, one journey, one supervised channel and a 90-day measurement window.",success_measures:["qualified conversations","return engagement","approved human handoffs"],timeline:"Next planning quarter",decision_authority:"executive-sponsor",investment_class:"institutional"});
+const brief=await prepareBrief(session.id);assert.equal(brief.status,"prepared");assert.equal(brief.brief.non_binding,true);
+const blocked=await requestHumanReview(session.id,{contact_permission:true,share_summary:false});assert.equal(blocked.status,"consent_required");
+const handoff=await requestHumanReview(session.id,{contact_permission:true,share_summary:true,name:"Private Executive",role:"CCO",organization:"Private Demonstration Company",preferred_contact:"video meeting"});assert.equal(handoff.status,"pending-human-review");assert.equal(handoff.priority,"high");
+console.log(JSON.stringify({status:"pass",checks:["opportunity saved","brief non-binding","incomplete consent blocked","institutional handoff prioritized"]},null,2));

@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import{hashInviteCode,issueInviteToken,rateLimit,verifyInviteCode,verifyInviteToken}from"../src/access-control.js";
+test("invitation codes are verified by hash",()=>{const hash=hashInviteCode("private-executive-code");assert.equal(verifyInviteCode("private-executive-code",hash),true);assert.equal(verifyInviteCode("wrong",hash),false);});
+test("signed tokens reject tampering",()=>{const secret="a-very-long-session-signing-secret-123456",token=issueInviteToken(secret);assert.equal(verifyInviteToken(token,secret),true);assert.equal(verifyInviteToken(token+"x",secret),false);});
+test("rate limiter closes",()=>{assert.equal(rateLimit("test-rate",{limit:2,windowMs:10000}).allowed,true);assert.equal(rateLimit("test-rate",{limit:2,windowMs:10000}).allowed,true);assert.equal(rateLimit("test-rate",{limit:2,windowMs:10000}).allowed,false);});

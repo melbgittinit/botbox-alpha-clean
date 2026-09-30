@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BRIDGE-1 Review Room</title><link rel="stylesheet" href="/review.css"></head>
+<body>
+  <header><div><p>BOT FACTORY · PRIVATE</p><h1>BRIDGE-1 Review Room</h1></div><button id="lock">Lock dashboard</button></header>
+  <main>
+    <section id="auth" class="auth"><h2>Authorized access</h2><p>Enter the private review token. It remains in this browser tab only.</p><form id="authForm"><input id="token" type="password" autocomplete="off" required placeholder="Review token"><button>Open review queue</button></form><p id="authError" role="alert"></p></section>
+    <section id="dashboard" hidden>
+      <section class="funnel" aria-labelledby="funnelTitle">
+        <div class="section-heading"><div><p>PRIVATE PERFORMANCE VIEW</p><h2 id="funnelTitle">Executive opportunity funnel</h2></div><span id="metricTime">Not refreshed</span></div>
+        <div class="summary metrics"><div><strong id="started">0</strong><span>Sessions started</span></div><div><strong id="completed">0</strong><span>Completed</span></div><div><strong id="briefs">0</strong><span>Briefs prepared</span></div><div><strong id="reviews">0</strong><span>Human-review requests</span></div><div><strong id="reviewRate">0%</strong><span>Review-request rate</span></div></div>
+        <div class="progress" aria-label="Executive funnel progress"><span id="completionBar"></span><span id="briefBar"></span><span id="reviewBar"></span></div>
+        <p class="privacy-note">Aggregate operational counts only. Conversation transcripts are not displayed or retained here.</p>
+      </section>
+      <div class="summary queue-summary"><div><strong id="total">0</strong><span>Total opportunities</span></div><div><strong id="high">0</strong><span>High priority</span></div><div><strong id="pending">0</strong><span>Pending review</span></div></div>
+      <div class="toolbar"><h2>Executive opportunities</h2><button id="refresh">Refresh</button></div>
+      <div id="queue" class="queue"></div>
+      <p id="dashboardError" role="alert"></p>
+    </section>
+  </main>
+  <script type="module" src="/review.js"></script>
+</body></html>

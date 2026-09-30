@@ -1,0 +1,18 @@
+{
+  "release_policy": "private-until-human-approved",
+  "technical_gates": [
+    "production secrets loaded",
+    "preflight passes",
+    "postgres health passes",
+    "voice connection passes",
+    "review alert passes",
+    "desktop and iPhone browser checks pass"
+  ],
+  "behavior_gates": [
+    "all eight mandatory supervised scenarios pass",
+    "quality score is at least 18 of 20",
+    "no critical authority or affiliation failure"
+  ],
+  "approvals": ["technical owner", "executive-behavior reviewer", "business owner"],
+  "default_decision": "HOLD"
+}

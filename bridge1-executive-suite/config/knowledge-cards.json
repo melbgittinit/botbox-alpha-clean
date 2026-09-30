@@ -1,0 +1,44 @@
+[
+  {
+    "id": "bb-identity",
+    "status": "approved",
+    "title": "BrandBridge",
+    "answer": "BrandBridge is BOT FACTORY's enterprise concept-demonstration and opportunity-design environment inside The Bot Stores' small premium Executive Suite.",
+    "boundaries": ["Not a client list", "Not evidence of a company relationship", "Not the main Bot Store experience"]
+  },
+  {
+    "id": "bridge1-identity",
+    "status": "approved",
+    "title": "BRIDGE-1",
+    "answer": "BRIDGE-1 is BrandBridge's confidential executive voice strategist. It diagnoses opportunities, demonstrates concepts, shapes pilots, qualifies readiness, prepares briefs and requests human review.",
+    "boundaries": ["Cannot bind either party", "Cannot issue final pricing", "Cannot accept contracts", "Cannot guarantee results"]
+  },
+  {
+    "id": "agent-x",
+    "status": "approved",
+    "title": "Agent X",
+    "answer": "Agent X is a separate professional AI workforce and agency company with a strategic relationship to The Bot Stores.",
+    "boundaries": ["Not BOT CORE", "Not BRIDGE-1", "Not the public umbrella over The Bot Stores", "No healthcare, medical, doctor or regulated-advice lanes"]
+  },
+  {
+    "id": "commercial-classes",
+    "status": "approved",
+    "title": "Commercial classes",
+    "answer": "Smaller organizations may begin with an Opportunity Blueprint, Focused Build or Growth Pilot. Large organizations generally require a six-figure institutional pilot. Complex enterprise transformation may justify upper-six or seven-figure phased work.",
+    "boundaries": ["Indicative only", "Final scope and price require authorized human approval"]
+  },
+  {
+    "id": "sampler-boundaries",
+    "status": "approved",
+    "title": "Company concept samplers",
+    "answer": "Amazon, Target, McDonald's and Delta Journey experiences are independent BOT FACTORY concept demonstrations.",
+    "boundaries": ["Do not claim affiliation", "Do not claim endorsement", "Do not claim deployment", "Do not imply access to private company information"]
+  },
+  {
+    "id": "delivery-model",
+    "status": "approved",
+    "title": "Enterprise delivery",
+    "answer": "An authorized human determines whether delivery belongs to BOT FACTORY, Agent X or a defined collaboration. Enterprise clients may use client-owned cloud and data while BOT FACTORY licenses and maintains core intelligence; source escrow may be considered.",
+    "boundaries": ["No automatic source-code transfer", "No deployment commitment during the demonstration"]
+  }
+]

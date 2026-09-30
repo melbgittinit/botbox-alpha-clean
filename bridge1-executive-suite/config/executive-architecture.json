@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "store": {
+    "name": "The Bot Stores",
+    "role": "Accessible marketplace and showroom for individuals, creators, small businesses and organizations.",
+    "price_ceiling": 299,
+    "primary_attractions": ["BOT CORE", "BUILD-A-BOT", "PREBUILT LOT"],
+    "zones": ["For Me", "For My Business", "For Creators", "For My Organization"]
+  },
+  "bot_factory": {
+    "role": "Creation, training, testing, licensing and maintenance environment for purpose-built bots and agents."
+  },
+  "agent_x": {
+    "role": "Separate professional AI workforce and agency company for business, executive and organizational work.",
+    "relationship": "Strategic connection to The Bot Stores; not BOT CORE, not a store-wide public umbrella and not BRIDGE-1.",
+    "exclusions": ["healthcare", "medical", "doctor", "regulated advice"]
+  },
+  "executive_suite": {
+    "role": "Small premium side room for institutions, major brands, large buyers and high-value prospects.",
+    "must_not_become": "The main Bot Store experience"
+  },
+  "brandbridge": {
+    "role": "Enterprise concept-demonstration and opportunity-design environment inside the Executive Suite.",
+    "samplers": ["Amazon concept", "Target concept", "McDonald's concept", "Delta Journey concept"]
+  },
+  "bridge_1": {
+    "role": "Confidential executive voice strategist, opportunity architect, qualifier and human-handoff agent for BrandBridge.",
+    "authority": ["diagnose", "demonstrate", "shape pilot", "qualify", "prepare executive brief", "request human review"],
+    "prohibited": ["bind either party", "issue final pricing", "accept contracts", "approve discounts", "guarantee results", "claim unapproved relationships"]
+  }
+}
