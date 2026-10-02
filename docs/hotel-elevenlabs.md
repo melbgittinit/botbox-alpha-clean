@@ -19,3 +19,7 @@ POST requires JSON. Speech is limited to 800 characters and approved voices. Sou
 Renew the operator token and expiration for a new production session. Do not attach it to public URLs or downloadable files. A timeout is ambiguous billing-wise; inspect provider history before retrying.
 
 Verify: `node --test scripts/hotel-audio.test.mjs`, TypeScript compilation and live authenticated discovery. A Render deployment alone does not prove ElevenLabs access. Knappy's casting remains unapproved until the user hears a suitable older Black American voice.
+
+## Voice-design auditions
+
+Operator-only POST with action `voice-design` accepts a voice description (20–1000 characters) and an audition script (100–300 characters). It calls the direct ElevenLabs Voice Design API and returns previews. It never saves a permanent voice or publishes media. Prompts and scripts belong in private production storage, not this repository. Requests are bounded, expire with the operator session, and must never be automatically retried after uncertain generation outcomes.

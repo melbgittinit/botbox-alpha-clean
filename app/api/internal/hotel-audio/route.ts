@@ -40,11 +40,15 @@ async function provider(path: string, method = "GET", body?: unknown) {
 async function providerError(response: Response) {
   // Never echo provider messages: they may contain account information or submitted text.
   let code = "provider_error";
+  let requiredPermission: string | undefined;
   try {
     const result = await response.json();
     if (typeof result?.detail?.status === "string" && /^[a-z0-9_]{1,80}$/.test(result.detail.status)) code = result.detail.status;
+    if (code === "missing_permissions" && typeof result?.detail?.message === "string") {
+      requiredPermission = result.detail.message.match(/\b(voices_read|voices_write|voice_generation|text_to_speech|sound_generation)\b/)?.[1];
+    }
   } catch { /* Non-JSON provider error. */ }
-  return json({ error: code, provider: "elevenlabs", provider_status: response.status }, 502);
+  return json({ error: code, provider: "elevenlabs", provider_status: response.status, ...(requiredPermission ? { required_permission: requiredPermission } : {}) }, 502);
 }
 
 function voiceSummary(voice: Record<string, unknown>) {
@@ -104,7 +108,12 @@ export async function POST(request: Request) {
   } catch { return json({ error: "invalid_json" }, 400); }
   let path: string;
   let payload: Record<string, unknown>;
-  if (body.action === "sound-effect") {
+  if (body.action === "voice-design") {
+    if (typeof body.voice_description !== "string" || body.voice_description.length < 20 || body.voice_description.length > 1000) return json({ error: "description_requires_20_to_1000_characters" }, 400);
+    if (typeof body.text !== "string" || body.text.length < 100 || body.text.length > 300) return json({ error: "audition_requires_100_to_300_characters" }, 400);
+    path = "/v1/text-to-voice/design?output_format=mp3_44100_128";
+    payload = { voice_description: body.voice_description, text: body.text, auto_generate_text: false, model_id: "eleven_ttv_v3", loudness: 0, guidance_scale: 5, should_enhance: false };
+  } else if (body.action === "sound-effect") {
     const effect = typeof body.cue_id === "string" && Object.hasOwn(effects, body.cue_id) ? effects[body.cue_id] : null;
     if (!effect) return json({ error: "unknown_sound_cue" }, 400);
     path = "/v1/sound-generation?output_format=mp3_44100_128";
@@ -121,6 +130,17 @@ export async function POST(request: Request) {
   try {
     const response = await provider(path, "POST", payload);
     if (!response.ok) return providerError(response);
+    if (body.action === "voice-design") {
+      const raw = await response.text();
+      if (raw.length > 15_000_000) return json({ error: "invalid_preview_size" }, 502);
+      const result = JSON.parse(raw);
+      if (!Array.isArray(result.previews) || result.previews.length < 1 || result.previews.length > 5) return json({ error: "invalid_previews" }, 502);
+      const previews = result.previews.map((preview: Record<string, unknown>) => {
+        if (typeof preview.audio_base_64 !== "string" || preview.audio_base_64.length < 100 || !/^[A-Za-z0-9+/=\s]+$/.test(preview.audio_base_64)) throw new Error("invalid_preview_audio");
+        return { audio_base_64: preview.audio_base_64, generated_voice_id: preview.generated_voice_id, media_type: preview.media_type, duration_secs: preview.duration_secs };
+      });
+      return json({ provider: "elevenlabs", text: result.text, previews, note: "Auditions only. No voice saved or installed." });
+    }
     const type = response.headers.get("content-type") || "";
     if (!type.includes("audio/") && !type.includes("application/octet-stream")) return json({ error: "unexpected_provider_response" }, 502);
     const bytes = await response.arrayBuffer();
