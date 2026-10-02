@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Need = "make" | "done" | "reach" | "earn" | "better" | "next";
 type Surface = "hub" | "botstores";
+type LiftResult = {
+  source: "ai" | "structured";
+  title: string;
+  readout: { focus: string; friction: string; leverage: string };
+  firstMove: { title: string; why: string; action: string; timebox: string };
+  deliverable: { title: string; content: string };
+  path: string[];
+  boost: string;
+  steps?: string[];
+  result?: string;
+};
+
 type ElevateAccess = {
   authenticated: boolean;
   level: "CUSTOMIZE" | "ACTIVATE" | "POWER_UP" | "MAKE_IT_REAL";
@@ -16,10 +28,37 @@ type ElevateAccess = {
 };
 
 const checkout = {
-  activate: "https://urbanspirit.biz/products/elevate-me-bot-activation-power-levels?variant=53879074324773",
   gift: "https://urbanspirit.biz/products/elevate-me-bot-activation-power-levels?variant=53879074357541",
-  power: "https://urbanspirit.biz/products/elevate-me-bot-activation-power-levels?variant=53879074390309",
-  real: "https://urbanspirit.biz/products/elevate-me-bot-activation-power-levels?variant=53879074423077",
+};
+
+const BOT_IMAGE = "https://cdn.shopify.com/s/files/1/1982/3607/files/Elevate_Me_Bot__A_Brighter_You_1.jpg?v=1790122086";
+
+const needs: { id: Need; label: string; hint: string }[] = [
+  { id: "make", label: "Make Something", hint: "Turn the idea into a first useful version." },
+  { id: "done", label: "Get It Done", hint: "Break through the thing that is stuck." },
+  { id: "reach", label: "Reach My People", hint: "Create the message and path to the right audience." },
+  { id: "earn", label: "Earn Something", hint: "Find the clearest value and a testable offer." },
+  { id: "better", label: "Make It Better", hint: "Improve the part that matters most." },
+  { id: "next", label: "My Next Move", hint: "Choose the move that creates momentum now." },
+];
+
+const card: React.CSSProperties = {
+  background: "linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045))",
+  border: "1px solid rgba(255,255,255,.16)",
+  borderRadius: 26,
+  boxShadow: "0 26px 80px rgba(0,0,0,.28)",
+};
+
+const button: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "14px 19px",
+  borderRadius: 999,
+  border: 0,
+  textDecoration: "none",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
 function getElevateCycleKey() {
@@ -32,14 +71,10 @@ function getElevateCycleKey() {
     }
     const raw = localStorage.getItem("elevate_cycle_key");
     if (!raw) return null;
-    try {
-      const saved = JSON.parse(raw);
-      const key = String(saved?.key || "").trim().toUpperCase();
-      const at = Number(saved?.at || 0);
-      if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(key) && at > 0 && Date.now() - at <= 7 * 24 * 60 * 60 * 1000) {
-        return key;
-      }
-    } catch {}
+    const saved = JSON.parse(raw);
+    const key = String(saved?.key || "").trim().toUpperCase();
+    const at = Number(saved?.at || 0);
+    if (/^ELV-\d{8}-[A-Z0-9]{2,12}$/.test(key) && at > 0 && Date.now() - at <= 7 * 24 * 60 * 60 * 1000) return key;
     localStorage.removeItem("elevate_cycle_key");
     return null;
   } catch {
@@ -57,7 +92,7 @@ function getElevateSessionId() {
     localStorage.setItem("elevate_measurement_session", created);
     return created;
   } catch {
-    return null;
+    return `elevate-${Date.now()}`;
   }
 }
 
@@ -81,95 +116,38 @@ function trackElevateEvent(
         offer,
         channel: params.get("utm_medium") || "direct",
         source: params.get("utm_source") || "direct",
-        payload: {
-          utm_campaign: params.get("utm_campaign"),
-          ...payload,
-        },
+        payload: { utm_campaign: params.get("utm_campaign"), ...payload },
       }),
     });
   } catch {}
 }
 
-const needs: { id: Need; label: string }[] = [
-  { id: "make", label: "Make Something" },
-  { id: "done", label: "Get It Done" },
-  { id: "reach", label: "Reach My People" },
-  { id: "earn", label: "Earn Something" },
-  { id: "better", label: "Make It Better" },
-  { id: "next", label: "My Next Move" },
-];
-
-function firstElevation(need: Need, mission: string) {
-  const subject = mission.trim() || "what matters most to you";
-  const plans: Record<Need, string[]> = {
-    make: [
-      `Create one useful thing today around “${subject}.”`,
-      "Keep it small enough to finish in 15 minutes.",
-      "When it is ready, use SEND IT to put it in front of someone."
-    ],
-    done: [
-      `Pick the smallest unfinished step connected to “${subject}.”`,
-      "Complete that step before adding another.",
-      "Mark it done, then ask your Bot for the next move."
-    ],
-    reach: [
-      `Choose one useful message about “${subject}.”`,
-      "Prepare one version for 1 person, one for 5, and one for 50.",
-      "Share the smallest version first and learn from the response."
-    ],
-    earn: [
-      `Identify one honest way “${subject}” could help someone else.`,
-      "Package that value in one clear sentence.",
-      "Use your share path or Earn Mode connection to test interest."
-    ],
-    better: [
-      `Choose one existing item connected to “${subject}.”`,
-      "Make the headline clearer and the next action easier.",
-      "Save the improved version before creating anything new."
-    ],
-    next: [
-      `Today’s move: make one visible step toward “${subject}.”`,
-      "Do not build the whole plan—complete one useful action.",
-      "Return after completion and let your Bot choose the next move."
-    ],
-  };
-  return plans[need];
-}
-
-const card: React.CSSProperties = {
-  background: "rgba(255,255,255,.08)",
-  border: "1px solid rgba(255,255,255,.17)",
-  borderRadius: 22,
-  padding: 22,
-  boxShadow: "0 18px 60px rgba(0,0,0,.22)"
-};
-
-const button: React.CSSProperties = {
-  display: "inline-block",
-  padding: "13px 18px",
-  borderRadius: 999,
-  border: 0,
-  textDecoration: "none",
-  fontWeight: 800,
-  cursor: "pointer"
-};
-
 export default function ElevateMeBotPage() {
   const [botName, setBotName] = useState("Nova");
   const [mission, setMission] = useState("");
+  const [outcome, setOutcome] = useState("");
+  const [blocker, setBlocker] = useState("");
+  const [context, setContext] = useState("");
   const [need, setNeed] = useState<Need>("next");
   const [surface, setSurface] = useState<Surface>("hub");
-  const [result, setResult] = useState<string[] | null>(null);
-  const [resultTitle, setResultTitle] = useState("Your next Elevation");
-  const [resultSource, setResultSource] = useState<"ai"|"structured"|"local">("local");
-  const [resultExtra, setResultExtra] = useState<string | null>(null);
+  const [lift, setLift] = useState<LiftResult | null>(null);
   const [runningAction, setRunningAction] = useState(false);
+  const [processingStep, setProcessingStep] = useState(0);
+  const [previewMessage, setPreviewMessage] = useState("");
+  const [previewsRemaining, setPreviewsRemaining] = useState<number | null>(null);
   const [access, setAccess] = useState<ElevateAccess>({
     authenticated: false,
     level: "CUSTOMIZE",
     entitlements: { activated: false, powerUp: false, makeItReal: false, giftCreditsPurchased: 0 },
   });
   const [checkingAccess, setCheckingAccess] = useState(true);
+
+  const processingLabels = [
+    "Reading what you really want to change…",
+    "Finding the highest-leverage opening…",
+    "Building something useful for you now…",
+    "Packaging your first Lift…",
+  ];
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -188,16 +166,31 @@ export default function ElevateMeBotPage() {
         entitlements: { activated: false, powerUp: false, makeItReal: false, giftCreditsPurchased: 0 },
       }))
       .finally(() => setCheckingAccess(false));
+
     try {
       const saved = localStorage.getItem("elevate_me_bot_profile");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.botName) setBotName(parsed.botName);
         if (parsed.mission) setMission(parsed.mission);
+        if (parsed.outcome) setOutcome(parsed.outcome);
+        if (parsed.blocker) setBlocker(parsed.blocker);
+        if (parsed.context) setContext(parsed.context);
         if (parsed.need) setNeed(parsed.need);
       }
     } catch {}
   }, []);
+
+  useEffect(() => {
+    if (!runningAction) {
+      setProcessingStep(0);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setProcessingStep(current => Math.min(current + 1, processingLabels.length - 1));
+    }, 900);
+    return () => window.clearInterval(timer);
+  }, [runningAction]);
 
   function signInUrl() {
     const cycleKey = getElevateCycleKey();
@@ -206,178 +199,331 @@ export default function ElevateMeBotPage() {
     return `/api/auth/shopify/start?next=${encodeURIComponent(`/elevate-me-bot?${qs.toString()}`)}`;
   }
 
-  async function saveAndRun(n: Need = need, preview = false) {
-    if (!preview && !access.entitlements.activated) {
+  const fullContext = useMemo(() => [
+    outcome ? `Desired outcome: ${outcome}` : "",
+    blocker ? `Biggest blocker: ${blocker}` : "",
+    context ? `Useful context: ${context}` : "",
+  ].filter(Boolean).join("\n"), [outcome, blocker, context]);
+
+  function saveProfile() {
+    try {
+      localStorage.setItem(
+        "elevate_me_bot_profile",
+        JSON.stringify({ botName, mission, outcome, blocker, context, need, surface, updatedAt: new Date().toISOString() })
+      );
+    } catch {}
+  }
+
+  async function runPreview() {
+    if (!mission.trim()) {
+      setPreviewMessage("Give the Bot one real thing to elevate first.");
+      return;
+    }
+    setPreviewMessage("");
+    setLift(null);
+    setRunningAction(true);
+    saveProfile();
+    trackElevateEvent("preview_run", surface, undefined, { action: need, richer_intake: true });
+
+    try {
+      const response = await fetch("/api/elevate/preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          action: need,
+          mission,
+          botName,
+          context: fullContext,
+          surface,
+          sessionId: getElevateSessionId(),
+        }),
+      });
+      const data = await response.json();
+      if (response.status === 429) {
+        setPreviewMessage("You have used today's free Lift previews. Activate for $1 to save your Bot and keep working.");
+        setPreviewsRemaining(0);
+        return;
+      }
+      if (!response.ok) throw new Error(data?.error || "PREVIEW_FAILED");
+      setLift(data.result);
+      setPreviewsRemaining(Number(data.previewsRemaining));
+      window.setTimeout(() => document.getElementById("your-lift")?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    } catch {
+      setPreviewMessage("The Bot could not finish that Lift. Please try once more.");
+    } finally {
+      setRunningAction(false);
+    }
+  }
+
+  async function runActivated(n: Need = need) {
+    if (!access.entitlements.activated) {
       trackElevateEvent("activation_gate_hit", surface, "activate", { action: n });
       window.location.href = signInUrl();
       return;
     }
-    try {
-      localStorage.setItem(
-        "elevate_me_bot_profile",
-        JSON.stringify({ botName, mission, need: n, surface, updatedAt: new Date().toISOString() })
-      );
-    } catch {}
     setNeed(n);
-
-    if (preview) {
-      trackElevateEvent("preview_run", surface, undefined, { action: n });
-      setResultTitle("Preview Elevation");
-      setResultSource("local");
-      setResultExtra(null);
-      setResult(firstElevation(n, mission));
-      return;
-    }
-
+    setLift(null);
     setRunningAction(true);
+    saveProfile();
     try {
       const response = await fetch("/api/elevate/action", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: n, mission, botName }),
+        body: JSON.stringify({ action: n, mission, botName, context: fullContext }),
       });
       if (!response.ok) throw new Error("ACTION_FAILED");
       const data = await response.json();
-      setResultTitle(data.result?.title || "Your next Elevation");
-      setResultSource(data.result?.source || "structured");
-      setResultExtra(data.result?.result || null);
-      setResult(Array.isArray(data.result?.steps) ? data.result.steps : firstElevation(n, mission));
+      setLift(data.result);
+      window.setTimeout(() => document.getElementById("your-lift")?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
     } catch {
-      setResultTitle("Your next Elevation");
-      setResultSource("structured");
-      setResultExtra(null);
-      setResult(firstElevation(n, mission));
+      setPreviewMessage("That Elevation did not finish. Try it again.");
     } finally {
       setRunningAction(false);
     }
   }
 
   const bg = surface === "botstores"
-    ? "linear-gradient(145deg,#090312,#19072e 50%,#062430)"
-    : "linear-gradient(145deg,#07152f,#181047 50%,#07323b)";
+    ? "radial-gradient(circle at 50% -15%,rgba(80,224,234,.17),transparent 35%),linear-gradient(145deg,#08020f,#160625 55%,#041d25)"
+    : "radial-gradient(circle at 50% -15%,rgba(80,224,234,.18),transparent 34%),radial-gradient(circle at 15% 20%,rgba(243,201,105,.10),transparent 25%),linear-gradient(145deg,#030712,#0a1230 52%,#05252d)";
 
   return (
-    <main style={{ minHeight: "100vh", background: bg, color: "#fff", padding: "28px 16px 64px", fontFamily: "Arial,sans-serif" }}>
-      <div style={{ maxWidth: 1120, margin: "0 auto" }}>
-        <header style={{ textAlign: "center", padding: "18px 0 28px" }}>
-          <div style={{ letterSpacing: ".16em", textTransform: "uppercase", color: "#f3c969", fontSize: 13, fontWeight: 800 }}>
-            {surface === "botstores" ? "THE BOT STORES • FULL FUNCTION BOT" : "SERIOUSLY SATISFYING HUB • FEATURED BOT"}
+    <main style={{ minHeight: "100vh", background: bg, color: "#fff", fontFamily: "Arial,sans-serif", overflowX: "hidden" }}>
+      <style>{`
+        @keyframes elevatePulse {
+          0%,100% { transform: scale(1); opacity:.65; }
+          50% { transform: scale(1.06); opacity:1; }
+        }
+        @keyframes elevateScan {
+          0% { transform: translateY(-10%); opacity:0; }
+          20% { opacity:.9; }
+          80% { opacity:.9; }
+          100% { transform: translateY(680%); opacity:0; }
+        }
+        @keyframes elevateFloat {
+          0%,100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        .elevate-input::placeholder { color:#7e829c; }
+        .elevate-choice:hover { transform:translateY(-2px); border-color:rgba(120,230,223,.55)!important; }
+        @media (max-width: 820px) {
+          .elevate-console-grid { grid-template-columns:1fr!important; }
+          .elevate-bot-stage { min-height:460px!important; }
+          .elevate-result-grid { grid-template-columns:1fr!important; }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "26px 16px 72px" }}>
+        <header style={{ textAlign: "center", padding: "14px 0 24px" }}>
+          <div style={{ letterSpacing: ".17em", textTransform: "uppercase", color: "#f3c969", fontSize: 12, fontWeight: 900 }}>
+            {surface === "botstores" ? "THE BOT STORES • FULL FUNCTION BOT" : "SERIOUSLY SATISFYING HUB • ENTER THE BOT"}
           </div>
-          <h1 style={{ fontSize: "clamp(46px,9vw,92px)", lineHeight: .94, margin: "12px 0 10px" }}>ELEVATE ME BOT</h1>
-          <p style={{ maxWidth: 760, margin: "0 auto", fontSize: 20, color: "#ddd9ef", lineHeight: 1.5 }}>
-            Customize it. Tell it what you need. Then use one touch to elevate something real.
+          <h1 style={{ fontSize: "clamp(48px,9vw,96px)", lineHeight: .92, margin: "12px 0 12px", letterSpacing: "-.045em" }}>ELEVATE ME BOT</h1>
+          <p style={{ maxWidth: 820, margin: "0 auto", fontSize: "clamp(18px,2.2vw,24px)", color: "#ddd9ef", lineHeight: 1.5 }}>
+            Don’t ask for another generic plan. Put one real thing inside the Bot and leave with a clearer direction, a first move, and something already made for you.
           </p>
         </header>
 
-        <section style={{ ...card, marginBottom: 18, padding: "14px 18px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-            <strong>MY BOT LEVEL: {checkingAccess ? "CHECKING…" : access.level.replaceAll("_", " ")}</strong>
-            <span style={{ color: "#c9c5dd", fontSize: 14 }}>
+        <section className="elevate-console-grid" style={{ display: "grid", gridTemplateColumns: ".88fr 1.12fr", gap: 22, alignItems: "stretch", marginTop: 14 }}>
+          <div className="elevate-bot-stage" style={{ ...card, minHeight: 650, position: "relative", overflow: "hidden", background: "radial-gradient(circle at 50% 38%,rgba(89,236,244,.20),transparent 25%),linear-gradient(180deg,rgba(4,10,18,.96),rgba(3,5,10,.98))" }}>
+            <div style={{ position: "absolute", inset: 20, border: "1px solid rgba(120,230,223,.14)", borderRadius: 22, pointerEvents: "none" }} />
+            <div style={{ position: "absolute", left: "8%", right: "8%", bottom: 26, height: 2, background: "linear-gradient(90deg,transparent,#78e6df,transparent)", opacity: .65 }} />
+            <img
+              src={BOT_IMAGE}
+              alt="Elevate Me Bot black edition"
+              loading="eager"
+              style={{ width: "100%", height: "100%", maxHeight: 650, objectFit: "cover", objectPosition: "center top", display: "block", borderRadius: 26, opacity: runningAction ? .72 : 1, transition: "opacity .4s ease", animation: "elevateFloat 6s ease-in-out infinite" }}
+            />
+            {runningAction && (
+              <>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,transparent 0%,rgba(120,230,223,.08) 42%,transparent 72%)", animation: "elevateScan 2.8s linear infinite" }} />
+                <div style={{ position: "absolute", left: 22, right: 22, bottom: 22, padding: "18px 20px", borderRadius: 18, background: "rgba(2,7,12,.86)", border: "1px solid rgba(120,230,223,.42)", backdropFilter: "blur(12px)" }}>
+                  <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>BOT READOUT IN PROGRESS</div>
+                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>{processingLabels[processingStep]}</div>
+                  <div style={{ height: 5, background: "rgba(255,255,255,.10)", borderRadius: 999, marginTop: 13, overflow: "hidden" }}>
+                    <div style={{ width: `${((processingStep + 1) / processingLabels.length) * 100}%`, height: "100%", background: "linear-gradient(90deg,#78e6df,#f3c969)", transition: "width .5s ease" }} />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div style={{ ...card, padding: "24px 22px" }}>
+            <div style={{ color: "#78e6df", fontWeight: 900, letterSpacing: ".12em", fontSize: 11 }}>STEP INSIDE • FREE LIFT PREVIEW</div>
+            <h2 style={{ fontSize: "clamp(30px,4vw,48px)", lineHeight: 1, margin: "10px 0 10px" }}>Give the Bot enough to help.</h2>
+            <p style={{ color: "#cfc9dd", lineHeight: 1.55, marginTop: 0 }}>
+              Three strong answers are better than a long form. The last field is optional if you want the Bot to see more.
+            </p>
+
+            <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
+              <label>
+                <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>1. What are we elevating?</span>
+                <textarea className="elevate-input" value={mission} onChange={e => setMission(e.target.value)} placeholder="Example: I have a catering business but I’m not getting enough weekday orders." rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16, lineHeight: 1.45 }} />
+              </label>
+
+              <label>
+                <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>2. What would a real lift look like?</span>
+                <input className="elevate-input" value={outcome} onChange={e => setOutcome(e.target.value)} placeholder="More bookings, finish the project, stronger confidence, a better offer…" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16 }} />
+              </label>
+
+              <label>
+                <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>3. What is getting in the way?</span>
+                <input className="elevate-input" value={blocker} onChange={e => setBlocker(e.target.value)} placeholder="I don’t know what to say, no time, low response, too many choices…" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16 }} />
+              </label>
+
+              <label>
+                <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>4. Anything useful the Bot should know? <span style={{ color: "#8c92aa", fontWeight: 600 }}>Optional</span></span>
+                <textarea className="elevate-input" value={context} onChange={e => setContext(e.target.value)} placeholder="Paste a draft, describe the audience, mention what you already tried, or leave this blank." rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 15, lineHeight: 1.45 }} />
+              </label>
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontWeight: 900, marginBottom: 10 }}>What kind of Lift do you want?</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 9 }}>
+                {needs.map(n => (
+                  <button className="elevate-choice" key={n.id} onClick={() => setNeed(n.id)} style={{ textAlign: "left", padding: 13, borderRadius: 15, border: need === n.id ? "1px solid #f3c969" : "1px solid rgba(255,255,255,.13)", background: need === n.id ? "rgba(243,201,105,.13)" : "rgba(255,255,255,.035)", color: "#fff", cursor: "pointer", transition: "all .2s ease" }}>
+                    <strong style={{ display: "block", fontSize: 14 }}>{n.label}</strong>
+                    <span style={{ display: "block", color: "#aaa5bc", fontSize: 11, lineHeight: 1.35, marginTop: 4 }}>{n.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginTop: 22 }}>
+              <button onClick={runPreview} disabled={runningAction} style={{ ...button, background: "#f3c969", color: "#111", minWidth: 220, opacity: runningAction ? .65 : 1 }}>
+                {runningAction ? "BUILDING MY LIFT…" : "PUT IT IN THE BOT"}
+              </button>
+              <input value={botName} onChange={e => setBotName(e.target.value)} aria-label="Bot name" style={{ width: 115, padding: "12px 13px", borderRadius: 999, border: "1px solid rgba(255,255,255,.19)", background: "rgba(255,255,255,.05)", color: "#fff", textAlign: "center", fontWeight: 800 }} />
+              <span style={{ color: "#9995ab", fontSize: 12 }}>Bot name</span>
+            </div>
+
+            {previewMessage && <div style={{ marginTop: 14, padding: 13, borderRadius: 14, background: "rgba(243,201,105,.09)", border: "1px solid rgba(243,201,105,.25)", color: "#f5e0a2" }}>{previewMessage}</div>}
+            {previewsRemaining !== null && previewsRemaining > 0 && <div style={{ marginTop: 10, color: "#9995ab", fontSize: 12 }}>{previewsRemaining} free Lift preview{previewsRemaining === 1 ? "" : "s"} remaining in this preview window.</div>}
+          </div>
+        </section>
+
+        {lift && (
+          <section id="your-lift" style={{ marginTop: 26, scrollMarginTop: 18 }}>
+            <div style={{ ...card, padding: "28px 24px", borderColor: "rgba(120,230,223,.38)", background: "radial-gradient(circle at 86% 0%,rgba(120,230,223,.13),transparent 28%),linear-gradient(145deg,rgba(14,24,48,.96),rgba(5,12,22,.98))" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
+                <div>
+                  <div style={{ color: "#78e6df", fontWeight: 900, letterSpacing: ".14em", fontSize: 11 }}>✓ YOUR BOT READOUT</div>
+                  <h2 style={{ fontSize: "clamp(34px,5vw,58px)", lineHeight: 1, margin: "9px 0 0" }}>{lift.title}</h2>
+                </div>
+                <div style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(120,230,223,.3)", color: "#9df1ec", fontSize: 11, fontWeight: 900 }}>
+                  {lift.source === "ai" ? "AI-ASSISTED LIFT" : "SMART LIFT"}
+                </div>
+              </div>
+
+              <div className="elevate-result-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, marginTop: 24 }}>
+                {[
+                  ["WHAT I HEARD", lift.readout.focus],
+                  ["WHAT MAY BE HOLDING IT BACK", lift.readout.friction],
+                  ["WHERE THE LEVERAGE IS", lift.readout.leverage],
+                ].map(([title, copy]) => (
+                  <article key={title} style={{ padding: 18, borderRadius: 18, border: "1px solid rgba(255,255,255,.11)", background: "rgba(255,255,255,.045)" }}>
+                    <div style={{ color: "#f3c969", fontWeight: 900, fontSize: 11, letterSpacing: ".09em" }}>{title}</div>
+                    <p style={{ margin: "9px 0 0", color: "#e7e3ee", lineHeight: 1.55 }}>{copy}</p>
+                  </article>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 16, padding: 22, borderRadius: 20, background: "linear-gradient(135deg,rgba(243,201,105,.15),rgba(255,255,255,.035))", border: "1px solid rgba(243,201,105,.31)" }}>
+                <div style={{ color: "#f3c969", fontSize: 11, fontWeight: 900, letterSpacing: ".11em" }}>YOUR FIRST MOVE • {lift.firstMove.timebox}</div>
+                <h3 style={{ margin: "8px 0 7px", fontSize: 28 }}>{lift.firstMove.title}</h3>
+                <p style={{ margin: 0, color: "#cfc9dd", lineHeight: 1.55 }}>{lift.firstMove.why}</p>
+                <div style={{ marginTop: 14, padding: 16, borderRadius: 15, background: "rgba(0,0,0,.25)", fontSize: 18, lineHeight: 1.55 }}>{lift.firstMove.action}</div>
+              </div>
+
+              <div style={{ marginTop: 16, padding: 22, borderRadius: 20, background: "rgba(120,230,223,.07)", border: "1px solid rgba(120,230,223,.25)" }}>
+                <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".11em" }}>MADE INSIDE THE BOT</div>
+                <h3 style={{ margin: "8px 0 12px", fontSize: 27 }}>{lift.deliverable.title}</h3>
+                <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.7, color: "#f5f3f8", fontSize: 16 }}>{lift.deliverable.content}</div>
+              </div>
+
+              <div style={{ marginTop: 16 }}>
+                <div style={{ color: "#bba5ff", fontWeight: 900, fontSize: 11, letterSpacing: ".11em" }}>YOUR LIFT PATH</div>
+                <div className="elevate-result-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 10, marginTop: 10 }}>
+                  {lift.path.map((item, index) => (
+                    <div key={index} style={{ padding: 17, borderRadius: 17, background: "rgba(255,255,255,.045)", border: "1px solid rgba(255,255,255,.10)" }}>
+                      <strong style={{ color: "#f3c969" }}>{index + 1}</strong>
+                      <div style={{ marginTop: 7, lineHeight: 1.5 }}>{item}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginTop: 17, padding: "15px 18px", borderRadius: 16, borderLeft: "4px solid #78e6df", background: "rgba(120,230,223,.06)", fontSize: 17, lineHeight: 1.5 }}>
+                {lift.boost}
+              </div>
+
+              <div style={{ marginTop: 22, padding: "20px 18px", borderRadius: 19, background: "linear-gradient(135deg,rgba(243,201,105,.16),rgba(125,77,245,.10))", border: "1px solid rgba(243,201,105,.24)" }}>
+                <div style={{ color: "#f3c969", fontSize: 11, fontWeight: 900, letterSpacing: ".12em" }}>KEEP THE LIFT GOING</div>
+                <h3 style={{ margin: "7px 0 8px", fontSize: 26 }}>Save the Bot and keep working for $1.</h3>
+                <p style={{ margin: 0, color: "#d6d0e0", lineHeight: 1.55 }}>Activation should feel like continuing something useful—not paying to discover whether the Bot can help.</p>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+                  {access.entitlements.activated
+                    ? <button onClick={() => runActivated(need)} style={{ ...button, background: "#78e6df", color: "#041117" }}>RUN ANOTHER ELEVATION</button>
+                    : <a href={`/elevate-me-bot/unlock?level=activate&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} onClick={() => trackElevateEvent("unlock_open", surface, "activate")} style={{ ...button, background: "#f3c969", color: "#111" }}>ACTIVATE + SAVE MY BOT • $1</a>}
+                  <button onClick={() => { setLift(null); window.scrollTo({ top: 0, behavior: "smooth" }); }} style={{ ...button, background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.25)" }}>CHANGE WHAT I’M ELEVATING</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section style={{ ...card, marginTop: 24, padding: "22px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
+            <div>
+              <div style={{ color: "#f3c969", fontWeight: 900, letterSpacing: ".10em", fontSize: 11 }}>MY BOT LEVEL</div>
+              <strong style={{ display: "block", marginTop: 5, fontSize: 21 }}>{checkingAccess ? "CHECKING…" : access.level.replaceAll("_", " ")}</strong>
+            </div>
+            <span style={{ color: "#c9c5dd", fontSize: 13 }}>
               ACTIVATE {access.entitlements.activated ? "✓" : "🔒"} · POWER UP {access.entitlements.powerUp ? "✓" : "🔒"} · MAKE IT REAL {access.entitlements.makeItReal ? "✓" : "🔒"}
             </span>
           </div>
         </section>
 
-        <section style={{ ...card, marginBottom: 18 }}>
-          <div style={{ color: "#f3c969", fontWeight: 800, letterSpacing: ".08em" }}>0 • CUSTOMIZE + SURVEY — INCLUDED</div>
-          <h2 style={{ fontSize: 30, marginBottom: 8 }}>Build the Bot around you.</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14 }}>
-            <label>
-              <span style={{ display: "block", marginBottom: 7, fontWeight: 700 }}>Bot name</span>
-              <input value={botName} onChange={e => setBotName(e.target.value)} style={{ width: "100%", padding: 13, borderRadius: 12, border: "1px solid #6b6790", background: "#0a1028", color: "#fff", boxSizing: "border-box" }} />
-            </label>
-            <label>
-              <span style={{ display: "block", marginBottom: 7, fontWeight: 700 }}>What are we elevating?</span>
-              <input value={mission} onChange={e => setMission(e.target.value)} placeholder="My business, confidence, audience, money..." style={{ width: "100%", padding: 13, borderRadius: 12, border: "1px solid #6b6790", background: "#0a1028", color: "#fff", boxSizing: "border-box" }} />
-            </label>
-          </div>
-          <div style={{ marginTop: 18 }}>
-            <div style={{ fontWeight: 700, marginBottom: 9 }}>What would help most right now?</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {needs.map(n => (
-                <button key={n.id} onClick={() => setNeed(n.id)} style={{ ...button, background: need === n.id ? "#f3c969" : "#fff", color: "#111" }}>
-                  {n.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section style={{ ...card, marginBottom: 18, borderColor: "rgba(243,201,105,.55)" }}>
-          <div style={{ color: "#f3c969", fontWeight: 800, letterSpacing: ".08em" }}>1 • $1 ACTIVATE</div>
-          <h2 style={{ fontSize: 32, margin: "8px 0" }}>Your first real Elevation.</h2>
-          <p style={{ color: "#ddd9ef", lineHeight: 1.6, maxWidth: 800 }}>
-            Activation is not payment for customization. It starts the operating Bot: first Elevation, basic one-touch actions, Send 1 • 5 • 50, Share My Bot, basic Earn Mode, and limited weekly Elevations.
-          </p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-            <button onClick={() => saveAndRun(need, true)} style={{ ...button, background: "#f3c969", color: "#111" }}>PREVIEW MY FIRST ELEVATION</button>
-            {access.entitlements.activated
-    ? <span style={{ ...button, background: "#78e6df", color: "#041117" }}>ACTIVATED ✓</span>
-    : <a onClick={() => trackElevateEvent("unlock_open", surface, "activate")} href={`/elevate-me-bot/unlock?level=activate&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} style={{ ...button, background: "#fff", color: "#111" }}>ACTIVATE FOR $1</a>}
-  {!access.entitlements.activated && (
-    <a href={signInUrl()} style={{ ...button, background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.45)" }}>I ALREADY PURCHASED • VERIFY</a>
-  )}
-          </div>
-        </section>
-
-        {result && (
-          <section style={{ ...card, marginBottom: 18, background: "rgba(255,255,255,.12)" }}>
-            <div style={{ color: "#78e6df", fontWeight: 800 }}>✓ ELEVATION COMPLETE</div>
-            <h2 style={{ fontSize: 30, margin: "8px 0" }}>{resultTitle}</h2><div style={{fontSize:12,letterSpacing:".08em",textTransform:"uppercase",color:"#c9c5dd"}}>{resultSource === "ai" ? "AI-assisted" : resultSource === "structured" ? "Smart structured mode" : "Preview mode"}</div>
-            <ol style={{ lineHeight: 1.75, fontSize: 18 }}>
-              {result.map((r, i) => <li key={i}>{r}</li>)}
-            </ol>{resultExtra && <div style={{marginTop:14,padding:14,borderRadius:14,background:"rgba(255,255,255,.07)",whiteSpace:"pre-wrap",lineHeight:1.6}}>{resultExtra}</div>}
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
-              <button onClick={() => saveAndRun("reach")} style={{ ...button, background: "#fff", color: "#111" }}>
-    {access.entitlements.activated ? "SEND IT • 1 / 5 / 50" : "SEND IT • ACTIVATE TO USE"}
-  </button>
-              {access.entitlements.powerUp
-    ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE THIS ✓</a>
-    : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>EXPLODE IT • POWER UP $2.99</a>}
-              {access.entitlements.giftCreditsPurchased > 0
-    ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>
-        USE MY GIFT CREDIT{access.entitlements.giftCreditsPurchased > 1 ? "S" : ""} • {access.entitlements.giftCreditsPurchased}
-      </a>
-    : <a onClick={() => trackElevateEvent("checkout_intent", surface, "gift")} href={checkout.gift} style={{ ...button, background: "#7d4df5", color: "#fff" }}>GIFT A BOT • $1.99</a>}
-            </div>
-          </section>
-        )}
-
-        <section style={{ ...card, marginBottom: 18 }}>
-          <div style={{ color: "#78e6df", fontWeight: 800, letterSpacing: ".08em" }}>ONE-TOUCH HOME</div>
-          <h2 style={{ fontSize: 30 }}>What should we elevate next?</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 12 }}>
+        <section style={{ ...card, marginTop: 18, padding: "22px 20px" }}>
+          <div style={{ color: "#78e6df", fontWeight: 900, letterSpacing: ".10em", fontSize: 11 }}>ONE-TOUCH HOME</div>
+          <h2 style={{ fontSize: 30, margin: "8px 0 14px" }}>Once activated, your Bot stays ready.</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 11 }}>
             {needs.map(n => (
-              <button key={n.id} onClick={() => saveAndRun(n.id)} style={{ textAlign: "left", padding: 18, borderRadius: 17, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.06)", color: "#fff", cursor: "pointer", opacity: access.entitlements.activated ? 1 : .68 }}>
-                <strong style={{ display: "block", fontSize: 18 }}>{n.label.toUpperCase()}</strong>
-                <span style={{ color: "#c9c5dd", fontSize: 14 }}>{access.entitlements.activated ? (runningAction ? "Working…" : "One touch → AI-assisted useful action") : "Activate to unlock this one-touch action"}</span>
+              <button key={n.id} onClick={() => runActivated(n.id)} style={{ textAlign: "left", padding: 17, borderRadius: 17, border: "1px solid rgba(255,255,255,.14)", background: "rgba(255,255,255,.045)", color: "#fff", cursor: "pointer", opacity: access.entitlements.activated ? 1 : .68 }}>
+                <strong style={{ display: "block", fontSize: 17 }}>{n.label.toUpperCase()}</strong>
+                <span style={{ color: "#aaa5bc", fontSize: 13 }}>{access.entitlements.activated ? n.hint : "Activate to keep this one-touch power available."}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14 }}>
-          <div style={card}>
-            <div style={{ color: "#78e6df", fontWeight: 800 }}>$2.99 POWER UP</div>
-            <h3>More powers. More momentum.</h3>
-            <p>EXPLODE, Reach My People, Sell Something, Help Me Earn, Plan This, Remix It, and better saved-project continuity.</p>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(270px,1fr))", gap: 14, marginTop: 18 }}>
+          <div style={{ ...card, padding: 22 }}>
+            <div style={{ color: "#78e6df", fontWeight: 900 }}>$2.99 POWER UP</div>
+            <h3 style={{ fontSize: 24, marginBottom: 8 }}>More powers. More momentum.</h3>
+            <p style={{ color: "#cbc5d7", lineHeight: 1.55 }}>EXPLODE, deeper reach, selling, planning, remixing and stronger saved-project continuity.</p>
             {access.entitlements.powerUp
-    ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#78e6df", color: "#041117" }}>OPEN POWER UP TOOLS ✓</a>
-    : <a onClick={() => trackElevateEvent("unlock_open", surface, "power")} href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
+              ? <a href="/elevate-me-bot/explode" style={{ ...button, background: "#78e6df", color: "#041117" }}>OPEN POWER UP TOOLS ✓</a>
+              : <a href={`/elevate-me-bot/unlock?level=power&surface=${surface}`} onClick={() => trackElevateEvent("unlock_open", surface, "power")} style={{ ...button, background: "#16b8c4", color: "#041117" }}>POWER UP</a>}
           </div>
-          <div style={card}>
-            <div style={{ color: "#f3c969", fontWeight: 800 }}>$7.99 MAKE IT REAL</div>
-            <h3>Move from digital to real-world results.</h3>
-            <p>Print My Stuff, HUB merch access, physical promo pathways, order/ship connections, and Creator College Freshman.</p>
+
+          <div style={{ ...card, padding: 22 }}>
+            <div style={{ color: "#f3c969", fontWeight: 900 }}>$7.99 MAKE IT REAL</div>
+            <h3 style={{ fontSize: 24, marginBottom: 8 }}>Move from digital to real-world results.</h3>
+            <p style={{ color: "#cbc5d7", lineHeight: 1.55 }}>Print preparation, HUB merch access, physical promo pathways and Creator College connections.</p>
             {access.entitlements.makeItReal
-    ? <a href="/elevate-me-bot/make-it-real" style={{ ...button, background: "#f3c969", color: "#111" }}>PRINT MY STUFF ✓</a>
-    : <a onClick={() => trackElevateEvent("unlock_open", surface, "real")} href={`/elevate-me-bot/unlock?level=real&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
+              ? <a href="/elevate-me-bot/make-it-real" style={{ ...button, background: "#f3c969", color: "#111" }}>OPEN MAKE IT REAL ✓</a>
+              : <a href={`/elevate-me-bot/unlock?level=real&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} onClick={() => trackElevateEvent("unlock_open", surface, "real")} style={{ ...button, background: "#f3c969", color: "#111" }}>MAKE IT REAL</a>}
+          </div>
+
+          <div style={{ ...card, padding: 22 }}>
+            <div style={{ color: "#bba5ff", fontWeight: 900 }}>$1.99 GIFT A BOT</div>
+            <h3 style={{ fontSize: 24, marginBottom: 8 }}>Give somebody else their first Lift.</h3>
+            <p style={{ color: "#cbc5d7", lineHeight: 1.55 }}>A low-cost way to send the experience to someone you think could use momentum.</p>
+            {access.entitlements.giftCreditsPurchased > 0
+              ? <a href="/elevate-me-bot/gift" style={{ ...button, background: "#7d4df5", color: "#fff" }}>USE MY GIFT CREDIT</a>
+              : <a href={checkout.gift} onClick={() => trackElevateEvent("checkout_intent", surface, "gift")} style={{ ...button, background: "#7d4df5", color: "#fff" }}>GIFT A BOT</a>}
           </div>
         </section>
-
-        <footer style={{ textAlign: "center", color: "#b9b4ca", paddingTop: 32, fontSize: 14 }}>
-          Customize → $1 Activate → $2.99 Power Up → $7.99 Make It Real → Creator
-        </footer>
       </div>
     </main>
   );
