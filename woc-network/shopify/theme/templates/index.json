@@ -157,58 +157,10 @@
       "type": "network-masthead"
     },
     "network_today": {
-      "block_order": [
-        "story0",
-        "story1",
-        "story2",
-        "story3"
-      ],
-      "blocks": {
-        "story0": {
-          "settings": {
-            "category": "CULTURE · FILM",
-            "link": "https://tylerperry.com/tyler-perrys-why-did-i-get-married-again-now-streaming-on-netflix/",
-            "source": "Tyler Perry · September 11, 2026",
-            "summary": "Why Did I Get Married Again? is now streaming on Netflix. The reunion moves to a wedding in Lake Como, with Taraji P. Henson joining the cast.",
-            "title": "Tyler Perry brings the couples back together."
-          },
-          "type": "story"
-        },
-        "story1": {
-          "settings": {
-            "category": "WOMEN · TELEVISION",
-            "link": "https://www.forbes.com/sites/dominiquefluker/2026/09/02/black-women-directors-are-making-emmy-history-in-2026--and-changing-who-gets-to-shape-television/",
-            "source": "Forbes · September 2, 2026",
-            "summary": "A look at the women whose directing nominations are helping reshape who tells the stories on television.",
-            "title": "Black women directors are making Emmy history."
-          },
-          "type": "story"
-        },
-        "story2": {
-          "settings": {
-            "category": "SPORT · PEOPLE",
-            "link": "https://people.com/ben-shelton-alexander-zverev-2026-us-open-final-12116565",
-            "source": "People · September 13, 2026",
-            "summary": "Shelton became the first Black American man to reach the final since Arthur Ashe in 1972, finishing runner-up to Alexander Zverev.",
-            "title": "Ben Shelton’s historic run reaches the US Open final."
-          },
-          "type": "story"
-        },
-        "story3": {
-          "settings": {
-            "category": "CULTURE · STYLE",
-            "link": "https://www.harpersbazaar.com/celebrity/latest/a73656208/ayo-edebiri-red-carpet-photos-emmys-2026/",
-            "source": "Harper’s Bazaar · September 14, 2026",
-            "summary": "The actress returned to the Emmys in a two-tone look pairing icy blue ruffles with fiery orange draping.",
-            "title": "Ayo Edebiri brings fire and ice to the Emmy carpet."
-          },
-          "type": "story"
-        }
-      },
+      "type": "network-today",
       "settings": {
-        "edition": "September 15, 2026 · Editor’s selections"
-      },
-      "type": "network-today"
+        "news_blog": "the-network"
+      }
     },
     "publishing": {
       "settings": {

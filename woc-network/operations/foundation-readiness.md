@@ -141,3 +141,17 @@ GitHub branch woc-garden-party-alpha remained readable at a2bec7311b90d2a74c829c
 ### Required recovery
 Reconnect the Shopify connector to the shop that owns womenofcolorstudybibles.com and exposes theme IDs 190252056874 / 190859313450. After identity verification, re-read fresh draft files and merge narrowly because separate Teaching Room work may have changed them. Do not reuse cached theme bodies or checksums. Metrics remain UNKNOWN.
 
+
+
+## Network news implementation — October 3, 2026
+Verified correct WOC store. Current MAIN is 191419154730 (not earlier baseline). Created fresh duplicate 191507661098, WOC — Network news feed — Oct 3, UNPUBLISHED, from current MAIN. No MAIN writes or publication.
+
+Implemented in this draft: network-today reads latest five published articles from selected blog the-network, internal article headline/image/read links, archive link, actual latest-story publication timestamp, honest empty state. Removed hardcoded Tyler fallback from this section. Masthead status is connected to latest story age: current <=24h, latest edition <=48h, previous edition thereafter; missing/invalid/future dates are empty. Neutral dot unless current, retained reduced-motion behavior. This measures publication recency, not job health or verified full-edition completion.
+
+Changed only sections/network-today.liquid, sections/network-masthead.liquid, assets/network-news-status.js, locales/en.default.json (added network_news keys), templates/index.json (network_today configuration only). FIND HER and The Tree content untouched.
+
+Validation: Shopify helper passed four component files using bundled fallback docs after remote docs timeout; seven JS freshness boundary assertions passed. Shopify caught duplicate stylesheet tags not caught by helper; consolidated tags and saved successfully. Initial batch normalized index before the new section schema existed; corrected by saving index again after section. Final read-back matched JS/Liquid text and JSON semantics; selected blog verified. Cookie-aware preview HTML contained draft ID, data-network-news, empty-state text and JS asset; no Liquid error marker. Full browser/mobile visual and populated-article end-to-end test not yet done.
+
+Status: BUILT + limited TESTED in unpublished draft. NOT LIVE. No new articles published or invented; blog had no published articles at audit. No scheduler or production publisher enabled by this change. Do not publish empty feed as completed news operation. Preview: https://womenofcolorstudybibles.com/?preview_theme_id=191507661098
+
+Next: produce a source-verified original edition in Shopify article records, confirm reading/return/archive routes and approved imagery, then connect daily discovery/verification/publication with durable edition records and bounded retries. Verify second scheduled update before declaring operational. Re-read latest MAIN before any eventual publish to preserve other chats' changes. Scheduled development is not production publishing. FIND HER routing/report tasks remain unchanged.

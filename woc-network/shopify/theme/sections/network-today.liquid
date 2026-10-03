@@ -1,0 +1,27 @@
+{% assign news_blog = section.settings.news_blog %}
+{% assign latest_story = news_blog.articles.first %}
+<section id="network-stories" class="network-news" aria-labelledby="network-news-title" data-network-news data-published-at="{{ latest_story.published_at | date: '%s' }}" data-current-label="{{ 'network_news.current' | t | escape }}" data-recent-label="{{ 'network_news.recent' | t | escape }}" data-previous-label="{{ 'network_news.previous' | t | escape }}" data-empty-label="{{ 'network_news.empty_label' | t | escape }}">
+<div class="news-inner">
+<header class="news-heading"><div><p class="news-kicker">{{ 'network_news.brand' | t }}</p><h2 id="network-news-title">{{ 'network_news.heading' | t }}</h2></div>
+<div><p>{{ 'network_news.deck' | t }}</p><p role="status" data-news-status>{{ 'network_news.previous' | t }}</p>
+{% if latest_story != blank %}<p>{{ 'network_news.updated' | t }} <time datetime="{{ latest_story.published_at | date: '%Y-%m-%dT%H:%M:%S%z' }}">{{ latest_story.published_at | date: '%B %d, %Y · %I:%M %p %Z' }}</time></p>{% endif %}
+</div></header>
+{% if latest_story != blank %}
+<div class="news-layout">{% for story in news_blog.articles limit: 5 %}
+<article class="news-story {% if forloop.first %}news-story--lead{% endif %}">
+{% if story.image != blank %}<a class="news-image" href="{{ story.url }}" aria-label="{{ story.title | escape }}">{{ story.image | image_url: width: 1500 | image_tag: loading: 'lazy', widths: '500,900,1500' }}</a>{% endif %}
+<div class="news-copy"><p class="news-kicker">{{ 'network_news.brand' | t }}</p><h3><a href="{{ story.url }}">{{ story.title | escape }}</a></h3><p>{{ story.excerpt_or_content | strip_html | truncatewords: 45 | escape }}</p><a class="news-source" href="{{ story.url }}">{{ 'network_news.read' | t }} <span aria-hidden="true">→</span></a></div>
+</article>{% endfor %}</div>
+<a class="news-source" href="{{ news_blog.url }}">{{ 'network_news.archive' | t }} →</a>
+{% else %}<p>{{ 'network_news.empty' | t }}</p>{% endif %}
+</div></section>
+{% stylesheet %}
+.network-news{background:#07130f;color:#e8e5df;padding:65px 24px 90px}.news-inner{max-width:1360px;margin:auto}.news-heading{display:flex;align-items:end;justify-content:space-between;gap:30px;border-bottom:1px solid #dfbd6855;padding-bottom:28px;margin-bottom:36px}.news-kicker{font:700 11px/1.5 Arial,sans-serif;letter-spacing:.16em;color:#dfbd68;margin:0 0 12px}.news-heading h2{color:#fff;font:clamp(36px,5vw,66px)/1.05 Georgia,serif;letter-spacing:-.035em;margin:0}.news-heading>p{font-size:16px;max-width:340px;margin:0}.news-heading small{display:block;margin-top:14px;color:#b8b9ae;font-size:12px}.news-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:60px}.news-story--lead{grid-row:span 3}.news-image{display:block}.news-image img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center 25%;display:block}.news-story h3{font:clamp(24px,2.5vw,34px)/1.12 Georgia,serif;color:#fff;margin:8px 0 12px}.news-story h3 a{color:inherit;text-decoration:none}.news-story h3 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}.news-story--lead h3{font-size:clamp(34px,4vw,52px)}.news-copy>p:not(.news-kicker){font-size:17px;line-height:1.6;color:#cccfc5;margin:0 0 18px}.news-source{font-size:12px;line-height:1.5;color:#dfbd68;text-decoration:none;display:inline-flex;align-items:center;gap:12px;min-height:44px}.news-story--lead .news-copy{padding-top:26px}.news-story:not(.news-story--lead){border-top:1px solid #dfbd6844;padding:22px 0}.news-story:nth-child(2){border-top:0;padding-top:0}.network-news a:focus-visible{outline:3px solid #dfbd68;outline-offset:5px}@media(max-width:800px){.network-news{padding:45px 18px 65px}.news-heading{display:block}.news-heading>p{margin-top:20px;max-width:none}.news-layout{grid-template-columns:1fr;gap:28px}.news-story--lead{grid-row:auto}.news-story:nth-child(2){padding-top:25px;border-top:1px solid #dfbd6844}.news-story:not(.news-story--lead){padding-bottom:0}}
+
+.news-heading>div:last-child{max-width:360px;font-size:15px;line-height:1.6}.news-story--lead{grid-row:span 4}.news-story:not(.news-story--lead) .news-image{max-width:180px;margin-bottom:18px}
+.network-news [data-news-status]{color:#bfc7bf}.network-news[data-freshness="current"] [data-news-status]{color:#8eecb4}
+{% endstylesheet %}
+{% schema %}
+{"name":"Network Today — News","settings":[{"type":"blog","id":"news_blog","label":"Network story blog"}],"presets":[{"name":"Network Today — News"}]}
+{% endschema %}
+<script src="{{ 'network-news-status.js' | asset_url }}" defer></script>
