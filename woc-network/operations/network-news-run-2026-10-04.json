@@ -1,0 +1,33 @@
+{
+  "run_at_utc": "2026-10-04T12:28:54Z",
+  "run_at_local": "2026-10-04T08:28:54-04:00",
+  "status": "blocked_wrong_shopify_store",
+  "required_primary_domain": "womenofcolorstudybibles.com",
+  "connected_shop": {
+    "name": "Urban Spirit - HUB",
+    "primary_domain": "urbanspirit.biz",
+    "myshopify_domain": "distributorsofurbanspiritbiblesbooks-gifts.myshopify.com",
+    "main_theme": {
+      "id": "gid://shopify/OnlineStoreTheme/192296616229",
+      "name": "HUB — WORLDS COMMERCE ORDER — READY FOR REVIEW"
+    }
+  },
+  "required_blog": {
+    "id": "gid://shopify/Blog/125658923306",
+    "result": "null_on_connected_shop"
+  },
+  "writes": {
+    "shopify": 0,
+    "themes": 0,
+    "articles": 0,
+    "images": 0
+  },
+  "automation": {
+    "id": "6ac17897aedc8191a312207cd8abeb74",
+    "enabled": false,
+    "disabled_at_utc": "2026-10-04T12:28:54Z"
+  },
+  "research_started": false,
+  "reason": "Cannot safely deduplicate or publish WOC newsroom while connector points at another store.",
+  "recovery": "Reconnect Shopify to womenofcolorstudybibles.com, then re-run identity and launch-gate checks."
+}
