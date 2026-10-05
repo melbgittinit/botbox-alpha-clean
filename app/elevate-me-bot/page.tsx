@@ -42,6 +42,64 @@ const needs: { id: Need; label: string; hint: string }[] = [
   { id: "next", label: "My Next Move", hint: "Choose the move that creates momentum now." },
 ];
 
+const modeConfig: Record<Need, {
+  mode: string;
+  verb: string;
+  outputLabel: string;
+  pathLabel: string;
+  accent: string;
+  glow: string;
+}> = {
+  make: {
+    mode: "MAKE STUDIO",
+    verb: "BUILDING",
+    outputLabel: "FIRST VERSION MADE FOR YOU",
+    pathLabel: "BUILD PATH",
+    accent: "#f3c969",
+    glow: "rgba(243,201,105,.16)",
+  },
+  done: {
+    mode: "DONE ENGINE",
+    verb: "UNBLOCKING",
+    outputLabel: "COMPLETION TOOL",
+    pathLabel: "FINISH PATH",
+    accent: "#78e6df",
+    glow: "rgba(120,230,223,.15)",
+  },
+  reach: {
+    mode: "REACH AMPLIFIER",
+    verb: "AMPLIFYING",
+    outputLabel: "READY-TO-SEND ASSET",
+    pathLabel: "1 / 5 / 50 PATH",
+    accent: "#83d7ff",
+    glow: "rgba(131,215,255,.15)",
+  },
+  earn: {
+    mode: "EARN LAB",
+    verb: "TESTING VALUE",
+    outputLabel: "OFFER / EARNING TEST",
+    pathLabel: "VALUE PATH",
+    accent: "#f3c969",
+    glow: "rgba(243,201,105,.17)",
+  },
+  better: {
+    mode: "BETTER BENCH",
+    verb: "IMPROVING",
+    outputLabel: "UPGRADED VERSION",
+    pathLabel: "IMPROVEMENT PATH",
+    accent: "#bba5ff",
+    glow: "rgba(187,165,255,.16)",
+  },
+  next: {
+    mode: "NEXT MOVE RADAR",
+    verb: "PRIORITIZING",
+    outputLabel: "DECISION + STARTER",
+    pathLabel: "MOMENTUM PATH",
+    accent: "#78e6df",
+    glow: "rgba(120,230,223,.15)",
+  },
+};
+
 const card: React.CSSProperties = {
   background: "linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045))",
   border: "1px solid rgba(255,255,255,.16)",
@@ -235,6 +293,9 @@ export default function ElevateMeBotPage() {
         ? "The Bot can start, but adding the outcome or blocker will make the Lift more specific."
         : "Start with one real situation in your own words. Specific beats polished.";
 
+
+  const activeMode = modeConfig[need];
+
   function saveProfile() {
     try {
       localStorage.setItem(
@@ -368,7 +429,7 @@ export default function ElevateMeBotPage() {
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,transparent 0%,rgba(120,230,223,.08) 42%,transparent 72%)", animation: "elevateScan 2.8s linear infinite" }} />
                 <div style={{ position: "absolute", left: 22, right: 22, bottom: 22, padding: "18px 20px", borderRadius: 18, background: "rgba(2,7,12,.86)", border: "1px solid rgba(120,230,223,.42)", backdropFilter: "blur(12px)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-                    <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>BOT READOUT IN PROGRESS</div>
+                    <div style={{ color: activeMode.accent, fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>{activeMode.mode} • {activeMode.verb}</div>
                     <div style={{ color: "#f3c969", fontSize: 12, fontWeight: 900 }}>SIGNAL {signalScore}/100</div>
                   </div>
                   <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>{processingLabels[processingStep]}</div>
@@ -425,7 +486,10 @@ export default function ElevateMeBotPage() {
             </div>
 
             <div style={{ marginTop: 20 }}>
-              <div style={{ fontWeight: 900, marginBottom: 10 }}>What kind of Lift do you want?</div>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontWeight: 900 }}>What kind of Lift do you want?</div>
+                <div style={{ color: activeMode.accent, fontSize: 10, fontWeight: 900, letterSpacing: ".10em" }}>{activeMode.mode}</div>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 9 }}>
                 {needs.map(n => (
                   <button className="elevate-choice" key={n.id} onClick={() => setNeed(n.id)} style={{ textAlign: "left", padding: 13, borderRadius: 15, border: need === n.id ? "1px solid #f3c969" : "1px solid rgba(255,255,255,.13)", background: need === n.id ? "rgba(243,201,105,.13)" : "rgba(255,255,255,.035)", color: "#fff", cursor: "pointer", transition: "all .2s ease" }}>
@@ -451,10 +515,10 @@ export default function ElevateMeBotPage() {
 
         {lift && (
           <section id="your-lift" style={{ marginTop: 26, scrollMarginTop: 18 }}>
-            <div style={{ ...card, padding: "28px 24px", borderColor: "rgba(120,230,223,.38)", background: "radial-gradient(circle at 86% 0%,rgba(120,230,223,.13),transparent 28%),linear-gradient(145deg,rgba(14,24,48,.96),rgba(5,12,22,.98))" }}>
+            <div style={{ ...card, padding: "28px 24px", borderColor: activeMode.glow, background: `radial-gradient(circle at 86% 0%,${activeMode.glow},transparent 30%),linear-gradient(145deg,rgba(14,24,48,.96),rgba(5,12,22,.98))` }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
                 <div>
-                  <div style={{ color: "#78e6df", fontWeight: 900, letterSpacing: ".14em", fontSize: 11 }}>✓ YOUR BOT READOUT</div>
+                  <div style={{ color: activeMode.accent, fontWeight: 900, letterSpacing: ".14em", fontSize: 11 }}>✓ {activeMode.mode} COMPLETE</div>
                   <h2 style={{ fontSize: "clamp(34px,5vw,58px)", lineHeight: 1, margin: "9px 0 0" }}>{lift.title}</h2>
                 </div>
                 <div style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(120,230,223,.3)", color: "#9df1ec", fontSize: 11, fontWeight: 900 }}>
@@ -483,13 +547,13 @@ export default function ElevateMeBotPage() {
               </div>
 
               <div style={{ marginTop: 16, padding: 22, borderRadius: 20, background: "rgba(120,230,223,.07)", border: "1px solid rgba(120,230,223,.25)" }}>
-                <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".11em" }}>MADE INSIDE THE BOT</div>
+                <div style={{ color: activeMode.accent, fontSize: 11, fontWeight: 900, letterSpacing: ".11em" }}>{activeMode.outputLabel}</div>
                 <h3 style={{ margin: "8px 0 12px", fontSize: 27 }}>{lift.deliverable.title}</h3>
                 <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.7, color: "#f5f3f8", fontSize: 16 }}>{lift.deliverable.content}</div>
               </div>
 
               <div style={{ marginTop: 16 }}>
-                <div style={{ color: "#bba5ff", fontWeight: 900, fontSize: 11, letterSpacing: ".11em" }}>YOUR LIFT PATH</div>
+                <div style={{ color: activeMode.accent, fontWeight: 900, fontSize: 11, letterSpacing: ".11em" }}>{activeMode.pathLabel}</div>
                 <div className="elevate-result-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 10, marginTop: 10 }}>
                   {lift.path.map((item, index) => (
                     <div key={index} style={{ padding: 17, borderRadius: 17, background: "rgba(255,255,255,.045)", border: "1px solid rgba(255,255,255,.10)" }}>
