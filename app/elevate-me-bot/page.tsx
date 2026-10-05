@@ -205,6 +205,36 @@ export default function ElevateMeBotPage() {
     context ? `Useful context: ${context}` : "",
   ].filter(Boolean).join("\n"), [outcome, blocker, context]);
 
+  const signalScore = useMemo(() => {
+    const scorePart = (value: string, max: number, target: number) => {
+      const length = value.trim().length;
+      if (!length) return 0;
+      return Math.min(max, Math.max(4, Math.round((length / target) * max)));
+    };
+    return Math.min(100,
+      scorePart(mission, 35, 140) +
+      scorePart(outcome, 25, 90) +
+      scorePart(blocker, 20, 90) +
+      scorePart(context, 20, 220)
+    );
+  }, [mission, outcome, blocker, context]);
+
+  const signalLabel = signalScore >= 80
+    ? "Rich signal"
+    : signalScore >= 55
+      ? "Strong enough to work"
+      : signalScore >= 30
+        ? "Finding the signal"
+        : "Needs a little more focus";
+
+  const signalTip = signalScore >= 80
+    ? "You gave the Bot enough detail for a highly specific first readout."
+    : signalScore >= 55
+      ? "This is enough to build a useful Lift. One more concrete detail can sharpen it further."
+      : signalScore >= 30
+        ? "The Bot can start, but adding the outcome or blocker will make the Lift more specific."
+        : "Start with one real situation in your own words. Specific beats polished.";
+
   function saveProfile() {
     try {
       localStorage.setItem(
@@ -223,7 +253,7 @@ export default function ElevateMeBotPage() {
     setLift(null);
     setRunningAction(true);
     saveProfile();
-    trackElevateEvent("preview_run", surface, undefined, { action: need, richer_intake: true });
+    trackElevateEvent("preview_run", surface, undefined, { action: need, richer_intake: true, signal_score: signalScore });
 
     try {
       const response = await fetch("/api/elevate/preview", {
@@ -337,7 +367,10 @@ export default function ElevateMeBotPage() {
               <>
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,transparent 0%,rgba(120,230,223,.08) 42%,transparent 72%)", animation: "elevateScan 2.8s linear infinite" }} />
                 <div style={{ position: "absolute", left: 22, right: 22, bottom: 22, padding: "18px 20px", borderRadius: 18, background: "rgba(2,7,12,.86)", border: "1px solid rgba(120,230,223,.42)", backdropFilter: "blur(12px)" }}>
-                  <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>BOT READOUT IN PROGRESS</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                    <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>BOT READOUT IN PROGRESS</div>
+                    <div style={{ color: "#f3c969", fontSize: 12, fontWeight: 900 }}>SIGNAL {signalScore}/100</div>
+                  </div>
                   <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>{processingLabels[processingStep]}</div>
                   <div style={{ height: 5, background: "rgba(255,255,255,.10)", borderRadius: 999, marginTop: 13, overflow: "hidden" }}>
                     <div style={{ width: `${((processingStep + 1) / processingLabels.length) * 100}%`, height: "100%", background: "linear-gradient(90deg,#78e6df,#f3c969)", transition: "width .5s ease" }} />
@@ -376,6 +409,21 @@ export default function ElevateMeBotPage() {
               </label>
             </div>
 
+            <div style={{ marginTop: 16, padding: "15px 16px", borderRadius: 17, background: "rgba(120,230,223,.055)", border: "1px solid rgba(120,230,223,.20)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
+                <div>
+                  <div style={{ color: "#78e6df", fontSize: 10, fontWeight: 900, letterSpacing: ".13em" }}>INPUT SIGNAL</div>
+                  <strong style={{ display: "block", marginTop: 4, fontSize: 18 }}>{signalLabel}</strong>
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: signalScore >= 55 ? "#f3c969" : "#fff" }}>{signalScore}<span style={{ color: "#7f8398", fontSize: 13 }}>/100</span></div>
+              </div>
+              <div style={{ height: 7, marginTop: 10, borderRadius: 999, background: "rgba(255,255,255,.08)", overflow: "hidden" }}>
+                <div style={{ width: `${signalScore}%`, height: "100%", borderRadius: 999, background: "linear-gradient(90deg,#16b8c4,#78e6df,#f3c969)", transition: "width .25s ease" }} />
+              </div>
+              <p style={{ margin: "9px 0 0", color: "#aaa6b8", fontSize: 12, lineHeight: 1.45 }}>{signalTip}</p>
+              <div style={{ marginTop: 7, color: "#73778d", fontSize: 10 }}>This measures usable input detail—not your odds of success.</div>
+            </div>
+
             <div style={{ marginTop: 20 }}>
               <div style={{ fontWeight: 900, marginBottom: 10 }}>What kind of Lift do you want?</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 9 }}>
@@ -410,7 +458,7 @@ export default function ElevateMeBotPage() {
                   <h2 style={{ fontSize: "clamp(34px,5vw,58px)", lineHeight: 1, margin: "9px 0 0" }}>{lift.title}</h2>
                 </div>
                 <div style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(120,230,223,.3)", color: "#9df1ec", fontSize: 11, fontWeight: 900 }}>
-                  {lift.source === "ai" ? "AI-ASSISTED LIFT" : "SMART LIFT"}
+                  {lift.source === "ai" ? "AI-ASSISTED LIFT" : "SMART LIFT"} · INPUT {signalScore}/100
                 </div>
               </div>
 
