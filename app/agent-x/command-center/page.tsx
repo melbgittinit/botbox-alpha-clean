@@ -8,8 +8,8 @@ type CommandCenterData = {
     id: string; name: string; status: string;
     agents: { id: string; name: string; category: string; permission_level: string; status: string }[];
   } | null;
-  missions: { id: string; name: string; objective: string; status: string; human_review_required: boolean; agents: { id: string; name: string; status: string }[] }[];
-  reports: { id: string; title: string; summary: string; completed: string[]; insights: string[]; recommendations: string[]; limitations: string[] }[];
+  missions: { id: string; template_id?: string; name: string; objective: string; success_definition?: string; status: string; human_review_required: boolean; agents: { id: string; name: string; status: string }[] }[];
+  reports: { id: string; mission_id?: string; title: string; summary: string; completed: string[]; insights: string[]; recommendations: string[]; limitations: string[] }[];
 };
 
 const panel = {
@@ -109,6 +109,17 @@ export default function AgentXCommandCenterPage() {
       .ax-opportunity-grid,.ax-control-grid,.ax-report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
       .ax-control-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
       .ax-report-grid{gap:14px;margin-top:18px}
+      .ax-workspace{margin-top:18px;padding:18px;border-radius:16px;border:1px solid rgba(121,184,255,.16);background:linear-gradient(180deg,rgba(8,16,26,.96),rgba(6,10,16,.98))}
+      .ax-workspace-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+      .ax-workspace-label{font-size:11px;font-weight:900;letter-spacing:.14em;color:#79b8ff}
+      .ax-evidence{display:inline-flex;align-items:center;min-height:30px;padding:0 9px;border-radius:999px;border:1px solid rgba(255,217,140,.20);background:rgba(255,217,140,.06);color:#ffd98c;font-size:10px;font-weight:900;letter-spacing:.08em}
+      .ax-workspace-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;margin-top:14px}
+      .ax-workspace-block{padding:15px;border-radius:13px;background:#0b121c;border:1px solid rgba(255,255,255,.05)}
+      .ax-workspace-block h4{font-size:12px;letter-spacing:.09em;color:#8fa6c1;margin:0 0 10px}
+      .ax-workspace-list{display:grid;gap:8px}
+      .ax-workspace-item{color:#b7c4d4;line-height:1.5;font-size:13px}
+      .ax-workspace-item strong{color:#eef6ff}
+      .ax-success{margin-top:14px;padding:13px 14px;border-radius:13px;background:rgba(98,224,161,.06);border:1px solid rgba(98,224,161,.14);color:#9fdcbb;font-size:13px;line-height:1.5}
       .ax-trust-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
       .ax-trust-item{padding:12px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.07);background:#090f17}
       .ax-trust-label{font-size:10px;font-weight:900;letter-spacing:.13em;color:#7890ab}
@@ -142,7 +153,7 @@ export default function AgentXCommandCenterPage() {
         .ax-action-row{align-items:stretch}
         .ax-primary{width:100%;box-sizing:border-box}
         .ax-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-        .ax-agent-grid,.ax-opportunity-grid,.ax-control-grid,.ax-report-grid{grid-template-columns:1fr}
+        .ax-agent-grid,.ax-opportunity-grid,.ax-control-grid,.ax-report-grid,.ax-workspace-grid{grid-template-columns:1fr}
         .ax-mission-head{display:block}
         .ax-approve{width:100%;margin-top:12px}
         .ax-readiness{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -216,20 +227,49 @@ export default function AgentXCommandCenterPage() {
 
         <section id="missions" className="ax-section">
           <div style={{fontSize:12,letterSpacing:'.18em',fontWeight:800,color:'#79b8ff',marginBottom:12}}>MY MISSIONS</div>
-          <div style={{display:'grid',gap:14}}>{data.missions.length ? data.missions.map(mission => <div key={mission.id} className="ax-panel" style={panel}>
-            <div className="ax-mission-head"><div><div style={{fontSize:12,fontWeight:800,color:mission.status==='active'?'#62e0a1':'#79b8ff'}}>{mission.status.toUpperCase()}</div><h2 style={{fontSize:28,margin:'8px 0'}}>{mission.name}</h2></div>{mission.status==='ready' && <button className="ax-approve" onClick={()=>approve(mission.id)} disabled={approving===mission.id}>{approving===mission.id?'APPROVING…':'APPROVE MISSION'}</button>}</div>
-            <p style={{color:'#b6c3d3',lineHeight:1.55,maxWidth:820}}>{mission.objective}</p>
-            <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:12}}>{mission.agents.map(agent=><span key={agent.id} style={{fontSize:13,padding:'7px 10px',borderRadius:999,background:'#0d1420',color:'#afbdce'}}>{agent.name} · {agent.status}</span>)}</div>
-            <div className="ax-readiness">
-              {[
-                ['Objective defined', Boolean(mission.objective)],
-                ['Agents assigned', mission.agents.length > 0],
-                ['Human approval', mission.status !== 'ready'],
-                ['Execution gate', mission.status === 'active'],
-              ].map(([label,complete]) => <div key={String(label)} style={{padding:'10px 12px',borderRadius:11,background:'#0b121c',border:'1px solid rgba(255,255,255,.07)',fontSize:12,color:complete?'#8fe7b8':'#9caec2'}}>{complete?'✓':'○'} {String(label)}</div>)}
-            </div>
-            <div style={{fontSize:12,color:'#8fa0b5',marginTop:14}}>{mission.status === 'ready' ? 'Human review required before activation.' : 'Mission approved. Execution remains limited to configured permissions and may require additional approvals.'}</div>
-          </div>) : <div className="ax-empty"><div className="ax-empty-mark">01</div><strong>No mission prepared yet</strong><span>Your first mission will appear here with its objective, assigned agents, readiness gates and human approval control.</span></div>}</div>
+          <div style={{display:'grid',gap:14}}>{data.missions.length ? data.missions.map(mission => {
+            const missionReports = data.reports.filter(report => report.mission_id === mission.id);
+            const workingBrief = missionReports.find(report => report.title.includes('Working Brief'));
+            return <div key={mission.id} className="ax-panel" style={panel}>
+              <div className="ax-mission-head"><div><div style={{fontSize:12,fontWeight:800,color:mission.status==='active'?'#62e0a1':'#79b8ff'}}>{mission.status.toUpperCase()}</div><h2 style={{fontSize:28,margin:'8px 0'}}>{mission.name}</h2></div>{mission.status==='ready' && <button className="ax-approve" onClick={()=>approve(mission.id)} disabled={approving===mission.id}>{approving===mission.id?'APPROVING…':'APPROVE MISSION'}</button>}</div>
+              <p style={{color:'#b6c3d3',lineHeight:1.55,maxWidth:820}}>{mission.objective}</p>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:12}}>{mission.agents.map(agent=><span key={agent.id} style={{fontSize:13,padding:'7px 10px',borderRadius:999,background:'#0d1420',color:'#afbdce'}}>{agent.name} · {agent.status}</span>)}</div>
+              <div className="ax-readiness">
+                {[
+                  ['Objective defined', Boolean(mission.objective)],
+                  ['Agents assigned', mission.agents.length > 0],
+                  ['Human approval', mission.status !== 'ready'],
+                  ['Working brief', Boolean(workingBrief)],
+                ].map(([label,complete]) => <div key={String(label)} style={{padding:'10px 12px',borderRadius:11,background:'#0b121c',border:'1px solid rgba(255,255,255,.07)',fontSize:12,color:complete?'#8fe7b8':'#9caec2'}}>{complete?'✓':'○'} {String(label)}</div>)}
+              </div>
+              <div style={{fontSize:12,color:'#8fa0b5',marginTop:14}}>{mission.status === 'ready' ? 'Human review required before activation.' : 'Mission approved. Agent X has prepared the first working brief; external actions remain permission-gated.'}</div>
+
+              {mission.status === 'active' && <div className="ax-workspace">
+                <div className="ax-workspace-head">
+                  <div>
+                    <div className="ax-workspace-label">MISSION WORKSPACE</div>
+                    <h3 style={{fontSize:24,letterSpacing:'-.025em',margin:'8px 0 0'}}>{workingBrief?.title || 'Working brief pending'}</h3>
+                  </div>
+                  <div className="ax-evidence">INPUT-BASED · HUMAN REVIEW</div>
+                </div>
+                {workingBrief ? <>
+                  <p style={{color:'#aebed0',lineHeight:1.58,margin:'12px 0 0'}}>{workingBrief.summary}</p>
+                  <div className="ax-workspace-grid">
+                    <div className="ax-workspace-block">
+                      <h4>MISSION HYPOTHESES + PRIORITIES</h4>
+                      <div className="ax-workspace-list">{workingBrief.insights.map((item,index)=><div key={item} className="ax-workspace-item"><strong>{String(index+1).padStart(2,'0')}.</strong> {item}</div>)}</div>
+                    </div>
+                    <div className="ax-workspace-block">
+                      <h4>7-DAY ACTION PATH</h4>
+                      <div className="ax-workspace-list">{workingBrief.recommendations.map(item=><div key={item} className="ax-workspace-item">→ {item}</div>)}</div>
+                    </div>
+                  </div>
+                  {mission.success_definition && <div className="ax-success"><strong style={{color:'#c8f0d8'}}>Success definition:</strong> {mission.success_definition}</div>}
+                  <details style={{marginTop:14,color:'#8fa0b5'}}><summary>Evidence limits + guardrails</summary>{workingBrief.limitations.map(item=><div key={item} style={{marginTop:8,fontSize:13,lineHeight:1.5}}>• {item}</div>)}</details>
+                </> : <div className="ax-empty" style={{marginTop:14}}><div className="ax-empty-mark">W</div><strong>Working brief is being prepared</strong><span>Refresh the workspace if the mission was just approved. External action remains blocked until a reviewed brief is available.</span></div>}
+              </div>}
+            </div>;
+          }) : <div className="ax-empty"><div className="ax-empty-mark">01</div><strong>No mission prepared yet</strong><span>Your first mission will appear here with its objective, assigned agents, readiness gates and human approval control.</span></div>}</div>
         </section>
 
         <section id="opportunities" className="ax-section">
