@@ -10,6 +10,22 @@ type CommandCenterData = {
   } | null;
   missions: { id: string; template_id?: string; name: string; objective: string; success_definition?: string; status: string; human_review_required: boolean; agents: { id: string; name: string; status: string }[] }[];
   reports: { id: string; mission_id?: string; title: string; summary: string; completed: string[]; insights: string[]; recommendations: string[]; limitations: string[] }[];
+  actions: {
+    id: string;
+    mission_id: string;
+    source_report_id?: string;
+    selected_action: string;
+    action_type: string;
+    status: 'prepared' | 'approved_for_use' | 'changes_requested' | 'hold' | 'completed' | 'stopped';
+    deliverable: {
+      title?: string;
+      purpose?: string;
+      sections?: { label: string; content: string }[];
+      approval_checklist?: string[];
+    };
+    human_review_required: boolean;
+    review_note?: string | null;
+  }[];
 };
 
 const panel = {
@@ -24,6 +40,8 @@ export default function AgentXCommandCenterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState('');
+  const [preparing, setPreparing] = useState('');
+  const [reviewing, setReviewing] = useState('');
   const opportunities = data
     ? Array.from(new Set(data.reports.flatMap(report => report.recommendations))).slice(0, 8)
     : [];
@@ -57,6 +75,57 @@ export default function AgentXCommandCenterPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const prepareAction = async (missionId: string, reportId: string, selectedAction: string) => {
+    if (!data) return;
+    setPreparing(selectedAction);
+    setError('');
+    try {
+      const res = await fetch('/api/agent-x/command-center', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'prepare_action',
+          organizationId: data.organization.id,
+          missionId,
+          reportId,
+          selectedAction,
+        }),
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload?.ok) throw new Error(payload?.error || 'Action preparation failed');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Action preparation failed');
+    } finally {
+      setPreparing('');
+    }
+  };
+
+  const reviewAction = async (actionId: string, decision: 'approved_for_use' | 'changes_requested' | 'hold') => {
+    if (!data) return;
+    setReviewing(actionId + decision);
+    setError('');
+    try {
+      const res = await fetch('/api/agent-x/command-center', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'review_action',
+          organizationId: data.organization.id,
+          actionId,
+          decision,
+        }),
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload?.ok) throw new Error(payload?.error || 'Action review failed');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Action review failed');
+    } finally {
+      setReviewing('');
+    }
+  };
 
   const approve = async (missionId: string) => {
     if (!data) return;
@@ -120,6 +189,23 @@ export default function AgentXCommandCenterPage() {
       .ax-workspace-item{color:#b7c4d4;line-height:1.5;font-size:13px}
       .ax-workspace-item strong{color:#eef6ff}
       .ax-success{margin-top:14px;padding:13px 14px;border-radius:13px;background:rgba(98,224,161,.06);border:1px solid rgba(98,224,161,.14);color:#9fdcbb;font-size:13px;line-height:1.5}
+      .ax-next-actions{display:grid;gap:10px;margin-top:14px}
+      .ax-next-action{padding:14px;border-radius:14px;background:#0b121c;border:1px solid rgba(255,255,255,.06)}
+      .ax-next-action-row{display:flex;justify-content:space-between;gap:14px;align-items:center}
+      .ax-action-copy{color:#bec9d8;line-height:1.5;font-size:13px}
+      .ax-action-btn{min-height:42px;flex:0 0 auto;border:0;border-radius:999px;padding:0 13px;background:#eef6ff;color:#07111d;font-size:11px;font-weight:950;letter-spacing:.04em;cursor:pointer}
+      .ax-action-btn:disabled{opacity:.55;cursor:wait}
+      .ax-deliverable{margin-top:16px;padding:16px;border-radius:15px;border:1px solid rgba(98,224,161,.18);background:linear-gradient(180deg,rgba(11,28,23,.72),rgba(6,13,15,.92))}
+      .ax-deliverable-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+      .ax-deliverable-status{display:inline-flex;min-height:30px;align-items:center;padding:0 9px;border-radius:999px;border:1px solid rgba(98,224,161,.2);background:rgba(98,224,161,.07);color:#93e3b8;font-size:10px;font-weight:900;letter-spacing:.08em}
+      .ax-deliverable-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+      .ax-deliverable-section{padding:13px;border-radius:12px;background:#081119;border:1px solid rgba(255,255,255,.05)}
+      .ax-deliverable-section h5{margin:0 0 7px;font-size:11px;letter-spacing:.08em;color:#7fa0c2}
+      .ax-deliverable-section p{margin:0;color:#b9c7d5;line-height:1.5;font-size:13px}
+      .ax-review-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+      .ax-review-btn{min-height:42px;border-radius:999px;padding:0 13px;border:1px solid rgba(255,255,255,.10);background:#0b131d;color:#dbe7f4;font-size:11px;font-weight:900;letter-spacing:.04em;cursor:pointer}
+      .ax-review-btn.primary{background:#79b8ff;color:#07111d;border-color:transparent}
+      .ax-review-btn:disabled{opacity:.55;cursor:wait}
       .ax-trust-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
       .ax-trust-item{padding:12px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.07);background:#090f17}
       .ax-trust-label{font-size:10px;font-weight:900;letter-spacing:.13em;color:#7890ab}
@@ -153,7 +239,8 @@ export default function AgentXCommandCenterPage() {
         .ax-action-row{align-items:stretch}
         .ax-primary{width:100%;box-sizing:border-box}
         .ax-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-        .ax-agent-grid,.ax-opportunity-grid,.ax-control-grid,.ax-report-grid,.ax-workspace-grid{grid-template-columns:1fr}
+        .ax-agent-grid,.ax-opportunity-grid,.ax-control-grid,.ax-report-grid,.ax-workspace-grid,.ax-deliverable-grid{grid-template-columns:1fr}
+        .ax-next-action-row{display:block}.ax-action-btn{width:100%;margin-top:10px}
         .ax-mission-head{display:block}
         .ax-approve{width:100%;margin-top:12px}
         .ax-readiness{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -230,6 +317,7 @@ export default function AgentXCommandCenterPage() {
           <div style={{display:'grid',gap:14}}>{data.missions.length ? data.missions.map(mission => {
             const missionReports = data.reports.filter(report => report.mission_id === mission.id);
             const workingBrief = missionReports.find(report => report.title.includes('Working Brief'));
+            const missionActions = data.actions?.filter(action => action.mission_id === mission.id) || [];
             return <div key={mission.id} className="ax-panel" style={panel}>
               <div className="ax-mission-head"><div><div style={{fontSize:12,fontWeight:800,color:mission.status==='active'?'#62e0a1':'#79b8ff'}}>{mission.status.toUpperCase()}</div><h2 style={{fontSize:28,margin:'8px 0'}}>{mission.name}</h2></div>{mission.status==='ready' && <button className="ax-approve" onClick={()=>approve(mission.id)} disabled={approving===mission.id}>{approving===mission.id?'APPROVING…':'APPROVE MISSION'}</button>}</div>
               <p style={{color:'#b6c3d3',lineHeight:1.55,maxWidth:820}}>{mission.objective}</p>
@@ -264,6 +352,41 @@ export default function AgentXCommandCenterPage() {
                       <div className="ax-workspace-list">{workingBrief.recommendations.map(item=><div key={item} className="ax-workspace-item">→ {item}</div>)}</div>
                     </div>
                   </div>
+
+                  <div className="ax-workspace-block" style={{marginTop:14}}>
+                    <h4>CHOOSE NEXT ACTION</h4>
+                    <div style={{fontSize:12,color:'#8194aa',lineHeight:1.5}}>Agent X will prepare the work for review. Preparing an action does not send, publish, purchase, contact anyone, or change an external account.</div>
+                    <div className="ax-next-actions">
+                      {workingBrief.recommendations.map(item => {
+                        const prepared = missionActions.find(action => action.selected_action === item);
+                        return <div key={item} className="ax-next-action">
+                          <div className="ax-next-action-row">
+                            <div className="ax-action-copy">{item}</div>
+                            {!prepared ? <button className="ax-action-btn" disabled={preparing===item} onClick={()=>prepareAction(mission.id,workingBrief.id,item)}>{preparing===item?'PREPARING…':'PREPARE THIS ACTION'}</button> : <div className="ax-deliverable-status">{prepared.status.replaceAll('_',' ').toUpperCase()}</div>}
+                          </div>
+                          {prepared && <div className="ax-deliverable">
+                            <div className="ax-deliverable-head">
+                              <div><div className="ax-workspace-label">PREPARED DELIVERABLE</div><h4 style={{fontSize:20,letterSpacing:'-.02em',margin:'7px 0 0',color:'#edf6ff'}}>{prepared.deliverable.title || 'Prepared Action'}</h4></div>
+                              <div className="ax-deliverable-status">{prepared.status.replaceAll('_',' ').toUpperCase()}</div>
+                            </div>
+                            {prepared.deliverable.purpose && <p style={{color:'#a7b7c7',lineHeight:1.55,fontSize:13}}>{prepared.deliverable.purpose}</p>}
+                            <div className="ax-deliverable-grid">{(prepared.deliverable.sections || []).map(section=><div key={section.label} className="ax-deliverable-section"><h5>{section.label.toUpperCase()}</h5><p>{section.content}</p></div>)}</div>
+                            <div className="ax-workspace-block" style={{marginTop:12}}>
+                              <h4>APPROVAL CHECKLIST</h4>
+                              <div className="ax-workspace-list">{(prepared.deliverable.approval_checklist || []).map(check=><div key={check} className="ax-workspace-item">□ {check}</div>)}</div>
+                            </div>
+                            <div className="ax-review-actions">
+                              <button className="ax-review-btn primary" disabled={reviewing===prepared.id+'approved_for_use'} onClick={()=>reviewAction(prepared.id,'approved_for_use')}>{reviewing===prepared.id+'approved_for_use'?'SAVING…':'APPROVE FOR USE'}</button>
+                              <button className="ax-review-btn" disabled={reviewing===prepared.id+'changes_requested'} onClick={()=>reviewAction(prepared.id,'changes_requested')}>{reviewing===prepared.id+'changes_requested'?'SAVING…':'REQUEST CHANGES'}</button>
+                              <button className="ax-review-btn" disabled={reviewing===prepared.id+'hold'} onClick={()=>reviewAction(prepared.id,'hold')}>{reviewing===prepared.id+'hold'?'SAVING…':'HOLD'}</button>
+                            </div>
+                            <div style={{fontSize:11,color:'#7f91a7',lineHeight:1.5,marginTop:11}}>“Approve for use” approves this prepared package for the customer’s use. It still does not cause Agent X to send or execute anything externally.</div>
+                          </div>}
+                        </div>;
+                      })}
+                    </div>
+                  </div>
+
                   {mission.success_definition && <div className="ax-success"><strong style={{color:'#c8f0d8'}}>Success definition:</strong> {mission.success_definition}</div>}
                   <details style={{marginTop:14,color:'#8fa0b5'}}><summary>Evidence limits + guardrails</summary>{workingBrief.limitations.map(item=><div key={item} style={{marginTop:8,fontSize:13,lineHeight:1.5}}>• {item}</div>)}</details>
                 </> : <div className="ax-empty" style={{marginTop:14}}><div className="ax-empty-mark">W</div><strong>Working brief is being prepared</strong><span>Refresh the workspace if the mission was just approved. External action remains blocked until a reviewed brief is available.</span></div>}
