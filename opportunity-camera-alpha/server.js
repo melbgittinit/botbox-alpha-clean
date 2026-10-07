@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import QRCode from 'qrcode';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ENVIRONMENTS, OPPORTUNITY_PATHS, evaluateOpportunity, getKnowledgeSummary } from './knowledgeBase.js';
+import { ENVIRONMENTS, OPPORTUNITY_PATHS, evaluateOpportunity, getKnowledgeSummary, getPathsForEnvironment } from './knowledgeBase.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -54,9 +54,55 @@ app.get('/api/opportunity-camera/paths', (_req, res) => {
 });
 
 
-function moneyFromPath(pathDef) {
+const EARN_MODE_TIERS = {
+  tier_1: 0.18,
+  tier_2: 0.22,
+  tier_3: 0.27,
+  tier_4: 0.33,
+  tier_5: 0.37
+};
+
+function profileSecret() {
+  return process.env.EARN_MODE_PROFILE_SECRET || '';
+}
+
+function signMemberProfile(payload) {
+  const secret = profileSecret();
+  if (!secret) return null;
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function verifyMemberProfileToken(token) {
+  const secret = profileSecret();
+  if (!secret || !token || !token.includes('.')) return null;
+  const [body,sig] = token.split('.');
+  const expected = crypto.createHmac('sha256', secret).update(body).digest('base64url');
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a,b)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body,'base64url').toString('utf8'));
+    if (!payload?.memberKey || !payload?.tier || !EARN_MODE_TIERS[payload.tier]) return null;
+    if (payload.expiresAt && Date.parse(payload.expiresAt) < Date.now()) return null;
+    return {
+      source:'beta_signed_profile',
+      memberKey:payload.memberKey,
+      memberRef:crypto.createHash('sha256').update(payload.memberKey).digest('base64url').slice(0,16),
+      tier:payload.tier,
+      commissionRate:EARN_MODE_TIERS[payload.tier],
+      eligibleOfferKeys:Array.isArray(payload.eligibleOfferKeys) ? payload.eligibleOfferKeys : null,
+      expiresAt:payload.expiresAt || null
+    };
+  } catch {
+    return null;
+  }
+}
+
+function moneyFromPath(pathDef, memberProfile=null) {
   const snapshot = pathDef?.commerce?.snapshot;
-  const trustedRate = Number(process.env.ALPHA_MEMBER_COMMISSION_RATE || '');
+  const trustedRate = memberProfile?.commissionRate;
   if (!snapshot?.priceCents) {
     return {
       status: pathDef?.commerce?.kind === 'network' ? 'community_path' : 'unavailable',
@@ -121,16 +167,63 @@ function verifyOpportunityToken(token) {
   }
 }
 
+app.post('/api/opportunity-camera/member-profile', (req,res) => {
+  const profile = verifyMemberProfileToken(req.body?.member_profile_token);
+  if (!profile) return res.status(401).json({error:'INVALID_MEMBER_PROFILE'});
+  res.json({
+    source:profile.source,
+    memberRef:profile.memberRef,
+    tier:profile.tier,
+    commissionRate:profile.commissionRate,
+    commissionRateLabel:`${(profile.commissionRate*100).toFixed(0)}%`,
+    expiresAt:profile.expiresAt
+  });
+});
+
+app.post('/api/admin/beta-member-token', (req,res) => {
+  const required = process.env.OPPORTUNITY_ADMIN_SECRET || '';
+  if (!required || req.get('x-opportunity-admin-secret') !== required) {
+    return res.status(401).json({error:'ADMIN_AUTH_REQUIRED'});
+  }
+  const { member_key:memberKey, tier='tier_1', eligible_offer_keys:eligibleOfferKeys, days=60 } = req.body || {};
+  if (!memberKey || !EARN_MODE_TIERS[tier]) return res.status(400).json({error:'INVALID_PROFILE_INPUT'});
+  const safeDays = Math.max(1,Math.min(120,Number(days)||60));
+  const expiresAt = new Date(Date.now()+safeDays*86400000).toISOString();
+  const token = signMemberProfile({
+    memberKey:String(memberKey),
+    tier,
+    eligibleOfferKeys:Array.isArray(eligibleOfferKeys)?eligibleOfferKeys:null,
+    issuedAt:new Date().toISOString(),
+    expiresAt
+  });
+  if (!token) return res.status(503).json({error:'PROFILE_SIGNING_NOT_CONFIGURED'});
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  res.json({
+    memberRef:crypto.createHash('sha256').update(String(memberKey)).digest('base64url').slice(0,16),
+    tier,
+    commissionRate:EARN_MODE_TIERS[tier],
+    expiresAt,
+    memberProfileToken:token,
+    launchUrl:`${baseUrl}/?profile=${encodeURIComponent(token)}`
+  });
+});
+
 app.post('/api/opportunity-camera/create-action-link', async (req, res) => {
-  const { pathKey } = req.body || {};
+  const { pathKey, member_profile_token:memberProfileToken } = req.body || {};
+  const memberProfile = verifyMemberProfileToken(memberProfileToken);
   const pathDef = OPPORTUNITY_PATHS.find(p => p.pathKey === pathKey && p.cameraApproved);
   if (!pathDef) return res.status(404).json({ error:'PATH_NOT_FOUND' });
   if (!pathDef.destinationUrl) return res.status(409).json({ error:'DESTINATION_NOT_READY', message:'This opportunity is not ready for tracked sharing yet.' });
   if (!actionLinkSecret()) return res.status(503).json({ error:'LINK_SIGNING_NOT_CONFIGURED' });
 
+  if (memberProfile?.eligibleOfferKeys && !memberProfile.eligibleOfferKeys.includes(pathDef.offerKey)) {
+    return res.status(403).json({error:'MEMBER_NOT_ELIGIBLE_FOR_OFFER'});
+  }
+
   const payload = {
     pathKey:pathDef.pathKey,
     offerKey:pathDef.offerKey,
+    memberRef:memberProfile?.memberRef || null,
     destinationUrl:pathDef.destinationUrl,
     createdAt:new Date().toISOString()
   };
@@ -144,7 +237,7 @@ app.post('/api/opportunity-camera/create-action-link', async (req, res) => {
     offer:pathDef.offerName,
     trackedUrl,
     qrDataUrl,
-    money:moneyFromPath(pathDef),
+    money:moneyFromPath(pathDef,memberProfile),
     note:'This alpha link tracks the Opportunity Camera pathway. Production member attribution will be added when Earn Mode authentication is connected.'
   });
 });
@@ -156,6 +249,7 @@ app.get('/go/:token', (req,res) => {
     event:'opportunity_link_click',
     pathKey:payload.pathKey,
     offerKey:payload.offerKey,
+    memberRef:payload.memberRef || null,
     at:new Date().toISOString()
   }));
   return res.redirect(302,payload.destinationUrl);
@@ -273,6 +367,7 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
     const readiness = ['new','active','advanced'].includes(req.body?.member_readiness)
       ? req.body.member_readiness
       : 'new';
+    const memberProfile = verifyMemberProfileToken(req.body?.member_profile_token);
 
     const match = evaluateOpportunity({
       environment: scene.environment,
@@ -293,7 +388,26 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
       });
     }
 
-    const primary = match.primary;
+    let primary = match.primary;
+    let alternatives = match.alternatives;
+
+    if (memberProfile?.eligibleOfferKeys) {
+      if (!memberProfile.eligibleOfferKeys.includes(primary.offerKey)) {
+        const eligible = [primary, ...getPathsForEnvironment(scene.environment)]
+          .filter(p => memberProfile.eligibleOfferKeys.includes(p.offerKey));
+        if (!eligible.length) {
+          return res.json({
+            result:'keep_looking',
+            headline:'Keep looking.',
+            message:'I found possible HUB matches, but none are currently eligible for this Earn Mode profile.',
+            scene:{...scene,label:ENVIRONMENTS[scene.environment]?.label || ENVIRONMENTS.other_unknown.label},
+            alternatives:[]
+          });
+        }
+        primary = eligible[0];
+      }
+      alternatives = alternatives.filter(a => memberProfile.eligibleOfferKeys.includes(a.offerKey));
+    }
 
     return res.json({
       result: match.result,
@@ -317,8 +431,14 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
         trainingKey: primary.trainingKey,
         commerce: primary.commerce || null
       },
-      alternatives: match.alternatives,
-      money: moneyFromPath(primary)
+      alternatives,
+      member: memberProfile ? {
+        source:memberProfile.source,
+        memberRef:memberProfile.memberRef,
+        tier:memberProfile.tier,
+        commissionRate:memberProfile.commissionRate
+      } : null,
+      money: moneyFromPath(primary,memberProfile)
     });
   } catch (error) {
     console.error(error);
