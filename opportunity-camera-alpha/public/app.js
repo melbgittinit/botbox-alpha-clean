@@ -1,6 +1,8 @@
 const $ = (s) => document.querySelector(s);
 let imageDataUrl = null;
 let currentOpportunity = null;
+let memberProfileToken = null;
+let memberProfile = null;
 const BAG_KEY = 'earn_mode_opportunity_bag_alpha_v1';
 
 function loadBag(){ try{return JSON.parse(localStorage.getItem(BAG_KEY)||'[]')}catch{return []} }
@@ -18,6 +20,46 @@ function renderBag(){
 async function boot() {
   const config = await fetch('/api/config').then(r => r.json());
   $('#heroImage').src = config.heroUrl;
+  const params = new URLSearchParams(location.search);
+  const token = params.get('profile');
+  if (token) {
+    try {
+      const response = await fetch('/api/opportunity-camera/member-profile',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({member_profile_token:token})
+      });
+      if (response.ok) {
+        memberProfileToken = token;
+        memberProfile = await response.json();
+        localStorage.setItem('earn_mode_opportunity_profile_alpha', token);
+      }
+    } catch {}
+  }
+  if (!memberProfileToken) {
+    const stored = localStorage.getItem('earn_mode_opportunity_profile_alpha');
+    if (stored) {
+      try {
+        const response = await fetch('/api/opportunity-camera/member-profile',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({member_profile_token:stored})
+        });
+        if (response.ok) {
+          memberProfileToken = stored;
+          memberProfile = await response.json();
+        } else {
+          localStorage.removeItem('earn_mode_opportunity_profile_alpha');
+        }
+      } catch {}
+    }
+  }
+  const status = $('#memberStatus');
+  if (status) {
+    status.textContent = memberProfile
+      ? `Beta Earn Mode profile connected • ${memberProfile.tier.replace('_',' ')} • ${memberProfile.commissionRateLabel}`
+      : 'Beta mode • personalized commission not connected';
+  }
   renderBag();
 }
 
@@ -47,7 +89,10 @@ $('#scanButton').onclick = async () => {
     const response = await fetch('/api/opportunity-camera/scan', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ image_data_url: imageDataUrl })
+      body: JSON.stringify({
+        image_data_url: imageDataUrl,
+        member_profile_token: memberProfileToken
+      })
     });
     const data = await response.json();
 
@@ -105,7 +150,10 @@ $('#makeQr').onclick = async () => {
     const response = await fetch('/api/opportunity-camera/create-action-link', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({pathKey:currentOpportunity.pathKey})
+      body:JSON.stringify({
+        pathKey:currentOpportunity.pathKey,
+        member_profile_token:memberProfileToken
+      })
     });
     const data = await response.json();
     if (!response.ok) {
