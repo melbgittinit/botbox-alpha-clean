@@ -63,7 +63,7 @@ const EARN_MODE_TIERS = {
 };
 
 function profileSecret() {
-  return process.env.EARN_MODE_PROFILE_SECRET || '';
+  return process.env.EARN_MODE_PROFILE_SECRET || process.env.OPPORTUNITY_LINK_SECRET || '';
 }
 
 function signMemberProfile(payload) {
@@ -181,7 +181,7 @@ app.post('/api/opportunity-camera/member-profile', (req,res) => {
 });
 
 app.post('/api/admin/beta-member-token', (req,res) => {
-  const required = process.env.OPPORTUNITY_ADMIN_SECRET || '';
+  const required = process.env.OPPORTUNITY_ADMIN_SECRET || process.env.PGP_CAMERA_WORKER_SECRET || '';
   if (!required || req.get('x-opportunity-admin-secret') !== required) {
     return res.status(401).json({error:'ADMIN_AUTH_REQUIRED'});
   }
