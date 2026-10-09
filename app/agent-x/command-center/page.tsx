@@ -25,6 +25,10 @@ type CommandCenterData = {
     };
     human_review_required: boolean;
     review_note?: string | null;
+    outcome_status?: 'worked' | 'partly_worked' | 'did_not_work' | 'not_used' | null;
+    outcome_note?: string | null;
+    outcome_evidence?: string | null;
+    outcome_recommendation?: string | null;
   }[];
 };
 
@@ -42,6 +46,7 @@ export default function AgentXCommandCenterPage() {
   const [approving, setApproving] = useState('');
   const [preparing, setPreparing] = useState('');
   const [reviewing, setReviewing] = useState('');
+  const [outcomeNotes, setOutcomeNotes] = useState<Record<string,string>>({});
   const opportunities = data
     ? Array.from(new Set(data.reports.flatMap(report => report.recommendations))).slice(0, 8)
     : [];
@@ -102,7 +107,11 @@ export default function AgentXCommandCenterPage() {
     }
   };
 
-  const reviewAction = async (actionId: string, decision: 'approved_for_use' | 'changes_requested' | 'hold') => {
+  const reviewAction = async (
+    actionId: string,
+    decision: 'approved_for_use' | 'changes_requested' | 'hold' | 'outcome_worked' | 'outcome_partly_worked' | 'outcome_did_not_work' | 'outcome_not_used',
+    reviewNote?: string
+  ) => {
     if (!data) return;
     setReviewing(actionId + decision);
     setError('');
@@ -115,6 +124,7 @@ export default function AgentXCommandCenterPage() {
           organizationId: data.organization.id,
           actionId,
           decision,
+          reviewNote: reviewNote || null,
         }),
       });
       const payload = await res.json();
@@ -206,6 +216,11 @@ export default function AgentXCommandCenterPage() {
       .ax-review-btn{min-height:42px;border-radius:999px;padding:0 13px;border:1px solid rgba(255,255,255,.10);background:#0b131d;color:#dbe7f4;font-size:11px;font-weight:900;letter-spacing:.04em;cursor:pointer}
       .ax-review-btn.primary{background:#79b8ff;color:#07111d;border-color:transparent}
       .ax-review-btn:disabled{opacity:.55;cursor:wait}
+      .ax-outcome{margin-top:14px;padding:15px;border-radius:14px;border:1px solid rgba(121,184,255,.14);background:#08111a}
+      .ax-outcome textarea{width:100%;min-height:82px;resize:vertical;border-radius:12px;border:1px solid rgba(121,184,255,.18);background:#0b1420;color:#eef6ff;padding:12px;font:inherit;line-height:1.45}
+      .ax-outcome-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+      .ax-outcome-btn{min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#0d1722;color:#cbd8e6;font-size:11px;font-weight:900;letter-spacing:.03em;cursor:pointer;padding:0 10px}
+      .ax-outcome-result{margin-top:12px;padding:13px 14px;border-radius:12px;background:rgba(121,184,255,.06);border:1px solid rgba(121,184,255,.15);color:#b9d2ee;font-size:13px;line-height:1.5}
       .ax-trust-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
       .ax-trust-item{padding:12px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.07);background:#090f17}
       .ax-trust-label{font-size:10px;font-weight:900;letter-spacing:.13em;color:#7890ab}
@@ -241,6 +256,7 @@ export default function AgentXCommandCenterPage() {
         .ax-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
         .ax-agent-grid,.ax-opportunity-grid,.ax-control-grid,.ax-report-grid,.ax-workspace-grid,.ax-deliverable-grid{grid-template-columns:1fr}
         .ax-next-action-row{display:block}.ax-action-btn{width:100%;margin-top:10px}
+        .ax-outcome-grid{grid-template-columns:1fr 1fr}
         .ax-mission-head{display:block}
         .ax-approve{width:100%;margin-top:12px}
         .ax-readiness{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -381,6 +397,37 @@ export default function AgentXCommandCenterPage() {
                               <button className="ax-review-btn" disabled={reviewing===prepared.id+'hold'} onClick={()=>reviewAction(prepared.id,'hold')}>{reviewing===prepared.id+'hold'?'SAVING…':'HOLD'}</button>
                             </div>
                             <div style={{fontSize:11,color:'#7f91a7',lineHeight:1.5,marginTop:11}}>“Approve for use” approves this prepared package for the customer’s use. It still does not cause Agent X to send or execute anything externally.</div>
+
+                            {(prepared.status==='approved_for_use' || prepared.status==='hold' || prepared.outcome_status) && <div className="ax-outcome">
+                              <div className="ax-workspace-label">OUTCOME REVIEW</div>
+                              <h5 style={{fontSize:18,margin:'7px 0 6px',color:'#eef6ff'}}>What happened after this action was used?</h5>
+                              <div style={{fontSize:12,color:'#8396aa',lineHeight:1.5}}>Record the result so Agent X can learn from evidence instead of assuming the action worked.</div>
+                              {!prepared.outcome_status ? <>
+                                <textarea
+                                  value={outcomeNotes[prepared.id] || ''}
+                                  onChange={e=>setOutcomeNotes(prev=>({...prev,[prepared.id]:e.target.value}))}
+                                  placeholder="Optional evidence or notes: what happened, what customers said, what changed, or why it was not used."
+                                  style={{marginTop:10}}
+                                />
+                                <div className="ax-outcome-grid">
+                                  {[
+                                    ['outcome_worked','WORKED'],
+                                    ['outcome_partly_worked','PARTLY WORKED'],
+                                    ['outcome_did_not_work','DIDN’T WORK'],
+                                    ['outcome_not_used','NOT USED'],
+                                  ].map(([decision,label])=><button
+                                    key={decision}
+                                    className="ax-outcome-btn"
+                                    disabled={reviewing===prepared.id+decision}
+                                    onClick={()=>reviewAction(prepared.id,decision as 'outcome_worked' | 'outcome_partly_worked' | 'outcome_did_not_work' | 'outcome_not_used',outcomeNotes[prepared.id] || '')}
+                                  >{reviewing===prepared.id+decision?'SAVING…':label}</button>)}
+                                </div>
+                              </> : <div className="ax-outcome-result">
+                                <strong style={{color:'#e8f3ff'}}>{prepared.outcome_status.replaceAll('_',' ').toUpperCase()}</strong>
+                                {prepared.outcome_note && <div style={{marginTop:6}}>{prepared.outcome_note}</div>}
+                                {prepared.outcome_recommendation && <div style={{marginTop:8,color:'#9fc9f5'}}>{prepared.outcome_recommendation}</div>}
+                              </div>}
+                            </div>}
                           </div>}
                         </div>;
                       })}
