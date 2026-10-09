@@ -100,6 +100,40 @@ const modeConfig: Record<Need, {
   },
 };
 
+
+const hubDoors: Record<Need, { title: string; copy: string; href: string; eyebrow: string }[]> = {
+  make: [
+    { title: "Creator Flow", copy: "Keep building what the Bot just helped you start.", href: "https://urbanspirit.biz/pages/creator-flow", eyebrow: "BUILD" },
+    { title: "Creator Lab", copy: "Move from idea to a more developed maker path.", href: "https://urbanspirit.biz/pages/creator-lab", eyebrow: "MAKE" },
+    { title: "Musicverse", copy: "Enter a creative world when sound, story or atmosphere can help the idea grow.", href: "https://urbanspirit.biz/pages/musicverse", eyebrow: "EXPERIENCE" },
+  ],
+  done: [
+    { title: "RESET", copy: "Clear noise and rebuild momentum around what matters most.", href: "https://urbanspirit.biz/pages/start-your-free-2-day-reset", eyebrow: "RESET" },
+    { title: "Creator Flow", copy: "Turn the next action into a simple working sequence.", href: "https://urbanspirit.biz/pages/creator-flow", eyebrow: "MOVE" },
+    { title: "Explore the HUB", copy: "Open the wider HUB only after you have your next move.", href: "https://urbanspirit.biz/pages/world-mode", eyebrow: "OPEN" },
+  ],
+  reach: [
+    { title: "Earn Mode", copy: "Connect your message to a tracked earning path when it fits.", href: "https://urbanspirit.biz/pages/earn-mode", eyebrow: "NOW ADD" },
+    { title: "The Bot Factory", copy: "Turn outreach or media ideas into specialized tools.", href: "https://urbanspirit.biz/pages/bot-factory-media-door", eyebrow: "AMPLIFY" },
+    { title: "Explore the HUB", copy: "Move into broader audience and experience worlds.", href: "https://urbanspirit.biz/pages/world-mode", eyebrow: "EXPAND" },
+  ],
+  earn: [
+    { title: "Earn Mode", copy: "Take the value test you just created into the HUB earning engine.", href: "https://urbanspirit.biz/pages/earn-mode", eyebrow: "NOW ADD" },
+    { title: "SHOP BOT", copy: "Explore a business-focused Bot path for products and selling.", href: "https://urbanspirit.biz/pages/shop-bot", eyebrow: "SELL" },
+    { title: "Creator Flow", copy: "Build the offer or asset before you scale it.", href: "https://urbanspirit.biz/pages/creator-flow", eyebrow: "BUILD" },
+  ],
+  better: [
+    { title: "Creator Flow", copy: "Keep improving the thing you already have.", href: "https://urbanspirit.biz/pages/creator-flow", eyebrow: "REFINE" },
+    { title: "Musicverse", copy: "Use sound and creative worlds to elevate presentation and feeling.", href: "https://urbanspirit.biz/pages/musicverse", eyebrow: "FEEL" },
+    { title: "Explore the HUB", copy: "Find another HUB world that matches what you are improving.", href: "https://urbanspirit.biz/pages/world-mode", eyebrow: "EXPLORE" },
+  ],
+  next: [
+    { title: "Explore the HUB", copy: "Let the HUB open around the direction the Bot just uncovered.", href: "https://urbanspirit.biz/pages/world-mode", eyebrow: "YOUR HUB" },
+    { title: "Earn Mode", copy: "If the next move is commercial, continue into Earn Mode.", href: "https://urbanspirit.biz/pages/earn-mode", eyebrow: "EARN" },
+    { title: "RESET", copy: "If the next move is personal clarity, enter a Reset path.", href: "https://urbanspirit.biz/pages/start-your-free-2-day-reset", eyebrow: "RESET" },
+  ],
+};
+
 const card: React.CSSProperties = {
   background: "linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.045))",
   border: "1px solid rgba(255,255,255,.16)",
@@ -295,6 +329,7 @@ export default function ElevateMeBotPage() {
 
 
   const activeMode = modeConfig[need];
+  const recommendedDoors = hubDoors[need];
 
   function saveProfile() {
     try {
@@ -577,6 +612,38 @@ export default function ElevateMeBotPage() {
                     ? <button onClick={() => runActivated(need)} style={{ ...button, background: "#78e6df", color: "#041117" }}>RUN ANOTHER ELEVATION</button>
                     : <a href={`/elevate-me-bot/unlock?level=activate&surface=${surface}${getElevateCycleKey() ? `&elv=${encodeURIComponent(getElevateCycleKey()!)}` : ""}`} onClick={() => trackElevateEvent("unlock_open", surface, "activate")} style={{ ...button, background: "#f3c969", color: "#111" }}>ACTIVATE + SAVE MY BOT • $1</a>}
                   <button onClick={() => { setLift(null); window.scrollTo({ top: 0, behavior: "smooth" }); }} style={{ ...button, background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,.25)" }}>CHANGE WHAT I’M ELEVATING</button>
+                </div>
+              </div>
+
+
+              <div style={{ marginTop: 24, padding: "24px 20px", borderRadius: 22, background: "radial-gradient(circle at 50% 0%,rgba(120,230,223,.10),transparent 35%),rgba(255,255,255,.035)", border: "1px solid rgba(255,255,255,.12)" }}>
+                <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>YOUR HUB IS OPENING</div>
+                <h3 style={{ margin: "8px 0 8px", fontSize: 30 }}>Based on this Lift, start with these doors.</h3>
+                <p style={{ margin: 0, color: "#cfc9dd", lineHeight: 1.55, maxWidth: 760 }}>
+                  You do not need to understand the entire HUB. Elevate Me Bot is using what you asked for to surface the next three places most likely to matter.
+                </p>
+                <div className="elevate-result-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, marginTop: 18 }}>
+                  {recommendedDoors.map((door, index) => (
+                    <a
+                      key={door.title}
+                      href={door.href}
+                      onClick={() => trackElevateEvent("hub_door_open", surface, undefined, { action: need, door: door.title, position: index + 1 })}
+                      style={{
+                        display: "block",
+                        padding: 18,
+                        borderRadius: 18,
+                        border: index === 0 ? `1px solid ${activeMode.accent}` : "1px solid rgba(255,255,255,.12)",
+                        background: index === 0 ? activeMode.glow : "rgba(255,255,255,.035)",
+                        color: "#fff",
+                        textDecoration: "none",
+                        minHeight: 150,
+                      }}
+                    >
+                      <div style={{ color: index === 0 ? activeMode.accent : "#a9a5ba", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>{door.eyebrow}</div>
+                      <strong style={{ display: "block", marginTop: 8, fontSize: 22 }}>{door.title}</strong>
+                      <p style={{ margin: "8px 0 0", color: "#cbc6d7", lineHeight: 1.45, fontSize: 14 }}>{door.copy}</p>
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
