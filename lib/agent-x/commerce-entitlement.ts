@@ -20,33 +20,35 @@ export async function ingestPaidOrderEntitlements(input: {
   payloadSha256: string;
   items: PaidOrderItem[];
 }) {
-  const response = await fetch(`${input.supabaseUrl}/rest/v1/rpc/agent_x_ingest_paid_order_bridge`, {
+  const response = await fetch(`${input.supabaseUrl}/functions/v1/agent-x-commerce-bridge`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: input.publishableKey,
-      Authorization: `Bearer ${input.publishableKey}`,
+      'x-agent-x-commerce-secret': input.bridgeSecret,
     },
     body: JSON.stringify({
-      p_secret: input.bridgeSecret,
-      p_webhook_id: input.webhookId,
-      p_event_id: input.eventId || null,
-      p_topic: input.topic,
-      p_shop_domain: input.shopDomain,
-      p_order_id: input.orderId,
-      p_customer_id: input.customerId || null,
-      p_order_name: input.orderName || null,
-      p_email: input.email || null,
-      p_paid_at: input.paidAt || null,
-      p_payload_sha256: input.payloadSha256,
-      p_items: input.items,
+      action: 'ingest_paid_order',
+      payload: {
+        webhookId: input.webhookId,
+        eventId: input.eventId || null,
+        topic: input.topic,
+        shopDomain: input.shopDomain,
+        orderId: input.orderId,
+        customerId: input.customerId || null,
+        orderName: input.orderName || null,
+        email: input.email || null,
+        paidAt: input.paidAt || null,
+        payloadSha256: input.payloadSha256,
+        items: input.items,
+      },
     }),
     cache: 'no-store',
   });
 
-  let data: any = null;
-  try { data = await response.json(); } catch { data = null; }
-  if (!response.ok || !data?.ok) {
+  let envelope: any = null;
+  try { envelope = await response.json(); } catch { envelope = null; }
+  const data = envelope?.data;
+  if (!response.ok || !envelope?.ok || !data?.ok) {
     throw new Error('entitlement_ingest_failed');
   }
   return data;
@@ -66,31 +68,33 @@ export async function reverseOrderEntitlements(input: {
   lineItemIds?: string[] | null;
   metadata?: Record<string, unknown>;
 }) {
-  const response = await fetch(`${input.supabaseUrl}/rest/v1/rpc/agent_x_ingest_reversal_webhook`, {
+  const response = await fetch(`${input.supabaseUrl}/functions/v1/agent-x-commerce-bridge`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: input.publishableKey,
-      Authorization: `Bearer ${input.publishableKey}`,
+      'x-agent-x-commerce-secret': input.bridgeSecret,
     },
     body: JSON.stringify({
-      p_secret: input.bridgeSecret,
-      p_webhook_id: input.webhookId,
-      p_event_id: input.eventId || null,
-      p_topic: input.topic,
-      p_shop_domain: input.shopDomain,
-      p_order_id: input.orderId,
-      p_payload_sha256: input.payloadSha256,
-      p_status: input.status,
-      p_line_item_ids: input.lineItemIds ?? null,
-      p_metadata: input.metadata || {},
+      action: 'reverse_order',
+      payload: {
+        webhookId: input.webhookId,
+        eventId: input.eventId || null,
+        topic: input.topic,
+        shopDomain: input.shopDomain,
+        orderId: input.orderId,
+        payloadSha256: input.payloadSha256,
+        status: input.status,
+        lineItemIds: input.lineItemIds ?? null,
+        metadata: input.metadata || {},
+      },
     }),
     cache: 'no-store',
   });
 
-  let data: any = null;
-  try { data = await response.json(); } catch { data = null; }
-  if (!response.ok || !data?.ok) {
+  let envelope: any = null;
+  try { envelope = await response.json(); } catch { envelope = null; }
+  const data = envelope?.data;
+  if (!response.ok || !envelope?.ok || !data?.ok) {
     throw new Error('entitlement_reversal_failed');
   }
   return data;
