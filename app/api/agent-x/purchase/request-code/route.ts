@@ -5,10 +5,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_AGENT_X_SUPABASE_URL;
-  const publishableKey = process.env.AGENT_X_SUPABASE_PUBLISHABLE_KEY;
   const bridgeSecret = process.env.AGENT_X_COMMERCE_BRIDGE_SECRET;
 
-  if (!supabaseUrl || !publishableKey || !bridgeSecret) {
+  if (!supabaseUrl || !bridgeSecret) {
     return NextResponse.json({ error: 'server_not_configured' }, { status: 503 });
   }
 
@@ -23,21 +22,20 @@ export async function POST(request: Request) {
   }
 
   const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
-  const rpc = await fetch(`${supabaseUrl}/rest/v1/rpc/agent_x_issue_purchase_claim_bridge`, {
+  const rpc = await fetch(`${supabaseUrl}/functions/v1/agent-x-commerce-bridge`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', apikey: publishableKey, Authorization: `Bearer ${publishableKey}` },
+    headers: { 'Content-Type': 'application/json', 'x-agent-x-commerce-secret': bridgeSecret },
     body: JSON.stringify({
-      p_secret: bridgeSecret,
-      p_email: email,
-      p_order_name: orderName,
-      p_code: code,
+      action: 'issue_claim',
+      payload: { email, orderName, code },
     }),
     cache: 'no-store',
   });
 
-  let claim: any = null;
-  try { claim = await rpc.json(); } catch { claim = null; }
-  if (!rpc.ok) {
+  let envelope: any = null;
+  try { envelope = await rpc.json(); } catch { envelope = null; }
+  const claim = envelope?.data;
+  if (!rpc.ok || !envelope?.ok) {
     return NextResponse.json({ error: 'claim_request_failed' }, { status: 502 });
   }
 
