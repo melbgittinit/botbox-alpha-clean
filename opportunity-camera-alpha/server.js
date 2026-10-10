@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENVIRONMENTS, OPPORTUNITY_PATHS, evaluateOpportunity, getKnowledgeSummary, getPathsForEnvironment } from './knowledgeBase.js';
+import { CAMERA_PLANS, normalizeCameraEntitlement, cameraStatus, consumeLookPayload, upgradeCameraPayload } from './entitlement.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -89,11 +90,13 @@ function verifyMemberProfileToken(token) {
     return {
       source:'beta_signed_profile',
       memberKey:payload.memberKey,
+      rawPayload:payload,
       memberRef:crypto.createHash('sha256').update(payload.memberKey).digest('base64url').slice(0,16),
       tier:payload.tier,
       commissionRate:EARN_MODE_TIERS[payload.tier],
       eligibleOfferKeys:Array.isArray(payload.eligibleOfferKeys) ? payload.eligibleOfferKeys : null,
-      expiresAt:payload.expiresAt || null
+      expiresAt:payload.expiresAt || null,
+      camera:normalizeCameraEntitlement(payload)
     };
   } catch {
     return null;
@@ -176,7 +179,8 @@ app.post('/api/opportunity-camera/member-profile', (req,res) => {
     tier:profile.tier,
     commissionRate:profile.commissionRate,
     commissionRateLabel:`${(profile.commissionRate*100).toFixed(0)}%`,
-    expiresAt:profile.expiresAt
+    expiresAt:profile.expiresAt,
+    camera:profile.camera
   });
 });
 
@@ -194,7 +198,11 @@ app.post('/api/admin/beta-member-token', (req,res) => {
     tier,
     eligibleOfferKeys:Array.isArray(eligibleOfferKeys)?eligibleOfferKeys:null,
     issuedAt:new Date().toISOString(),
-    expiresAt
+    expiresAt,
+    cameraPlan:'free_trial',
+    cameraIncludedLooks:CAMERA_PLANS.free_trial.includedLooks,
+    cameraLooksUsed:0,
+    cameraExpiresAt:expiresAt
   });
   if (!token) return res.status(503).json({error:'PROFILE_SIGNING_NOT_CONFIGURED'});
   const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -204,7 +212,29 @@ app.post('/api/admin/beta-member-token', (req,res) => {
     commissionRate:EARN_MODE_TIERS[tier],
     expiresAt,
     memberProfileToken:token,
+    camera:normalizeCameraEntitlement({
+      cameraPlan:'free_trial',
+      cameraIncludedLooks:CAMERA_PLANS.free_trial.includedLooks,
+      cameraLooksUsed:0,
+      cameraExpiresAt:expiresAt
+    }),
     launchUrl:`${baseUrl}/?profile=${encodeURIComponent(token)}`
+  });
+});
+
+
+app.post('/api/admin/beta-upgrade-camera', (req,res) => {
+  const required = process.env.OPPORTUNITY_ADMIN_SECRET || process.env.PGP_CAMERA_WORKER_SECRET || '';
+  if (!required || req.get('x-opportunity-admin-secret') !== required) {
+    return res.status(401).json({error:'ADMIN_AUTH_REQUIRED'});
+  }
+  const profile = verifyMemberProfileToken(req.body?.member_profile_token);
+  if (!profile) return res.status(401).json({error:'INVALID_MEMBER_PROFILE'});
+  const upgradedPayload = upgradeCameraPayload(profile.rawPayload,'camera_30');
+  const token = signMemberProfile(upgradedPayload);
+  res.json({
+    memberProfileToken:token,
+    camera:normalizeCameraEntitlement(upgradedPayload)
   });
 });
 
@@ -368,6 +398,22 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
       ? req.body.member_readiness
       : 'new';
     const memberProfile = verifyMemberProfileToken(req.body?.member_profile_token);
+    if (!memberProfile) {
+      return res.status(401).json({
+        error:'EARN_MODE_PROFILE_REQUIRED',
+        message:'Connect your Earn Mode beta profile before using Opportunity Camera.'
+      });
+    }
+    const entitlementCheck = cameraStatus(memberProfile.camera);
+    if (!entitlementCheck.allowed) {
+      return res.status(402).json({
+        error:entitlementCheck.reason,
+        message:entitlementCheck.reason === 'CAMERA_PASS_REQUIRED'
+          ? 'Your included Opportunity Looks are used. Activate the 30-Day Camera Pass to continue.'
+          : 'Your Opportunity Camera access has expired.',
+        camera:memberProfile.camera
+      });
+    }
 
     const match = evaluateOpportunity({
       environment: scene.environment,
@@ -409,6 +455,10 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
       alternatives = alternatives.filter(a => memberProfile.eligibleOfferKeys.includes(a.offerKey));
     }
 
+    const consumedPayload = consumeLookPayload(memberProfile.rawPayload);
+    const nextProfileToken = signMemberProfile(consumedPayload);
+    const nextCamera = normalizeCameraEntitlement(consumedPayload);
+
     return res.json({
       result: match.result,
       headline: match.headline,
@@ -432,12 +482,14 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
         commerce: primary.commerce || null
       },
       alternatives,
-      member: memberProfile ? {
+      member: {
         source:memberProfile.source,
         memberRef:memberProfile.memberRef,
         tier:memberProfile.tier,
         commissionRate:memberProfile.commissionRate
-      } : null,
+      },
+      camera:nextCamera,
+      nextMemberProfileToken:nextProfileToken,
       money: moneyFromPath(primary,memberProfile)
     });
   } catch (error) {
