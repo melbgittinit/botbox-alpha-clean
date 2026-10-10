@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import AgentXSiteNav from '../../components/AgentXSiteNav';
 
 type ActivationData = {
   organization: { id: string; name: string };
@@ -83,6 +84,7 @@ export default function AgentXPage() {
 
   return (
     <main className="ax-landing">
+      <AgentXSiteNav/>
       <style>{`
         :root { color-scheme: dark; }
         * { box-sizing: border-box; }
@@ -531,7 +533,7 @@ export default function AgentXPage() {
             </p>
             <div className="ax-actions">
               <a href="#build-my-team" className="ax-cta primary">BUILD MY TEAM</a>
-              <a href="#agents" className="ax-cta secondary">EXPLORE AGENTS</a>
+              <a href="/workforces" className="ax-cta secondary">EXPLORE WORKFORCES</a>
             </div>
             <div className="ax-stage">PRIVATE BUILD · STANDALONE AGENT X PLATFORM</div>
             <div className="ax-status-rail">
@@ -851,6 +853,16 @@ export default function AgentXPage() {
           )}
         </div>
       </section>
+
+      <section className="ax-section tight"><div className="ax-wrap">
+        <div className="ax-section-kicker">PRIVATE PILOT + PRICING</div>
+        <h2 className="ax-section-title">Prove value. Then scale.</h2>
+        <p style={{maxWidth:760,color:'#aebed0',fontSize:17,lineHeight:1.6}}>Agent X is being graduated into its own platform with a controlled pilot before broad public pricing. The current staged price architecture is $99 for individual agents and $299 for ready-made workforces, with organization deployments scoped separately.</p>
+        <div className="ax-actions">
+          <a href="/pricing" className="ax-cta primary">VIEW STAGED PRICING</a>
+          <a href="/pilot" className="ax-cta secondary">PRIVATE PILOT</a>
+        </div>
+      </div></section>
 
       <footer className="ax-footer">
         AGENT X · STANDALONE PRIVATE BUILD · INTENDED HOME: XAGENTX.SI
