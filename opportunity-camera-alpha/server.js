@@ -392,6 +392,27 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
     });
   }
 
+  const readiness = ['new','active','advanced'].includes(req.body?.member_readiness)
+    ? req.body.member_readiness
+    : 'new';
+  const memberProfile = verifyMemberProfileToken(req.body?.member_profile_token);
+  if (!memberProfile) {
+    return res.status(401).json({
+      error:'EARN_MODE_PROFILE_REQUIRED',
+      message:'Connect your Earn Mode beta profile before using Opportunity Camera.'
+    });
+  }
+  const reservation = reserveLook(memberProfile);
+  if (!reservation.ok) {
+    return res.status(402).json({
+      error:reservation.reason,
+      message:reservation.reason === 'CAMERA_PASS_REQUIRED'
+        ? 'Your included Opportunity Looks are used. Activate the 30-Day Camera Pass to continue.'
+        : 'Your Opportunity Camera access has expired.',
+      camera:reservation.camera
+    });
+  }
+
   const schema = {
     type: 'object',
     additionalProperties: false,
@@ -470,32 +491,14 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
     }
 
     if (scene.confidence < 0.70 || scene.environment === 'other_unknown') {
+      const issued = issueProfileFromLedger(memberProfile);
       return res.json({
-        result: 'keep_looking',
-        headline: 'Keep looking.',
-        message: 'I do not see a strong enough opportunity yet.',
-        scene
-      });
-    }
-
-    const readiness = ['new','active','advanced'].includes(req.body?.member_readiness)
-      ? req.body.member_readiness
-      : 'new';
-    const memberProfile = verifyMemberProfileToken(req.body?.member_profile_token);
-    if (!memberProfile) {
-      return res.status(401).json({
-        error:'EARN_MODE_PROFILE_REQUIRED',
-        message:'Connect your Earn Mode beta profile before using Opportunity Camera.'
-      });
-    }
-    const reservation = reserveLook(memberProfile);
-    if (!reservation.ok) {
-      return res.status(402).json({
-        error:reservation.reason,
-        message:reservation.reason === 'CAMERA_PASS_REQUIRED'
-          ? 'Your included Opportunity Looks are used. Activate the 30-Day Camera Pass to continue.'
-          : 'Your Opportunity Camera access has expired.',
-        camera:reservation.camera
+        result:'keep_looking',
+        headline:'Keep looking.',
+        message:'I do not see a strong enough opportunity yet.',
+        scene,
+        camera:issued?.camera || reservation.camera,
+        nextMemberProfileToken:issued?.token || null
       });
     }
 
@@ -506,15 +509,18 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
     });
 
     if (match.result === 'keep_looking') {
+      const issued = issueProfileFromLedger(memberProfile);
       return res.json({
-        result: 'keep_looking',
-        headline: match.headline,
-        message: match.message,
-        scene: {
+        result:'keep_looking',
+        headline:match.headline,
+        message:match.message,
+        scene:{
           ...scene,
-          label: ENVIRONMENTS[scene.environment]?.label || ENVIRONMENTS.other_unknown.label
+          label:ENVIRONMENTS[scene.environment]?.label || ENVIRONMENTS.other_unknown.label
         },
-        alternatives: []
+        alternatives:[],
+        camera:issued?.camera || reservation.camera,
+        nextMemberProfileToken:issued?.token || null
       });
     }
 
@@ -526,12 +532,15 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
         const eligible = [primary, ...getPathsForEnvironment(scene.environment)]
           .filter(p => memberProfile.eligibleOfferKeys.includes(p.offerKey));
         if (!eligible.length) {
+          const issued = issueProfileFromLedger(memberProfile);
           return res.json({
             result:'keep_looking',
             headline:'Keep looking.',
             message:'I found possible HUB matches, but none are currently eligible for this Earn Mode profile.',
             scene:{...scene,label:ENVIRONMENTS[scene.environment]?.label || ENVIRONMENTS.other_unknown.label},
-            alternatives:[]
+            alternatives:[],
+            camera:issued?.camera || reservation.camera,
+            nextMemberProfileToken:issued?.token || null
           });
         }
         primary = eligible[0];
@@ -578,9 +587,8 @@ app.post('/api/opportunity-camera/scan', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    const memberProfile = verifyMemberProfileToken(req.body?.member_profile_token);
-    const camera = memberProfile ? refundReservedLook(memberProfile) : null;
-    const issued = memberProfile ? issueProfileFromLedger(memberProfile) : null;
+    const camera = refundReservedLook(memberProfile);
+    const issued = issueProfileFromLedger(memberProfile);
     return res.status(500).json({
       error:'SCAN_FAILED',
       message:'The scan could not be completed safely.',
