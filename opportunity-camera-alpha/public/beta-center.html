@@ -9,13 +9,15 @@
 <body><main class="adminWrap">
 <div class="adminTop"><div><div class="eyebrow">EARN MODE • OWNER VIEW</div><h1>Opportunity Brain Beta Center</h1><p class="hint">The living knowledge base behind Opportunity Camera.</p></div><a class="back" href="/">← Camera</a></div>
 <div id="summary" class="summary"></div>
+<div id="readiness" class="pathCard" style="margin-bottom:18px"></div>
 <div id="paths" class="pathList"></div>
 </main><script>
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 (async()=>{
- const [summary,registry]=await Promise.all([
+ const [summary,registry,diag]=await Promise.all([
    fetch('/api/opportunity-camera/knowledge').then(r=>r.json()),
-   fetch('/api/opportunity-camera/paths').then(r=>r.json())
+   fetch('/api/opportunity-camera/paths').then(r=>r.json()),
+   fetch('/api/opportunity-camera/entitlement-diagnostics').then(r=>r.json())
  ]);
  document.querySelector('#summary').innerHTML=[
   ['Environments',summary.environments],
@@ -23,6 +25,21 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
   ['Ready',summary.statuses?.ready||0],
   ['Testing / Review',(summary.statuses?.testing||0)+(summary.statuses?.review||0)]
  ].map(([k,v])=>'<div class="metric"><b>'+esc(v)+'</b><span>'+esc(k)+'</span></div>').join('');
+ document.querySelector('#readiness').innerHTML=`
+  <div class="eyebrow">BETA COMMERCIAL READINESS</div>
+  <h2 style="margin:7px 0 14px">30-Day Camera Pass</h2>
+  <div class="chips">
+    <span class="chip">${diag.freeTrial?.looks || 3} free looks</span>
+    <span class="chip">${diag.paidPass?.looks || 40} paid looks</span>
+    <span class="chip">${diag.paidPass?.durationDays || 30} days</span>
+  </div>
+  <div class="detail">
+    <div><span>Entitlement ledger</span><strong>${esc(diag.alphaLedger)}</strong></div>
+    <div><span>Durable persistence</span><strong>${diag.durablePersistence ? 'CONNECTED' : 'NOT CONNECTED'}</strong></div>
+    <div><span>Public checkout</span><strong>${diag.checkoutEnabled ? 'ENABLED' : 'LOCKED'}</strong></div>
+    <div><span>Shopify webhook verification</span><strong>${diag.shopifyWebhookVerificationConfigured ? 'CONNECTED' : 'NOT CONNECTED'}</strong></div>
+  </div>
+  <div class="guard"><b>Release gate:</b> ${esc(diag.warning)}</div>`;
  document.querySelector('#paths').innerHTML=registry.paths.map(p=>`
   <article class="pathCard">
    <div class="pathHeader"><div><div class="eyebrow">${esc(p.pathKey)}</div><h2>${esc(p.name)}</h2></div><div class="chip gold">${esc(p.status.toUpperCase())}</div></div>
