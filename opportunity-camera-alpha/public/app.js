@@ -57,7 +57,7 @@ async function boot() {
   const status = $('#memberStatus');
   if (status) {
     status.textContent = memberProfile
-      ? `Beta Earn Mode profile connected • ${memberProfile.tier.replace('_',' ')} • ${memberProfile.commissionRateLabel}`
+      ? `Beta Earn Mode profile • ${memberProfile.tier.replace('_',' ')} • ${memberProfile.commissionRateLabel} • ${memberProfile.camera?.looksRemaining ?? '?'} looks left`
       : 'Beta mode • personalized commission not connected';
   }
   renderBag();
@@ -98,7 +98,21 @@ $('#scanButton').onclick = async () => {
 
     if (!response.ok) {
       $('#scanStatus').textContent = data.message || 'Scan unavailable.';
+      if (data.camera && $('#memberStatus')) {
+        $('#memberStatus').textContent = `${data.camera.label || 'Opportunity Camera'} • ${data.camera.looksRemaining ?? 0} looks left`;
+      }
       return;
+    }
+
+    if (data.nextMemberProfileToken) {
+      memberProfileToken = data.nextMemberProfileToken;
+      localStorage.setItem('earn_mode_opportunity_profile_alpha', memberProfileToken);
+    }
+    if (data.camera) {
+      memberProfile = {...(memberProfile||{}),camera:data.camera};
+      if ($('#memberStatus')) {
+        $('#memberStatus').textContent = `Beta Earn Mode profile • ${memberProfile.tier?.replace('_',' ') || ''} • ${memberProfile.commissionRateLabel || ''} • ${data.camera.looksRemaining} looks left`;
+      }
     }
 
     currentOpportunity = data.opportunity || null;
