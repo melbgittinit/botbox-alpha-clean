@@ -522,7 +522,7 @@ export default function AgentXPage() {
       <section className="ax-hero">
         <div className="ax-wrap ax-hero-grid">
           <div>
-            <div className="ax-kicker">THE BOT STORES · PREMIUM AI WORKFORCE</div>
+            <div className="ax-kicker">AGENT X · INTELLIGENCE WORKFORCE PLATFORM</div>
             <h1 className="ax-title">AGENT X</h1>
             <div className="ax-subtitle">Hire Intelligence.</div>
             <p className="ax-lead">
@@ -533,7 +533,7 @@ export default function AgentXPage() {
               <a href="#build-my-team" className="ax-cta primary">BUILD MY TEAM</a>
               <a href="#agents" className="ax-cta secondary">EXPLORE AGENTS</a>
             </div>
-            <div className="ax-stage">STAGING PREVIEW · NOT PUBLISHED TO THE BOT STORES</div>
+            <div className="ax-stage">PRIVATE BUILD · STANDALONE AGENT X PLATFORM</div>
             <div className="ax-status-rail">
               <div className="ax-status-chip"><span className="ax-dot"></span>HUMAN-LED</div>
               <div className="ax-status-chip">APPROVAL-GATED</div>
@@ -788,7 +788,7 @@ export default function AgentXPage() {
                   into a small-business template.
                 </p>
                 <div className="ax-staged-handoff">
-                  CUSTOM WORKFORCE CONTACT HANDOFF · STAGED FOR INTRODUCTION
+                  PRIVATE ORGANIZATION WORKFORCE · INTRODUCTION PATH IN BUILD
                 </div>
               </div>
             </section>
@@ -853,7 +853,7 @@ export default function AgentXPage() {
       </section>
 
       <footer className="ax-footer">
-        AGENT X · STAGED PREVIEW ONLY · NO LIVE BOT STORES PRODUCT, NAVIGATION OR CHECKOUT IS BEING PUBLISHED
+        AGENT X · STANDALONE PRIVATE BUILD · INTENDED HOME: XAGENTX.SI
       </footer>
     </main>
   );
