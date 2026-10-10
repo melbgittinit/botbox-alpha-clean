@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         {
           ok: false,
           error: 'custom_organization_workforce_required',
-          next: 'https://thebotstores.com/pages/contact',
+          next: 'https://xagentx.si/contact',
         },
         { status: 422 }
       );
