@@ -243,6 +243,19 @@ function verifyOpportunityToken(token) {
   }
 }
 
+
+app.get('/api/opportunity-camera/entitlement-diagnostics', (_req,res) => {
+  res.json({
+    alphaLedger:'memory',
+    durablePersistence:false,
+    checkoutEnabled:process.env.OPPORTUNITY_PASS_CHECKOUT_ENABLED === 'true',
+    shopifyWebhookVerificationConfigured:Boolean(process.env.SHOPIFY_WEBHOOK_SECRET),
+    freeTrial:{looks:CAMERA_PLANS.free_trial.includedLooks},
+    paidPass:{looks:CAMERA_PLANS.camera_30.includedLooks,durationDays:CAMERA_PLANS.camera_30.durationDays},
+    warning:'Alpha entitlement state can reset when the service restarts. Do not enable paid public checkout until durable persistence and Shopify webhook verification are connected.'
+  });
+});
+
 app.post('/api/opportunity-camera/member-profile', (req,res) => {
   const profile = verifyMemberProfileToken(req.body?.member_profile_token);
   if (!profile) return res.status(401).json({error:'INVALID_MEMBER_PROFILE'});
@@ -262,20 +275,29 @@ app.post('/api/admin/beta-member-token', (req,res) => {
   if (!required || req.get('x-opportunity-admin-secret') !== required) {
     return res.status(401).json({error:'ADMIN_AUTH_REQUIRED'});
   }
-  const { member_key:memberKey, tier='tier_1', eligible_offer_keys:eligibleOfferKeys, days=60 } = req.body || {};
-  if (!memberKey || !EARN_MODE_TIERS[tier]) return res.status(400).json({error:'INVALID_PROFILE_INPUT'});
-  const safeDays = Math.max(1,Math.min(120,Number(days)||60));
-  const expiresAt = new Date(Date.now()+safeDays*86400000).toISOString();
+  const {
+    member_key:memberKey,
+    tier='tier_1',
+    eligible_offer_keys:eligibleOfferKeys,
+    days=60,
+    camera_plan:cameraPlan='free_trial'
+  } = req.body || {};
+  if (!memberKey || !EARN_MODE_TIERS[tier] || !CAMERA_PLANS[cameraPlan]) {
+    return res.status(400).json({error:'INVALID_PROFILE_INPUT'});
+  }
+  const profileDays = cameraPlan === 'camera_30' ? CAMERA_PLANS.camera_30.durationDays : Math.max(1,Math.min(120,Number(days)||60));
+  const expiresAt = new Date(Date.now()+profileDays*86400000).toISOString();
   const token = signMemberProfile({
     memberKey:String(memberKey),
     tier,
     eligibleOfferKeys:Array.isArray(eligibleOfferKeys)?eligibleOfferKeys:null,
     issuedAt:new Date().toISOString(),
     expiresAt,
-    cameraPlan:'free_trial',
-    cameraIncludedLooks:CAMERA_PLANS.free_trial.includedLooks,
+    cameraPlan,
+    cameraIncludedLooks:CAMERA_PLANS[cameraPlan].includedLooks,
     cameraLooksUsed:0,
-    cameraExpiresAt:expiresAt
+    cameraExpiresAt:expiresAt,
+    cameraVersion:0
   });
   if (!token) return res.status(503).json({error:'PROFILE_SIGNING_NOT_CONFIGURED'});
   const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -286,8 +308,8 @@ app.post('/api/admin/beta-member-token', (req,res) => {
     expiresAt,
     memberProfileToken:token,
     camera:normalizeCameraEntitlement({
-      cameraPlan:'free_trial',
-      cameraIncludedLooks:CAMERA_PLANS.free_trial.includedLooks,
+      cameraPlan,
+      cameraIncludedLooks:CAMERA_PLANS[cameraPlan].includedLooks,
       cameraLooksUsed:0,
       cameraExpiresAt:expiresAt
     }),
