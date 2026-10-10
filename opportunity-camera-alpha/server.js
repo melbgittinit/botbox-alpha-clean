@@ -78,7 +78,10 @@ function issueProfileFromLedger(profile) {
 
 const app = express();
 app.disable('x-powered-by');
-app.use(express.json({ limit: '12mb' }));
+app.use(express.json({
+  limit:'12mb',
+  verify:(req,_res,buf)=>{ req.rawBody = Buffer.from(buf); }
+}));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -315,6 +318,107 @@ app.post('/api/admin/beta-upgrade-camera', (req,res) => {
     memberProfileToken:issued.token,
     camera:issued.camera
   });
+});
+
+
+const OPPORTUNITY_PASS_VARIANT_ID = '68284472688891';
+const OPPORTUNITY_PASS_PRODUCT_GID = 'gid://shopify/Product/15411878396155';
+
+function signPurchaseClaim(payload) {
+  const secret = profileSecret();
+  if (!secret) return null;
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256',secret).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+function verifyPurchaseClaim(token) {
+  const secret = profileSecret();
+  if (!secret || !token || !token.includes('.')) return null;
+  const [body,sig] = token.split('.');
+  const expected = crypto.createHmac('sha256',secret).update(body).digest('base64url');
+  const a=Buffer.from(sig); const b=Buffer.from(expected);
+  if (a.length!==b.length || !crypto.timingSafeEqual(a,b)) return null;
+  try {
+    const payload=JSON.parse(Buffer.from(body,'base64url').toString('utf8'));
+    if (!payload?.memberRef || payload?.productGid !== OPPORTUNITY_PASS_PRODUCT_GID) return null;
+    if (payload.expiresAt && Date.parse(payload.expiresAt) < Date.now()) return null;
+    return payload;
+  } catch { return null; }
+}
+
+app.post('/api/opportunity-camera/checkout', (req,res) => {
+  if (process.env.OPPORTUNITY_PASS_CHECKOUT_ENABLED !== 'true') {
+    return res.status(503).json({
+      error:'CHECKOUT_NOT_ENABLED',
+      message:'The 30-Day Opportunity Camera Pass is still in beta and is not available for purchase yet.'
+    });
+  }
+  const profile = verifyMemberProfileToken(req.body?.member_profile_token);
+  if (!profile) return res.status(401).json({error:'VALID_MEMBER_PROFILE_REQUIRED'});
+  const claim = signPurchaseClaim({
+    memberRef:profile.memberRef,
+    productGid:OPPORTUNITY_PASS_PRODUCT_GID,
+    plan:'camera_30',
+    issuedAt:new Date().toISOString(),
+    expiresAt:new Date(Date.now()+30*60*1000).toISOString()
+  });
+  if (!claim) return res.status(503).json({error:'PURCHASE_CLAIM_NOT_CONFIGURED'});
+
+  const properties = Buffer.from(JSON.stringify({_opcam_claim:claim})).toString('base64url');
+  const checkoutUrl = `https://urbanspirit.biz/cart/${OPPORTUNITY_PASS_VARIANT_ID}:1?properties=${encodeURIComponent(properties)}`;
+  res.json({checkoutUrl,plan:'camera_30',price:'1.99',currency:'USD'});
+});
+
+function verifyShopifyWebhook(req) {
+  const secret = process.env.SHOPIFY_WEBHOOK_SECRET || '';
+  const header = req.get('x-shopify-hmac-sha256') || '';
+  if (!secret || !header || !req.rawBody) return false;
+  const expected = crypto.createHmac('sha256',secret).update(req.rawBody).digest('base64');
+  const a=Buffer.from(header); const b=Buffer.from(expected);
+  return a.length===b.length && crypto.timingSafeEqual(a,b);
+}
+
+app.post('/webhooks/shopify/orders-paid', (req,res) => {
+  if (!process.env.SHOPIFY_WEBHOOK_SECRET) {
+    return res.status(503).json({error:'SHOPIFY_WEBHOOK_SECRET_NOT_CONFIGURED'});
+  }
+  if (!verifyShopifyWebhook(req)) {
+    return res.status(401).json({error:'INVALID_SHOPIFY_WEBHOOK'});
+  }
+
+  const order = req.body || {};
+  const lineItems = Array.isArray(order.line_items) ? order.line_items : [];
+  let activated = 0;
+
+  for (const line of lineItems) {
+    if (String(line.variant_id || '') !== OPPORTUNITY_PASS_VARIANT_ID) continue;
+    const properties = Array.isArray(line.properties) ? line.properties : [];
+    const claimProp = properties.find(p => p?.name === '_opcam_claim');
+    const claim = verifyPurchaseClaim(claimProp?.value);
+    if (!claim) continue;
+
+    const existing = entitlementLedger.get(claim.memberRef) || {version:0};
+    const expiresAt = new Date(Date.now()+CAMERA_PLANS.camera_30.durationDays*86400000).toISOString();
+    entitlementLedger.set(claim.memberRef,{
+      plan:'camera_30',
+      includedLooks:CAMERA_PLANS.camera_30.includedLooks,
+      looksUsed:0,
+      expiresAt,
+      version:Number(existing.version||0)+1
+    });
+    activated += 1;
+    console.log(JSON.stringify({
+      event:'camera_pass_activated',
+      memberRef:claim.memberRef,
+      orderId:String(order.id || ''),
+      plan:'camera_30',
+      includedLooks:CAMERA_PLANS.camera_30.includedLooks,
+      expiresAt
+    }));
+  }
+
+  return res.status(200).json({ok:true,activated});
 });
 
 app.post('/api/opportunity-camera/create-action-link', async (req, res) => {
