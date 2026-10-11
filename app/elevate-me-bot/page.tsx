@@ -513,6 +513,15 @@ export default function ElevateMeBotPage() {
           0%,100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
         }
+
+        @keyframes hubReveal {
+          0% { opacity:0; transform:translateY(18px) scale(.985); filter:blur(6px); }
+          100% { opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+        }
+        @keyframes hubGlow {
+          0%,100% { box-shadow:0 0 0 rgba(120,230,223,0); }
+          50% { box-shadow:0 0 44px rgba(120,230,223,.13); }
+        }
         .elevate-input::placeholder { color:#7e829c; }
         .elevate-choice:hover { transform:translateY(-2px); border-color:rgba(120,230,223,.55)!important; }
         @media (max-width: 820px) {
@@ -720,30 +729,64 @@ export default function ElevateMeBotPage() {
               </div>
 
 
-              <div style={{ marginTop: 24, padding: "24px 20px", borderRadius: 22, background: "radial-gradient(circle at 50% 0%,rgba(120,230,223,.10),transparent 35%),rgba(255,255,255,.035)", border: "1px solid rgba(255,255,255,.12)" }}>
-                <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>YOUR HUB IS OPENING</div>
-                <h3 style={{ margin: "8px 0 8px", fontSize: 30 }}>Based on this Lift, start with these doors.</h3>
-                <p style={{ margin: 0, color: "#cfc9dd", lineHeight: 1.55, maxWidth: 760 }}>
-                  You do not need to understand the entire HUB. Elevate Me Bot is using what you asked for to surface the next three places most likely to matter.
+              <div style={{ marginTop: 26, padding: "26px 20px", borderRadius: 24, background: "radial-gradient(circle at 50% 0%,rgba(120,230,223,.12),transparent 34%),radial-gradient(circle at 8% 100%,rgba(243,201,105,.08),transparent 30%),rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.13)", animation: "hubReveal .7s ease both" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                  <div>
+                    <div style={{ color: "#78e6df", fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>YOUR HUB IS OPENING</div>
+                    <h3 style={{ margin: "8px 0 8px", fontSize: "clamp(30px,4vw,44px)", lineHeight: 1 }}>You do not need the whole HUB. Start here.</h3>
+                  </div>
+                  <div style={{ padding: "8px 12px", borderRadius: 999, background: "rgba(120,230,223,.08)", border: "1px solid rgba(120,230,223,.22)", color: "#a9f0ec", fontSize: 10, fontWeight: 900, letterSpacing: ".10em" }}>
+                    PERSONALIZED FROM THIS LIFT
+                  </div>
+                </div>
+                <p style={{ margin: "0 0 18px", color: "#cfc9dd", lineHeight: 1.55, maxWidth: 790 }}>
+                  Elevate Me Bot used what you asked for to narrow the HUB down to the places most likely to matter next.
                 </p>
-                <div className="elevate-result-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 12, marginTop: 18 }}>
-                  {recommendedDoors.map((door, index) => (
+
+                <a
+                  href={recommendedDoors[0].href}
+                  onClick={() => trackElevateEvent("hub_door_open", surface, undefined, { action: need, door: recommendedDoors[0].title, position: 1 })}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0,1fr) auto",
+                    gap: 18,
+                    alignItems: "center",
+                    padding: "24px 22px",
+                    borderRadius: 22,
+                    border: `1px solid ${activeMode.accent}`,
+                    background: `linear-gradient(135deg,${activeMode.glow},rgba(255,255,255,.035))`,
+                    color: "#fff",
+                    textDecoration: "none",
+                    animation: "hubGlow 3.6s ease-in-out infinite, hubReveal .72s .08s ease both",
+                  }}
+                >
+                  <div>
+                    <div style={{ color: activeMode.accent, fontSize: 11, fontWeight: 900, letterSpacing: ".13em" }}>{recommendedDoors[0].eyebrow} • BEST NEXT DOOR</div>
+                    <strong style={{ display: "block", marginTop: 8, fontSize: "clamp(26px,4vw,40px)", lineHeight: 1 }}>{recommendedDoors[0].title}</strong>
+                    <p style={{ margin: "10px 0 0", color: "#e1dce9", lineHeight: 1.5, maxWidth: 700 }}>{recommendedDoors[0].copy}</p>
+                  </div>
+                  <div style={{ width: 46, height: 46, borderRadius: "50%", display: "grid", placeItems: "center", border: `1px solid ${activeMode.accent}`, color: activeMode.accent, fontSize: 23, fontWeight: 900 }}>→</div>
+                </a>
+
+                <div className="elevate-result-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12, marginTop: 12 }}>
+                  {recommendedDoors.slice(1).map((door, index) => (
                     <a
                       key={door.title}
                       href={door.href}
-                      onClick={() => trackElevateEvent("hub_door_open", surface, undefined, { action: need, door: door.title, position: index + 1 })}
+                      onClick={() => trackElevateEvent("hub_door_open", surface, undefined, { action: need, door: door.title, position: index + 2 })}
                       style={{
                         display: "block",
                         padding: 18,
                         borderRadius: 18,
-                        border: index === 0 ? `1px solid ${activeMode.accent}` : "1px solid rgba(255,255,255,.12)",
-                        background: index === 0 ? activeMode.glow : "rgba(255,255,255,.035)",
+                        border: "1px solid rgba(255,255,255,.12)",
+                        background: "rgba(255,255,255,.035)",
                         color: "#fff",
                         textDecoration: "none",
-                        minHeight: 150,
+                        minHeight: 142,
+                        animation: `hubReveal .72s ${0.18 + index * 0.10}s ease both`,
                       }}
                     >
-                      <div style={{ color: index === 0 ? activeMode.accent : "#a9a5ba", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>{door.eyebrow}</div>
+                      <div style={{ color: "#a9a5ba", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>{door.eyebrow}</div>
                       <strong style={{ display: "block", marginTop: 8, fontSize: 22 }}>{door.title}</strong>
                       <p style={{ margin: "8px 0 0", color: "#cbc6d7", lineHeight: 1.45, fontSize: 14 }}>{door.copy}</p>
                     </a>
