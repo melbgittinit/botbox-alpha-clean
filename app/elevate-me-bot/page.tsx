@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Need = "make" | "done" | "reach" | "earn" | "better" | "next";
 type Surface = "hub" | "botstores";
@@ -233,6 +233,11 @@ export default function ElevateMeBotPage() {
     entitlements: { activated: false, powerUp: false, makeItReal: false, giftCreditsPurchased: 0 },
   });
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [voiceTarget, setVoiceTarget] = useState<"mission" | "outcome" | "blocker" | "context">("mission");
+  const recognitionRef = useRef<any>(null);
 
   const processingLabels = [
     "Reading what you really want to change…",
@@ -283,6 +288,85 @@ export default function ElevateMeBotPage() {
     }, 900);
     return () => window.clearInterval(timer);
   }, [runningAction]);
+
+
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    setVoiceSupported(Boolean(SpeechRecognition));
+    return () => {
+      try { recognitionRef.current?.stop?.(); } catch {}
+      try { window.speechSynthesis?.cancel(); } catch {}
+    };
+  }, []);
+
+  function addVoiceText(target: "mission" | "outcome" | "blocker" | "context", transcript: string) {
+    const clean = transcript.trim();
+    if (!clean) return;
+    const merge = (previous: string) => previous.trim() ? `${previous.trim()} ${clean}` : clean;
+    if (target === "mission") setMission(merge);
+    if (target === "outcome") setOutcome(merge);
+    if (target === "blocker") setBlocker(merge);
+    if (target === "context") setContext(merge);
+  }
+
+  function startVoice(target = voiceTarget) {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setPreviewMessage("Voice input is not available in this browser. You can still type normally.");
+      return;
+    }
+    try { recognitionRef.current?.stop?.(); } catch {}
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    setVoiceTarget(target);
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => {
+      setListening(true);
+      setPreviewMessage("");
+    };
+    recognition.onresult = (event: any) => {
+      const transcript = String(event?.results?.[0]?.[0]?.transcript || "");
+      addVoiceText(target, transcript);
+    };
+    recognition.onerror = () => {
+      setPreviewMessage("I couldn't catch that. Try the Talk button again or type your answer.");
+    };
+    recognition.onend = () => setListening(false);
+    recognition.start();
+  }
+
+  function stopVoice() {
+    try { recognitionRef.current?.stop?.(); } catch {}
+    setListening(false);
+  }
+
+  function speakLift() {
+    if (!lift || !("speechSynthesis" in window)) return;
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const script = [
+      lift.title,
+      `What I heard: ${lift.readout.focus}`,
+      `Where the leverage is: ${lift.readout.leverage}`,
+      `Your first move: ${lift.firstMove.action}`,
+      `${lift.deliverable.title}: ${lift.deliverable.content.slice(0, 1400)}`,
+      lift.boost,
+    ].join(". ");
+    const utterance = new SpeechSynthesisUtterance(script);
+    utterance.rate = 0.96;
+    utterance.pitch = 1;
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }
 
   function signInUrl() {
     const cycleKey = getElevateCycleKey();
@@ -486,22 +570,22 @@ export default function ElevateMeBotPage() {
             <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
               <label>
                 <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>1. What are we elevating?</span>
-                <textarea className="elevate-input" value={mission} onChange={e => setMission(e.target.value)} placeholder="Example: I have a catering business but I’m not getting enough weekday orders." rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16, lineHeight: 1.45 }} />
+                <textarea className="elevate-input" value={mission} onFocus={() => setVoiceTarget("mission")} onChange={e => setMission(e.target.value)} placeholder="Example: I have a catering business but I’m not getting enough weekday orders." rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16, lineHeight: 1.45 }} />
               </label>
 
               <label>
                 <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>2. What would a real lift look like?</span>
-                <input className="elevate-input" value={outcome} onChange={e => setOutcome(e.target.value)} placeholder="More bookings, finish the project, stronger confidence, a better offer…" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16 }} />
+                <input className="elevate-input" value={outcome} onFocus={() => setVoiceTarget("outcome")} onChange={e => setOutcome(e.target.value)} placeholder="More bookings, finish the project, stronger confidence, a better offer…" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16 }} />
               </label>
 
               <label>
                 <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>3. What is getting in the way?</span>
-                <input className="elevate-input" value={blocker} onChange={e => setBlocker(e.target.value)} placeholder="I don’t know what to say, no time, low response, too many choices…" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16 }} />
+                <input className="elevate-input" value={blocker} onFocus={() => setVoiceTarget("blocker")} onChange={e => setBlocker(e.target.value)} placeholder="I don’t know what to say, no time, low response, too many choices…" style={{ width: "100%", boxSizing: "border-box", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 16 }} />
               </label>
 
               <label>
                 <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>4. Anything useful the Bot should know? <span style={{ color: "#8c92aa", fontWeight: 600 }}>Optional</span></span>
-                <textarea className="elevate-input" value={context} onChange={e => setContext(e.target.value)} placeholder="Paste a draft, describe the audience, mention what you already tried, or leave this blank." rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 15, lineHeight: 1.45 }} />
+                <textarea className="elevate-input" value={context} onFocus={() => setVoiceTarget("context")} onChange={e => setContext(e.target.value)} placeholder="Paste a draft, describe the audience, mention what you already tried, or leave this blank." rows={3} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: 14, borderRadius: 15, border: "1px solid #474e69", background: "#070d1d", color: "#fff", fontSize: 15, lineHeight: 1.45 }} />
               </label>
             </div>
 
@@ -539,9 +623,22 @@ export default function ElevateMeBotPage() {
               <button onClick={runPreview} disabled={runningAction} style={{ ...button, background: "#f3c969", color: "#111", minWidth: 220, opacity: runningAction ? .65 : 1 }}>
                 {runningAction ? "BUILDING MY LIFT…" : "PUT IT IN THE BOT"}
               </button>
+              {voiceSupported && (
+                <button
+                  onClick={() => listening ? stopVoice() : startVoice()}
+                  style={{ ...button, background: listening ? "#78e6df" : "rgba(120,230,223,.10)", color: listening ? "#041117" : "#bff7f3", border: "1px solid rgba(120,230,223,.42)" }}
+                >
+                  {listening ? "LISTENING… TAP TO STOP" : "🎙 TALK TO NOVA"}
+                </button>
+              )}
               <input value={botName} onChange={e => setBotName(e.target.value)} aria-label="Bot name" style={{ width: 115, padding: "12px 13px", borderRadius: 999, border: "1px solid rgba(255,255,255,.19)", background: "rgba(255,255,255,.05)", color: "#fff", textAlign: "center", fontWeight: 800 }} />
               <span style={{ color: "#9995ab", fontSize: 12 }}>Bot name</span>
             </div>
+            {voiceSupported && (
+              <div style={{ marginTop: 9, color: "#8e8aa0", fontSize: 11, lineHeight: 1.4 }}>
+                Tap a field, then Talk to Nova. Your spoken words go into that part of the Bot intake. Text remains available at all times.
+              </div>
+            )}
 
             {previewMessage && <div style={{ marginTop: 14, padding: 13, borderRadius: 14, background: "rgba(243,201,105,.09)", border: "1px solid rgba(243,201,105,.25)", color: "#f5e0a2" }}>{previewMessage}</div>}
             {previewsRemaining !== null && previewsRemaining > 0 && <div style={{ marginTop: 10, color: "#9995ab", fontSize: 12 }}>{previewsRemaining} free Lift preview{previewsRemaining === 1 ? "" : "s"} remaining in this preview window.</div>}
@@ -556,8 +653,15 @@ export default function ElevateMeBotPage() {
                   <div style={{ color: activeMode.accent, fontWeight: 900, letterSpacing: ".14em", fontSize: 11 }}>✓ {activeMode.mode} COMPLETE</div>
                   <h2 style={{ fontSize: "clamp(34px,5vw,58px)", lineHeight: 1, margin: "9px 0 0" }}>{lift.title}</h2>
                 </div>
-                <div style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(120,230,223,.3)", color: "#9df1ec", fontSize: 11, fontWeight: 900 }}>
-                  {lift.source === "ai" ? "AI-ASSISTED LIFT" : "SMART LIFT"} · INPUT {signalScore}/100
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <div style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(120,230,223,.3)", color: "#9df1ec", fontSize: 11, fontWeight: 900 }}>
+                    {lift.source === "ai" ? "AI-ASSISTED LIFT" : "SMART LIFT"} · INPUT {signalScore}/100
+                  </div>
+                  {"speechSynthesis" in window && (
+                    <button onClick={speakLift} style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(243,201,105,.35)", background: "rgba(243,201,105,.08)", color: "#f3c969", fontSize: 11, fontWeight: 900, cursor: "pointer" }}>
+                      {speaking ? "■ STOP VOICE" : "🔊 HEAR MY LIFT"}
+                    </button>
+                  )}
                 </div>
               </div>
 
