@@ -42,6 +42,33 @@ const needs: { id: Need; label: string; hint: string }[] = [
   { id: "next", label: "My Next Move", hint: "Choose the move that creates momentum now." },
 ];
 
+const quickStarts: { label: string; need: Need; mission: string; outcome: string; blocker: string; context: string }[] = [
+  {
+    label: "GET MORE CUSTOMERS",
+    need: "reach",
+    mission: "I have a good local business, but not enough of the right people are responding.",
+    outcome: "A clearer message and a practical way to reach more likely customers this week.",
+    blocker: "People may not immediately understand why they should choose me or act now.",
+    context: "Use a small-budget, relationship-first approach before recommending paid promotion.",
+  },
+  {
+    label: "TURN AN IDEA INTO MONEY",
+    need: "earn",
+    mission: "I have an idea or skill that could help people, but I have not turned it into a simple offer yet.",
+    outcome: "One clear offer I can test without spending a lot of money.",
+    blocker: "The idea feels too broad and I am not sure what somebody would actually pay for.",
+    context: "Keep the first test small, honest and low-risk. Do not assume demand until it is tested.",
+  },
+  {
+    label: "GET UNSTUCK TODAY",
+    need: "done",
+    mission: "I have something important I keep putting off and I need visible progress today.",
+    outcome: "A finish line and one action I can complete in the next 20 minutes.",
+    blocker: "The task feels too large and I keep planning instead of finishing.",
+    context: "Prioritize a status-changing action over polishing or adding more ideas.",
+  },
+];
+
 const modeConfig: Record<Need, {
   mode: string;
   verb: string;
@@ -237,6 +264,7 @@ export default function ElevateMeBotPage() {
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [voiceTarget, setVoiceTarget] = useState<"mission" | "outcome" | "blocker" | "context">("mission");
+  const [quickStartUsed, setQuickStartUsed] = useState(false);
   const recognitionRef = useRef<any>(null);
 
   const processingLabels = [
@@ -415,6 +443,17 @@ export default function ElevateMeBotPage() {
   const activeMode = modeConfig[need];
   const recommendedDoors = hubDoors[need];
 
+  function useQuickStart(example: typeof quickStarts[number]) {
+    setNeed(example.need);
+    setMission(example.mission);
+    setOutcome(example.outcome);
+    setBlocker(example.blocker);
+    setContext(example.context);
+    setQuickStartUsed(true);
+    setPreviewMessage("");
+    trackElevateEvent("quick_start_selected", surface, undefined, { action: example.need, example: example.label });
+  }
+
   function saveProfile() {
     try {
       localStorage.setItem(
@@ -576,6 +615,35 @@ export default function ElevateMeBotPage() {
               Three strong answers are better than a long form. The last field is optional if you want the Bot to see more.
             </p>
 
+            <div style={{ marginTop: 15, padding: "14px 14px 12px", borderRadius: 17, border: "1px solid rgba(243,201,105,.18)", background: "rgba(243,201,105,.045)" }}>
+              <div style={{ color: "#f3c969", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>DON'T KNOW WHAT TO TYPE? TRY THE BOT WITH A REAL STARTER</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+                {quickStarts.map(example => (
+                  <button
+                    key={example.label}
+                    onClick={() => useQuickStart(example)}
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: 999,
+                      border: "1px solid rgba(255,255,255,.18)",
+                      background: "rgba(255,255,255,.055)",
+                      color: "#fff",
+                      fontSize: 11,
+                      fontWeight: 900,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {example.label}
+                  </button>
+                ))}
+              </div>
+              {quickStartUsed && (
+                <div style={{ marginTop: 9, color: "#aaa6b8", fontSize: 11, lineHeight: 1.4 }}>
+                  Starter loaded. Change any words to make it yours—or run it as-is to see how the Lift works.
+                </div>
+              )}
+            </div>
+
             <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
               <label>
                 <span style={{ display: "block", marginBottom: 7, fontWeight: 900 }}>1. What are we elevating?</span>
@@ -666,7 +734,7 @@ export default function ElevateMeBotPage() {
                   <div style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(120,230,223,.3)", color: "#9df1ec", fontSize: 11, fontWeight: 900 }}>
                     {lift.source === "ai" ? "AI-ASSISTED LIFT" : "SMART LIFT"} · INPUT {signalScore}/100
                   </div>
-                  {"speechSynthesis" in window && (
+                  {typeof window !== "undefined" && "speechSynthesis" in window && (
                     <button onClick={speakLift} style={{ padding: "9px 13px", borderRadius: 999, border: "1px solid rgba(243,201,105,.35)", background: "rgba(243,201,105,.08)", color: "#f3c969", fontSize: 11, fontWeight: 900, cursor: "pointer" }}>
                       {speaking ? "■ STOP VOICE" : "🔊 HEAR MY LIFT"}
                     </button>
