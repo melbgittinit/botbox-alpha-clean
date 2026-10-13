@@ -180,6 +180,97 @@ const button: React.CSSProperties = {
   cursor: "pointer",
 };
 
+
+function ModeVisual({ need, accent, running }: { need: Need; accent: string; running: boolean }) {
+  const shell: React.CSSProperties = {
+    position: "absolute",
+    right: 18,
+    top: 18,
+    width: 150,
+    height: 104,
+    borderRadius: 18,
+    border: `1px solid ${accent}55`,
+    background: "rgba(2,7,12,.66)",
+    backdropFilter: "blur(10px)",
+    overflow: "hidden",
+    pointerEvents: "none",
+    opacity: running ? 1 : .86,
+    transition: "opacity .3s ease",
+  };
+
+  if (need === "make") {
+    return (
+      <div style={shell}>
+        <div style={{ position: "absolute", inset: 10, backgroundImage: `linear-gradient(${accent}20 1px,transparent 1px),linear-gradient(90deg,${accent}20 1px,transparent 1px)`, backgroundSize: "16px 16px" }} />
+        {[0,1,2].map(i => <div key={i} style={{ position: "absolute", left: 18 + i * 34, top: 24 + i * 14, width: 34, height: 24, border: `1px solid ${accent}99`, borderRadius: 6, background: `${accent}18`, animation: running ? `modeBuild 1.8s ${i * .18}s ease-in-out infinite alternate` : undefined }} />)}
+        <div style={{ position: "absolute", left: 14, bottom: 9, color: accent, fontSize: 9, fontWeight: 900, letterSpacing: ".12em" }}>BLUEPRINT LIVE</div>
+      </div>
+    );
+  }
+
+  if (need === "done") {
+    return (
+      <div style={shell}>
+        {[0,1,2].map(i => (
+          <div key={i} style={{ position: "absolute", left: 16, right: 14, top: 18 + i * 24, height: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 16, height: 16, borderRadius: 5, border: `1px solid ${accent}`, display: "grid", placeItems: "center", color: accent, fontSize: 11, animation: running ? `modeCheck 2.2s ${i * .3}s ease-in-out infinite` : undefined }}>✓</div>
+            <div style={{ height: 5, flex: 1, borderRadius: 999, background: i === 2 ? `${accent}45` : `${accent}70` }} />
+          </div>
+        ))}
+        <div style={{ position: "absolute", left: 14, bottom: 7, color: accent, fontSize: 9, fontWeight: 900, letterSpacing: ".12em" }}>FINISH LINE</div>
+      </div>
+    );
+  }
+
+  if (need === "reach") {
+    return (
+      <div style={shell}>
+        {[72,50,28].map((size, i) => <div key={size} style={{ position: "absolute", left: 75 - size / 2, top: 46 - size / 2, width: size, height: size, borderRadius: "50%", border: `1px solid ${accent}`, opacity: .75 - i * .15, animation: running ? `modePulse ${1.7 + i * .25}s ease-out infinite` : undefined }} />)}
+        <div style={{ position: "absolute", left: 69, top: 40, width: 12, height: 12, borderRadius: "50%", background: accent, boxShadow: `0 0 18px ${accent}` }} />
+        <div style={{ position: "absolute", left: 14, bottom: 7, color: accent, fontSize: 9, fontWeight: 900, letterSpacing: ".12em" }}>1 • 5 • 50</div>
+      </div>
+    );
+  }
+
+  if (need === "earn") {
+    return (
+      <div style={shell}>
+        {[24,44,62,82].map((h, i) => <div key={h} style={{ position: "absolute", bottom: 24, left: 24 + i * 24, width: 14, height: h * .65, borderRadius: "5px 5px 2px 2px", background: `linear-gradient(180deg,${accent},${accent}45)`, transformOrigin: "bottom", animation: running ? `modeBars 1.8s ${i * .12}s ease-in-out infinite alternate` : undefined }} />)}
+        <div style={{ position: "absolute", right: 18, top: 18, color: accent, fontSize: 22, fontWeight: 900 }}>↗</div>
+        <div style={{ position: "absolute", left: 14, bottom: 7, color: accent, fontSize: 9, fontWeight: 900, letterSpacing: ".12em" }}>VALUE SIGNAL</div>
+      </div>
+    );
+  }
+
+  if (need === "better") {
+    return (
+      <div style={shell}>
+        <div style={{ position: "absolute", left: 14, top: 16, width: 46, height: 62, borderRadius: 9, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.035)" }}>
+          <div style={{ margin: 8, height: 5, background: "rgba(255,255,255,.22)", borderRadius: 999 }} />
+          <div style={{ margin: "0 8px", height: 5, width: 22, background: "rgba(255,255,255,.14)", borderRadius: 999 }} />
+        </div>
+        <div style={{ position: "absolute", left: 67, top: 37, color: accent, fontSize: 22, animation: running ? "modeArrow 1.3s ease-in-out infinite alternate" : undefined }}>→</div>
+        <div style={{ position: "absolute", right: 14, top: 16, width: 46, height: 62, borderRadius: 9, border: `1px solid ${accent}`, background: `${accent}16`, boxShadow: running ? `0 0 22px ${accent}25` : undefined }}>
+          <div style={{ margin: 8, height: 5, background: accent, borderRadius: 999 }} />
+          <div style={{ margin: "0 8px", height: 5, width: 28, background: `${accent}90`, borderRadius: 999 }} />
+        </div>
+        <div style={{ position: "absolute", left: 14, bottom: 7, color: accent, fontSize: 9, fontWeight: 900, letterSpacing: ".12em" }}>BEFORE → BETTER</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={shell}>
+      <div style={{ position: "absolute", left: 34, top: 12, width: 76, height: 76, borderRadius: "50%", border: `1px solid ${accent}88`, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 10, borderRadius: "50%", border: `1px solid ${accent}45` }} />
+        <div style={{ position: "absolute", left: "50%", top: "50%", width: 38, height: 1, background: `linear-gradient(90deg,${accent},transparent)`, transformOrigin: "0 0", animation: running ? "modeRadar 2s linear infinite" : undefined }} />
+        <div style={{ position: "absolute", right: 15, top: 22, width: 6, height: 6, borderRadius: "50%", background: accent, boxShadow: `0 0 12px ${accent}` }} />
+      </div>
+      <div style={{ position: "absolute", left: 14, bottom: 7, color: accent, fontSize: 9, fontWeight: 900, letterSpacing: ".12em" }}>NEXT MOVE LOCKED</div>
+    </div>
+  );
+}
+
 function getElevateCycleKey() {
   try {
     const params = new URLSearchParams(window.location.search);
@@ -576,6 +667,31 @@ export default function ElevateMeBotPage() {
           0% { transform:rotate(0deg); }
           100% { transform:rotate(360deg); }
         }
+
+        @keyframes modeBuild {
+          0% { transform:translateY(0) scale(.96); opacity:.55; }
+          100% { transform:translateY(-5px) scale(1); opacity:1; }
+        }
+        @keyframes modeCheck {
+          0%,35% { opacity:.32; transform:scale(.9); }
+          55%,100% { opacity:1; transform:scale(1); }
+        }
+        @keyframes modePulse {
+          0% { transform:scale(.58); opacity:.9; }
+          100% { transform:scale(1.2); opacity:0; }
+        }
+        @keyframes modeBars {
+          0% { transform:scaleY(.55); opacity:.65; }
+          100% { transform:scaleY(1.06); opacity:1; }
+        }
+        @keyframes modeArrow {
+          0% { transform:translateX(-3px); opacity:.55; }
+          100% { transform:translateX(4px); opacity:1; }
+        }
+        @keyframes modeRadar {
+          0% { transform:rotate(0deg); }
+          100% { transform:rotate(360deg); }
+        }
         .elevate-input::placeholder { color:#7e829c; }
         .elevate-choice:hover { transform:translateY(-2px); border-color:rgba(120,230,223,.55)!important; }
         @media (max-width: 820px) {
@@ -599,7 +715,11 @@ export default function ElevateMeBotPage() {
         <section className="elevate-console-grid" style={{ display: "grid", gridTemplateColumns: ".88fr 1.12fr", gap: 22, alignItems: "stretch", marginTop: 14 }}>
           <div className="elevate-bot-stage" style={{ ...card, minHeight: 650, position: "relative", overflow: "hidden", background: "radial-gradient(circle at 50% 38%,rgba(89,236,244,.20),transparent 25%),linear-gradient(180deg,rgba(4,10,18,.96),rgba(3,5,10,.98))" }}>
             <div style={{ position: "absolute", inset: 20, border: "1px solid rgba(120,230,223,.14)", borderRadius: 22, pointerEvents: "none" }} />
-            <div style={{ position: "absolute", left: "8%", right: "8%", bottom: 26, height: 2, background: "linear-gradient(90deg,transparent,#78e6df,transparent)", opacity: .65 }} />
+            <div style={{ position: "absolute", left: 18, top: 18, zIndex: 3, padding: "8px 11px", borderRadius: 999, border: `1px solid ${activeMode.accent}55`, background: "rgba(2,7,12,.72)", color: activeMode.accent, fontSize: 10, fontWeight: 900, letterSpacing: ".12em", backdropFilter: "blur(8px)" }}>
+              {activeMode.mode}
+            </div>
+            <ModeVisual need={need} accent={activeMode.accent} running={runningAction} />
+            <div style={{ position: "absolute", left: "8%", right: "8%", bottom: 26, height: 2, background: `linear-gradient(90deg,transparent,${activeMode.accent},transparent)`, opacity: .65 }} />
             <img
               src={BOT_IMAGE}
               alt="Elevate Me Bot black edition"
