@@ -38,8 +38,22 @@ type LiftResult = {
   };
 };
 
+function contextLine(context: string | undefined, label: string) {
+  const line = String(context || "")
+    .split("\n")
+    .find(item => item.toLowerCase().startsWith(label.toLowerCase() + ":"));
+  return line ? line.slice(line.indexOf(":") + 1).trim() : "";
+}
+
 function fallbackResult(input: ElevateAiInput): LiftResult {
   const mission = input.mission.trim() || "what matters most to you";
+  const desired = contextLine(input.context, "Desired outcome");
+  const blocker = contextLine(input.context, "Biggest blocker");
+  const usefulContext = contextLine(input.context, "Useful context");
+  const outcomePhrase = desired || "a visible improvement you can verify";
+  const blockerPhrase = blocker || "the gap between the goal and the next concrete action";
+  const contextNote = usefulContext ? `\nCONTEXT TO HONOR: ${usefulContext}` : "";
+
   const actionCopy: Record<ElevateAction, {
     focus: string;
     friction: string;
@@ -51,64 +65,64 @@ function fallbackResult(input: ElevateAiInput): LiftResult {
     path: string[];
   }> = {
     make: {
-      focus: `Turn “${mission}” into one finished, visible first version.`,
-      friction: "The idea is still larger than the first useful thing that can be completed.",
-      leverage: "Reduce the scope until something real can be finished and shown today.",
+      focus: `Turn “${mission}” into a first version that directly moves you toward ${outcomePhrase}.`,
+      friction: `The biggest drag appears to be ${blockerPhrase}. The idea needs a smaller working form before more features are added.`,
+      leverage: "Define the smallest useful version someone could actually see, use, react to, or approve today.",
       title: "Build the smallest version worth showing",
-      action: `Create one concrete first version of “${mission}” with a clear beginning, middle and finish.`,
-      deliverableTitle: "Starter blueprint",
-      deliverable: `FIRST VERSION\nName: ${mission}\nPromise: One useful result for one specific person.\nBuild only: the core idea, one proof/example, and one clear next action.\nLeave everything else for version two.`,
-      path: ["Finish the first version today.", "Show it to one real person and collect one reaction.", "Improve only what that reaction proves matters."],
+      action: `Create a one-screen, one-page, one-message, or one-demo version of “${mission}” that proves the core value before you add extras.`,
+      deliverableTitle: "First-version build sheet",
+      deliverable: `FIRST VERSION\nProject: ${mission}\nTarget outcome: ${outcomePhrase}\n\nCORE PROMISE\nThis first version should help one specific person get one specific result.\n\nBUILD ONLY THESE 4 PIECES\n1. A clear title that says what this is.\n2. One sentence explaining who it helps and how.\n3. One proof/example/demo element.\n4. One obvious next action.\n\nDO NOT BUILD YET\nExtra features, multiple audiences, long explanations, or polish that does not improve understanding.\n\nFIRST TEST\nShow the version to one real person and ask: “What do you think this helps you do?”${contextNote}`,
+      path: ["Finish the first working version today.", "Put it in front of one real person and capture their exact reaction.", "Improve only the part their reaction proves is unclear or weak."],
     },
     done: {
-      focus: `Move “${mission}” from unfinished to visibly completed.`,
-      friction: "The work is probably being experienced as one large task instead of a sequence of finishable moves.",
-      leverage: "Define the finish line, then complete only the next physical action.",
-      title: "Create a finish line you can cross",
-      action: `Write the exact sentence that proves “${mission}” is done, then complete the smallest action that makes that sentence more true.`,
-      deliverableTitle: "Completion map",
-      deliverable: `DONE LOOKS LIKE: ${mission} is complete enough to use, send, publish, book, or hand off.\nNOW: Do the smallest action that changes its status.\nNEXT: Remove the biggest blocker.\nLATER: Polish only after the working version exists.`,
-      path: ["Complete one status-changing action now.", "Remove one blocker next.", "Finish and ship before polishing."],
+      focus: `Move “${mission}” from unfinished to a verifiable finish line tied to ${outcomePhrase}.`,
+      friction: `The work is likely staying open because of ${blockerPhrase}. The task needs a visible definition of done, not more planning.`,
+      leverage: "Choose the next status-changing action—the move that turns the project from planned to sent, posted, booked, approved, purchased, or completed.",
+      title: "Cross one real finish line",
+      action: `Write “DONE = ____” for “${mission},” then complete the smallest action that changes its real-world status within 20 minutes.`,
+      deliverableTitle: "Finish-line map",
+      deliverable: `DONE = “${mission} is complete enough to produce ${outcomePhrase}.”\n\nNOW — STATUS-CHANGING ACTION\nDo the one action that makes the project measurably more complete: send it, schedule it, publish it, submit it, confirm it, purchase the missing item, or hand it off.\n\nBLOCKER TO REMOVE\n${blockerPhrase}\n\nIF THAT BLOCKER CANNOT BE REMOVED TODAY\nCreate a workaround that keeps the project moving instead of waiting for perfect conditions.\n\nSTOP RULE\nDo not polish anything that is not preventing completion.${contextNote}`,
+      path: ["Complete one action that changes the project's status.", "Remove or route around the main blocker.", "Ship the usable version before polishing."],
     },
     reach: {
-      focus: `Make “${mission}” easy for the right people to understand and respond to.`,
-      friction: "A broad message often asks the audience to do too much interpretation.",
-      leverage: "Say one useful thing to one specific person, then scale the same message outward.",
-      title: "Make the message easier to answer",
-      action: `Write one sentence that says who “${mission}” helps, what changes for them, and what they should do next.`,
-      deliverableTitle: "1 / 5 / 50 outreach starter",
-      deliverable: `FOR 1: “I thought of you because I’m working on ${mission}. If this would help, I can show you the simplest version.”\n\nFOR 5: Send the same idea personally to five people most likely to care.\n\nFOR 50: Turn the strongest response into a short post, email, QR card, or announcement.`,
-      path: ["Send to one person first.", "Use their response to sharpen the wording.", "Only then expand to five and fifty."],
+      focus: `Make “${mission}” easier for the right people to understand, care about, and respond to so you can move toward ${outcomePhrase}.`,
+      friction: `The message may be asking people to interpret too much, especially with ${blockerPhrase} in the way.`,
+      leverage: "Use one simple promise, one audience, and one response request—then scale only the wording that earns a real reply.",
+      title: "Create a message people can answer",
+      action: `Send one clear message about “${mission}” to the single person most likely to understand the value, then use that response to sharpen the 5-person and 50-person versions.`,
+      deliverableTitle: "1 / 5 / 50 outreach kit",
+      deliverable: `MESSAGE CORE\n“I’m working on ${mission}. The goal is ${outcomePhrase}. I thought of you because this may be useful to you or someone you know. Would you like me to show you the simplest version?”\n\nFOR 1\nSend that message personally to the best-fit person. Do not add a long explanation.\n\nFOR 5\nPersonalize the first sentence for five people who have a clear reason to care. Ask for a reply, not a vague “check this out.”\n\nFOR 50\nTurn the strongest wording into a short post/email/QR message:\n“Trying to get ${outcomePhrase}? I’m testing a simple approach through ${mission}. Reply / scan / tap if you want to see it.”\n\nWHAT TO MEASURE\nReplies, questions, clicks, and requests for more—not impressions alone.${contextNote}`,
+      path: ["Send the one-person version first.", "Rewrite using the language from real replies.", "Then expand to five and fifty without changing the core promise."],
     },
     earn: {
-      focus: `Find the clearest value inside “${mission}” that another person may willingly pay for.`,
-      friction: "The earning idea may still be described as a project rather than a useful outcome.",
-      leverage: "Package one outcome, one buyer, one simple offer, and one low-risk test.",
+      focus: `Find the clearest value inside “${mission}” that could help a specific buyer get ${outcomePhrase}.`,
+      friction: `The earning path is probably too broad because of ${blockerPhrase}. The first offer needs one buyer, one result, one scope, and one low-risk test.`,
+      leverage: "Sell the outcome before building a large product, campaign, or system around it.",
       title: "Turn the idea into a testable offer",
-      action: `Describe one useful outcome “${mission}” can create for one specific customer and make a small offer around that outcome.`,
-      deliverableTitle: "Offer starter",
-      deliverable: `OFFER: “I help [specific person] get [specific result] through ${mission}.”\nSTART SMALL: Offer one clearly defined version before adding extras.\nTEST: Ask a few qualified people whether the result matters to them before spending on promotion.`,
-      path: ["Name the buyer and result.", "Test the offer with a small qualified audience.", "Improve the offer from real response before scaling."],
+      action: `Create one small paid or pre-commitment offer around the most useful result “${mission}” can create, then test it with a handful of qualified people before spending on promotion.`,
+      deliverableTitle: "Offer + validation card",
+      deliverable: `OFFER HYPOTHESIS\n“I help [specific person] get ${outcomePhrase} through ${mission}.”\n\nFIRST PAID VERSION\nKeep it narrow: one outcome, one defined deliverable, one simple price or commitment, one clear time frame.\n\nTEST MESSAGE\n“I’m testing a simple offer for people who want ${outcomePhrase}. It uses ${mission}. I’m looking for a few people to tell me whether this result is valuable enough to act on. Want the details?”\n\nVALIDATION RULE\nDo not treat likes as demand. Look for replies, requests for details, deposits, purchases, or explicit “yes, I would pay for that.”\n\nRISK CONTROL\nDo not spend meaningfully on ads, inventory, or automation until qualified people respond to the offer.${contextNote}`,
+      path: ["Name the buyer, result, scope and first price/commitment.", "Test it with a small qualified audience.", "Only scale after real response proves what people value."],
     },
     better: {
-      focus: `Improve the part of “${mission}” that most affects understanding or action.`,
-      friction: "Improvement becomes expensive when everything is changed at once.",
-      leverage: "Clarify the promise and next action before adding more features or decoration.",
-      title: "Improve the highest-leverage piece first",
-      action: `Rewrite the main promise of “${mission}” so a new person can understand the value and next step in seconds.`,
-      deliverableTitle: "Clarity upgrade",
-      deliverable: `BEFORE: “Here is ${mission}.”\nBETTER: “${mission} helps [specific person] get [specific result]. Start here: [one clear action].”\nUse that sentence to judge every headline, button and next step.`,
-      path: ["Clarify the promise.", "Make the next action obvious.", "Then improve visuals or features that support those two things."],
+      focus: `Improve “${mission}” in the specific way most likely to create ${outcomePhrase}.`,
+      friction: `The current version may be losing clarity or action because of ${blockerPhrase}.`,
+      leverage: "Improve the promise and next action before changing decoration, complexity, or feature count.",
+      title: "Upgrade the highest-leverage piece",
+      action: `Rewrite the main promise and next action for “${mission}” so a new person can understand the value in seconds and know exactly what to do next.`,
+      deliverableTitle: "Before → better upgrade",
+      deliverable: `BEFORE\n“Here is ${mission}.”\n\nBETTER CORE PROMISE\n“${mission} helps [specific person] get ${outcomePhrase} without [main friction, delay, confusion, or unnecessary step].”\n\nBETTER NEXT ACTION\n“Start here: [one clear action].”\n\nQUALITY CHECK\nA new visitor should be able to answer these three questions in under 10 seconds:\n1. What is this?\n2. Is it for me?\n3. What do I do next?\n\nIMPROVE NEXT\nOnly after those three answers are clear should you change visuals, add features, or expand the page.${contextNote}`,
+      path: ["Rewrite the promise around the desired outcome.", "Make the next action unmistakable.", "Then improve visuals/features that support those two things."],
     },
     next: {
-      focus: `Choose the next move that creates visible momentum for “${mission}.”`,
-      friction: "Too many possible moves can make planning feel like progress while nothing changes.",
-      leverage: "Choose the action that creates proof, feedback, completion, or a customer response.",
-      title: "Choose the move that changes the situation",
-      action: `Within the next 20 minutes, do one action for “${mission}” that another person could see, use, answer, or verify.`,
-      deliverableTitle: "Momentum card",
-      deliverable: `DO NOW: One visible, verifiable action.\nDO NEXT: Use the result to choose the second move.\nDO NOT: Add another large plan until the first action creates new information.`,
-      path: ["Create visible movement today.", "Use what happened to choose the next move.", "Repeat until the goal becomes a sequence of completed outcomes."],
+      focus: `Choose the next move for “${mission}” that creates the strongest evidence toward ${outcomePhrase}.`,
+      friction: `The situation is likely being slowed by ${blockerPhrase}, which can make more planning feel safer than action.`,
+      leverage: "Pick the move that creates new information—proof, completion, a reply, a customer reaction, a decision, or a usable asset.",
+      title: "Make the move that changes the situation",
+      action: `Within 20 minutes, take one action on “${mission}” that another person or system can see, answer, use, approve, reject, or verify.`,
+      deliverableTitle: "Next-move decision card",
+      deliverable: `YOUR TARGET\n${outcomePhrase}\n\nDO NOW\nChoose one visible action that creates new information about “${mission}.” Examples: send the draft, contact the buyer, publish the test, ask for the decision, build the first sample, schedule the meeting, or verify the missing fact.\n\nDO NEXT\nUse what happens—not what you guessed would happen—to choose move #2.\n\nDO NOT\nCreate another long plan, redesign everything, or add new features before move #1 produces evidence.\n\nDECISION RULE\nPrefer the action that teaches you the most while risking the least.${contextNote}`,
+      path: ["Create one visible, verifiable movement today.", "Use the response/result to choose the second move.", "Repeat until the goal becomes a chain of completed outcomes."],
     },
   };
 
@@ -132,7 +146,7 @@ function fallbackResult(input: ElevateAiInput): LiftResult {
       content: item.deliverable,
     },
     path: item.path,
-    boost: "You do not need the whole answer today. You need a useful change in direction that you can see and build on.",
+    boost: "You do not need the whole answer today. You need one useful change in direction, something concrete to use, and the next move after that.",
     steps: item.path.slice(0, 3),
     result: item.deliverable,
   };
