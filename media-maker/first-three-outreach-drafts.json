@@ -1,0 +1,28 @@
+{
+  "status": "DRAFTS ONLY — NOT SENT",
+  "launchHold": "Reviewer, measured delivery cost, checkout and fulfilment still unresolved",
+  "contactRule": "Public contact pages are research routes, not confirmed decision-maker or delivery evidence",
+  "drafts": [
+    {
+      "outlet": "Mirror Indy",
+      "source": "https://mirrorindy.org/contact/",
+      "angle": "Community-service explainer; avoid presenting statewide football as core city coverage",
+      "subject": "A small audience-specific script pilot for Mirror Indy",
+      "body": "Hello Mirror Indy team,\n\nWe are testing Media Maker, an editorial planning tool for adapting a supplied story into a short script, written companion and source checklist. Your community-centred Indianapolis coverage makes a practical local-service explainer a useful test case.\n\nWould an editor be open to reviewing a tightly scoped pilot using source material you select? Your team retains editorial control. Automated finished video is not part of this offer.\n\nYou can see the workflow and request a pilot at https://thebotstores.com/pages/media-maker. Scope, delivery date and price would be agreed before any purchase.\n\nIf this is not relevant, let us know and we will not follow up.\n\nMel Banks II\nThe Bot Stores"
+    },
+    {
+      "outlet": "The TRiiBE",
+      "source": "https://thetriibe.com/contact/",
+      "angle": "Black Chicago context and editorial ownership",
+      "subject": "A Chicago audience-tuning pilot for your editorial desk",
+      "body": "Hello The TRiiBE team,\n\nWe are building Media Maker to help organise a supplied story into an audience-specific script, written companion and source ledger. For your Black Chicago readership, I would propose testing how a local arts or community story can carry the same verified facts across a short script and written edition while preserving your voice and context.\n\nWould your editorial team consider reviewing one scoped planning pilot? You choose the source story and retain editorial approval. We are not offering automatic published reporting or finished video at this stage.\n\nThe working sample and enquiry route are at https://thebotstores.com/pages/media-maker. We would agree the scope and price before purchase.\n\nIf this is not useful, tell us and we will not follow up.\n\nMel Banks II\nThe Bot Stores"
+    },
+    {
+      "outlet": "MEDIALEX",
+      "source": "https://medialex.us/about/",
+      "angle": "Community radio and language-access planning; translation not sold",
+      "subject": "A community-radio planning pilot for MEDIALEX",
+      "body": "Hello MEDIALEX team,\n\nYour community-created radio and multilingual mission suggest a useful test for Media Maker: one short radio script and written companion built from material your team supplies, with clear audience and pronunciation notes.\n\nWe can also record the requirements for a future language edition, while keeping translation production outside this initial pilot. Your qualified local reviewers would retain editorial and language approval.\n\nWould you consider evaluating one scoped English-language planning pilot? The sample and request route are at https://thebotstores.com/pages/media-maker. Scope, schedule and price would be confirmed before purchase.\n\nIf this is not relevant, let us know and we will not follow up.\n\nMel Banks II\nThe Bot Stores"
+    }
+  ]
+}
