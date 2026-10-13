@@ -1,0 +1,67 @@
+{
+  "schema": "media-maker-pilot-rehearsal/v1",
+  "status": "INTERNAL DRAFT — independent editorial review pending",
+  "historicalEdition": "October 10–11, 2026 sports results; not current headlines",
+  "audience": "US general sports audience",
+  "deliverables": {
+    "script": "The weekend’s sports story: finishing strong. Cleveland won the deciding playoff game against Chicago, two to nothing, completing its series comeback. Oklahoma stunned top-ranked Texas, twenty-seven to twenty-four, with a field goal as time expired. Indiana rallied past Nebraska, twenty to seventeen. And Kentucky edged LSU, thirty-five to thirty-four, in overtime.",
+    "writtenCompanion": "Late finishes and reversals shaped Saturday’s sports results. Cleveland defeated the Chicago White Sox 2–0 in the deciding game of their American League Division Series, completing a comeback after losing the first two games. José Ramírez’s two-run home run provided the scoring.\n\nIn college football, Oklahoma defeated top-ranked Texas 27–24 with a field goal as time expired. Indiana beat Nebraska 20–17 after trailing 17–6 in the fourth quarter. Kentucky defeated LSU 35–34 in overtime.\n\nThese results offer different local leads. Cleveland’s edition centres on advancing after a series deficit. Chicago’s edition centres on the end of the White Sox’s postseason. Indiana’s edition centres on the Hoosiers’ fourth-quarter rally. Each version should retain the same scores and distinguish fact from commentary.\n\nThis internal rehearsal uses historical results from October 10, 2026. It is not a current sports bulletin and includes no licensed event footage.",
+    "sourceLedger": [
+      {
+        "claim": "Cleveland final and series comeback",
+        "url": "https://www.reuters.com/sports/baseball/guardians-complete-alds-comeback-blank-white-sox-game-5--flm-2026-10-11/",
+        "status": "Retrieved wire reporting; original scorecard recheck needed"
+      },
+      {
+        "claim": "Oklahoma final",
+        "url": "https://soonersports.com/boxscore.aspx?id=15626",
+        "status": "Official box-score search result retrieved"
+      },
+      {
+        "claim": "Indiana final and fourth-quarter deficit",
+        "url": "https://huskers.com/news/2026/10/10/huskers-push-no-7-hoosiers-to-limit",
+        "status": "Official report retrieved in earlier research; fresh page retrieval unavailable"
+      },
+      {
+        "claim": "Kentucky overtime final",
+        "url": "https://ukathletics.com/news/2026/10/10/no-25-kentucky-tops-no-10-lsu-in-overtime/",
+        "status": "Official report retrieved earlier; fresh page retrieval unavailable"
+      }
+    ],
+    "revisionLog": [
+      {
+        "revision": 1,
+        "change": "Omitted conflicting strikeout statistics and historical record claims; labelled edition historical."
+      }
+    ]
+  },
+  "checks": {
+    "scriptWordCount": 51,
+    "targetRuntimeSeconds": 30,
+    "recordedRuntime": null,
+    "articleUnder400Words": true,
+    "allRequestedDeliverablesPresent": true,
+    "independentReviewerAssigned": false,
+    "sourceRightsReviewed": false,
+    "paymentTested": false,
+    "customerDeliveryTested": false,
+    "articleWordCount": 143
+  },
+  "costs": {
+    "newPaidProviderActivated": false,
+    "providerCostMeasured": false,
+    "reviewerMinutes": null,
+    "revisionMinutes": null,
+    "labourRate": null,
+    "fees": null,
+    "marginValidated": false
+  },
+  "nextGates": [
+    "Independent original-source comparison",
+    "Named reviewer and capacity confirmation",
+    "Timed read",
+    "Private customer delivery rehearsal",
+    "Full cost record",
+    "Checkout and support test"
+  ]
+}
