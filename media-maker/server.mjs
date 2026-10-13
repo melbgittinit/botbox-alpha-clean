@@ -3,6 +3,7 @@ import {productionAccess} from './production-access.mjs';
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 const newsPage=await readFile(new URL('./news.html',import.meta.url));
+const heroVideo=Buffer.from((await readFile(new URL('./hero-loop.mp4.b64',import.meta.url),'utf8')).trim(),'base64');
 const ownerPage=await readFile(new URL('./owner.html',import.meta.url));
 const studio=await readFile(new URL('./studio.html',import.meta.url));
 const enquiryRates=new Map();
@@ -36,6 +37,7 @@ const server=http.createServer(async (req,res)=>{
  return res.end(JSON.stringify({error:access.ok?'Video production is not enabled':access.error}));
  }
  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405);return res.end();}
+ if(url.pathname==='/hero-loop.mp4'){res.writeHead(200,{'Content-Type':'video/mp4','Content-Length':heroVideo.length,'Cache-Control':'public,max-age=3600'});return res.end(req.method==='HEAD'?undefined:heroVideo);}
  if(url.pathname==='/owner'){res.setHeader('Cache-Control','no-store');res.setHeader('X-Robots-Tag','noindex, nofollow');res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(ownerPage);}
  if(url.pathname==='/news'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(newsPage);}
  if(url.pathname==='/api/news'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify(await getNews()));}
