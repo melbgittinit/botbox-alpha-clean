@@ -152,6 +152,120 @@ function safeString(value: unknown, max: number) {
   return String(value || "").trim().slice(0, max);
 }
 
+
+function missionTerms(mission: string) {
+  return mission
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(word => word.length >= 4)
+    .filter(word => !new Set(["this","that","with","from","have","want","need","more","what","your","about","into","some","just","really"]).has(word))
+    .slice(0, 12);
+}
+
+function liftQuality(input: ElevateAiInput, result: LiftResult) {
+  let score = 0;
+  const combined = [
+    result.title,
+    result.readout.focus,
+    result.readout.friction,
+    result.readout.leverage,
+    result.firstMove.title,
+    result.firstMove.why,
+    result.firstMove.action,
+    result.deliverable.title,
+    result.deliverable.content,
+    result.path.join(" "),
+  ].join(" ").toLowerCase();
+
+  const terms = missionTerms(input.mission);
+  const matchedTerms = terms.filter(term => combined.includes(term)).length;
+  const specificityRatio = terms.length ? matchedTerms / terms.length : 1;
+
+  if (result.readout.focus.length >= 45) score += 10;
+  if (result.readout.friction.length >= 45) score += 8;
+  if (result.readout.leverage.length >= 45) score += 10;
+  if (result.firstMove.action.length >= 55) score += 12;
+  if (result.firstMove.why.length >= 40) score += 8;
+  if (result.deliverable.content.length >= 260) score += 18;
+  if (result.deliverable.content.length >= 520) score += 8;
+  if (result.path.length === 3 && result.path.every(item => item.length >= 24)) score += 10;
+  if (specificityRatio >= .45) score += 10;
+  if (specificityRatio >= .70) score += 4;
+
+  const modeSignals: Record<ElevateAction, string[]> = {
+    make: ["version","build","draft","blueprint","create"],
+    done: ["done","finish","complete","checklist","blocker"],
+    reach: ["message","send","audience","1","5","50"],
+    earn: ["offer","customer","value","test","pay"],
+    better: ["before","better","improve","rewrite","upgrade"],
+    next: ["next","priority","now","first","move"],
+  };
+  if (modeSignals[input.action].some(signal => combined.includes(signal))) score += 7;
+
+  const genericPhrases = [
+    "believe in yourself",
+    "stay positive",
+    "take it one step at a time",
+    "you've got this",
+    "keep going",
+    "set smart goals",
+  ];
+  if (genericPhrases.some(phrase => combined.includes(phrase))) score -= 12;
+
+  return Math.max(0, Math.min(100, score));
+}
+
+function parseLiftPayload(input: ElevateAiInput, payload: any): LiftResult | null {
+  const raw = textFromResponse(payload);
+  if (!raw) return null;
+  const cleaned = raw.replace(/^\`\`\`json\s*/i, "").replace(/\`\`\`$/i, "").trim();
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    return null;
+  }
+
+  if (!parsed?.readout || !parsed?.firstMove || !parsed?.deliverable || !Array.isArray(parsed?.path)) {
+    return null;
+  }
+
+  const path = parsed.path.slice(0, 3).map((x: unknown) => safeString(x, 900));
+  if (path.length < 3) return null;
+
+  return {
+    source: "ai",
+    title: safeString(parsed.title || "Your Elevation", 140),
+    readout: {
+      focus: safeString(parsed.readout.focus, 900),
+      friction: safeString(parsed.readout.friction, 900),
+      leverage: safeString(parsed.readout.leverage, 900),
+    },
+    firstMove: {
+      title: safeString(parsed.firstMove.title, 180),
+      why: safeString(parsed.firstMove.why, 900),
+      action: safeString(parsed.firstMove.action, 1400),
+      timebox: safeString(parsed.firstMove.timebox || "20 minutes", 120),
+    },
+    deliverable: {
+      title: safeString(parsed.deliverable.title || "Made for you", 180),
+      content: safeString(parsed.deliverable.content, 6500),
+    },
+    path,
+    boost: safeString(parsed.boost, 600),
+    steps: path,
+    result: safeString(parsed.deliverable.content, 6500),
+    usage: payload?.usage ? {
+      inputTokens: Number(payload.usage.input_tokens || 0),
+      outputTokens: Number(payload.usage.output_tokens || 0),
+      totalTokens: Number(payload.usage.total_tokens || 0),
+      model: process.env.ELEVATE_AI_MODEL || "gpt-5.6-luna",
+    } : undefined,
+  };
+}
+
 export async function generateElevateAction(input: ElevateAiInput): Promise<LiftResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return fallbackResult(input);
@@ -210,63 +324,71 @@ Rules:
   ].filter(Boolean).join("\n\n");
 
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: process.env.ELEVATE_AI_MODEL || "gpt-5.6-luna",
-        instructions,
-        input: prompt,
-        max_output_tokens: 1400,
-        store: false,
-      }),
-      cache: "no-store",
-    });
+    const runModel = async (extraInstruction = "", extraInput = "") => {
+      const response = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: process.env.ELEVATE_AI_MODEL || "gpt-5.6-luna",
+          instructions: extraInstruction ? `${instructions}\n\n${extraInstruction}` : instructions,
+          input: extraInput ? `${prompt}\n\n${extraInput}` : prompt,
+          max_output_tokens: 1600,
+          store: false,
+        }),
+        cache: "no-store",
+      });
+      if (!response.ok) return null;
+      return response.json();
+    };
 
-    if (!response.ok) return fallbackResult(input);
-    const payload = await response.json();
-    const raw = textFromResponse(payload);
-    if (!raw) return fallbackResult(input);
+    const firstPayload = await runModel();
+    if (!firstPayload) return fallbackResult(input);
 
-    const cleaned = raw.replace(/^\`\`\`json\s*/i, "").replace(/\`\`\`$/i, "").trim();
-    const parsed = JSON.parse(cleaned);
-    if (!parsed?.readout || !parsed?.firstMove || !parsed?.deliverable || !Array.isArray(parsed?.path)) {
-      return fallbackResult(input);
+    let result = parseLiftPayload(input, firstPayload);
+    if (!result) return fallbackResult(input);
+
+    let quality = liftQuality(input, result);
+
+    if (quality < 72) {
+      const repairInstruction = `QUALITY REPAIR PASS:
+The first draft was too weak for a flagship Elevate Me Bot experience.
+Rewrite it with substantially more specificity and utility.
+Make the deliverable immediately usable, not generic advice.
+Anchor the answer in the user's actual mission and supplied context.
+Keep the same JSON schema and stay under 900 words.
+Do not mention this repair pass or any quality score to the user.`;
+
+      const repairInput = `Weak draft to replace:\n${JSON.stringify({
+        title: result.title,
+        readout: result.readout,
+        firstMove: result.firstMove,
+        deliverable: result.deliverable,
+        path: result.path,
+        boost: result.boost,
+      })}`;
+
+      const repairedPayload = await runModel(repairInstruction, repairInput);
+      const repaired = repairedPayload ? parseLiftPayload(input, repairedPayload) : null;
+      if (repaired) {
+        const repairedQuality = liftQuality(input, repaired);
+        if (repairedQuality >= quality) {
+          result = repaired;
+          quality = repairedQuality;
+        }
+      }
     }
 
-    const path = parsed.path.slice(0, 3).map((x: unknown) => safeString(x, 900));
-    const result: LiftResult = {
-      source: "ai",
-      title: safeString(parsed.title || "Your Elevation", 140),
-      readout: {
-        focus: safeString(parsed.readout.focus, 900),
-        friction: safeString(parsed.readout.friction, 900),
-        leverage: safeString(parsed.readout.leverage, 900),
-      },
-      firstMove: {
-        title: safeString(parsed.firstMove.title, 180),
-        why: safeString(parsed.firstMove.why, 900),
-        action: safeString(parsed.firstMove.action, 1400),
-        timebox: safeString(parsed.firstMove.timebox || "20 minutes", 120),
-      },
-      deliverable: {
-        title: safeString(parsed.deliverable.title || "Made for you", 180),
-        content: safeString(parsed.deliverable.content, 6500),
-      },
-      path,
-      boost: safeString(parsed.boost, 600),
-      steps: path,
-      result: safeString(parsed.deliverable.content, 6500),
-      usage: payload?.usage ? {
-        inputTokens: Number(payload.usage.input_tokens || 0),
-        outputTokens: Number(payload.usage.output_tokens || 0),
-        totalTokens: Number(payload.usage.total_tokens || 0),
-        model: process.env.ELEVATE_AI_MODEL || "gpt-5.6-luna",
-      } : undefined,
-    };
+    console.log("ELEVATE_LIFT_QUALITY " + JSON.stringify({
+      action: input.action,
+      mode,
+      quality,
+      source: result.source,
+      repaired: quality >= 72,
+    }));
+
     return result;
   } catch {
     return fallbackResult(input);
