@@ -561,6 +561,21 @@ export default function ElevateMeBotPage() {
           0%,100% { box-shadow:0 0 0 rgba(120,230,223,0); }
           50% { box-shadow:0 0 44px rgba(120,230,223,.13); }
         }
+
+        @keyframes capsuleIn {
+          0% { opacity:0; transform:translateY(18px) scale(.94); }
+          35% { opacity:1; transform:translateY(0) scale(1); }
+          70% { opacity:1; transform:translateY(-10px) scale(.985); }
+          100% { opacity:.15; transform:translateY(-42px) scale(.84); }
+        }
+        @keyframes capsuleOut {
+          0% { opacity:0; transform:translateY(32px) scale(.92); filter:blur(8px); }
+          100% { opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+        }
+        @keyframes dataOrbit {
+          0% { transform:rotate(0deg); }
+          100% { transform:rotate(360deg); }
+        }
         .elevate-input::placeholder { color:#7e829c; }
         .elevate-choice:hover { transform:translateY(-2px); border-color:rgba(120,230,223,.55)!important; }
         @media (max-width: 820px) {
@@ -594,6 +609,19 @@ export default function ElevateMeBotPage() {
             {runningAction && (
               <>
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,transparent 0%,rgba(120,230,223,.08) 42%,transparent 72%)", animation: "elevateScan 2.8s linear infinite" }} />
+                <div style={{ position: "absolute", inset: "8% 10% auto", height: 170, display: "grid", placeItems: "center", pointerEvents: "none" }}>
+                  <div style={{ position: "absolute", width: 140, height: 140, borderRadius: "50%", border: "1px solid rgba(120,230,223,.35)", animation: "dataOrbit 7s linear infinite" }}>
+                    <div style={{ position: "absolute", top: -5, left: "50%", width: 10, height: 10, borderRadius: "50%", background: "#f3c969", boxShadow: "0 0 18px #f3c969" }} />
+                    <div style={{ position: "absolute", bottom: 8, right: 8, width: 8, height: 8, borderRadius: "50%", background: "#78e6df", boxShadow: "0 0 16px #78e6df" }} />
+                  </div>
+                  <div style={{ width: "78%", maxWidth: 360, padding: "14px 16px", borderRadius: 18, border: "1px solid rgba(120,230,223,.34)", background: "rgba(3,8,14,.78)", backdropFilter: "blur(12px)", animation: "capsuleIn 3.4s ease-in-out infinite" }}>
+                    <div style={{ color: activeMode.accent, fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>INPUT ENTERING {activeMode.mode}</div>
+                    <div style={{ marginTop: 7, color: "#f5f2f8", fontSize: 14, lineHeight: 1.35 }}>
+                      {mission.trim() ? mission.trim().slice(0, 110) : "Your goal is entering the Bot…"}{mission.trim().length > 110 ? "…" : ""}
+                    </div>
+                  </div>
+                </div>
+
                 <div style={{ position: "absolute", left: 22, right: 22, bottom: 22, padding: "18px 20px", borderRadius: 18, background: "rgba(2,7,12,.86)", border: "1px solid rgba(120,230,223,.42)", backdropFilter: "blur(12px)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
                     <div style={{ color: activeMode.accent, fontSize: 11, fontWeight: 900, letterSpacing: ".14em" }}>{activeMode.mode} • {activeMode.verb}</div>
@@ -724,7 +752,11 @@ export default function ElevateMeBotPage() {
 
         {lift && (
           <section id="your-lift" style={{ marginTop: 26, scrollMarginTop: 18 }}>
-            <div style={{ ...card, padding: "28px 24px", borderColor: activeMode.glow, background: `radial-gradient(circle at 86% 0%,${activeMode.glow},transparent 30%),linear-gradient(145deg,rgba(14,24,48,.96),rgba(5,12,22,.98))` }}>
+            <div style={{ ...card, padding: "28px 24px", borderColor: activeMode.glow, background: `radial-gradient(circle at 86% 0%,${activeMode.glow},transparent 30%),linear-gradient(145deg,rgba(14,24,48,.96),rgba(5,12,22,.98))`, animation: "capsuleOut .65s ease both" }}>
+              <div style={{ marginBottom: 16, padding: "11px 14px", borderRadius: 14, border: `1px solid ${activeMode.accent}`, background: activeMode.glow, color: activeMode.accent, fontSize: 11, fontWeight: 900, letterSpacing: ".12em" }}>
+                LIFT CAPSULE RETURNED • YOUR INPUT HAS BEEN TRANSFORMED
+              </div>
+
               <div style={{ display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
                 <div>
                   <div style={{ color: activeMode.accent, fontWeight: 900, letterSpacing: ".14em", fontSize: 11 }}>✓ {activeMode.mode} COMPLETE</div>
