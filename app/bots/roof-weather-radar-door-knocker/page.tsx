@@ -8,7 +8,7 @@ const steps=[
  {n:"04",title:"Put a real rep at the door",copy:"Route the opportunity to a salesperson for inspection, explanation, estimate and agreement. The bot supports the rep—it does not replace the human relationship."}
 ];
 
-export default function RoofWeatherRadarDoorKnocker(){
+export default async function RoofWeatherRadarDoorKnocker({searchParams}:{searchParams:Promise<{submitted?:string;error?:string}>}){ const q=await searchParams;
  return <main className={styles.page}>
    <div className={styles.stage}>ALPHA PRODUCT EXPERIENCE — LIVE WEATHER FEEDS, PROPERTY DATA, CRM, OUTREACH AND CHECKOUT ARE NOT CONNECTED YET.</div>
    <div className={styles.wrap}>
@@ -105,10 +105,43 @@ export default function RoofWeatherRadarDoorKnocker(){
        </div>
      </section>
 
+
+     <section id="pilot" className={styles.pilotSection}>
+       <div className={styles.pilotIntro}>
+         <span className={styles.eyebrow}>ROOFING COMPANY PILOT</span>
+         <h2>Start with one market. Prove the workflow.</h2>
+         <p className={styles.muted}>We are looking for roofing and storm-response teams willing to test the storm-to-door workflow with human review at every consequential step.</p>
+         <div className={styles.pilotGets}>
+           <div><b>STORM WATCHLIST</b><span>Prioritized likely-impact areas</span></div>
+           <div><b>NEIGHBORHOOD MAP</b><span>Focused territory review</span></div>
+           <div><b>REP HANDOFF</b><span>Context for real salespeople</span></div>
+           <div><b>TRUST CONTROLS</b><span>Approval and claim boundaries</span></div>
+           <div><b>PILOT REPORT</b><span>What worked, what converted, what needs tuning</span></div>
+         </div>
+       </div>
+       <div className={styles.pilotFormWrap}>
+         {q.submitted==="1" ? <div className={styles.pilotSuccess}><b>PILOT REQUEST RECEIVED ✓</b><p>Thank you. Your company information has been recorded for review.</p></div> : null}
+         {q.error ? <div className={styles.pilotError}><b>WE COULDN'T COMPLETE THAT REQUEST.</b><p>{q.error==="required" ? "Please complete the required company, contact, email and territory fields." : "The pilot request service is temporarily unavailable. Please try again shortly."}</p></div> : null}
+         <form className={styles.pilotForm} action="/api/roof-radar/pilot" method="post">
+           <label>Roofing company *<input name="company" required /></label>
+           <label>Contact person *<input name="contact" required /></label>
+           <div className={styles.pilotTwo}><label>Work email *<input name="email" type="email" required /></label><label>Phone<input name="phone" type="tel" /></label></div>
+           <label>Service territory / ZIP codes *<textarea name="territory" rows={2} required placeholder="Example: South Atlanta, 30213, 30291, 30349" /></label>
+           <div className={styles.pilotTwo}><label>Number of sales reps<input name="reps" inputMode="numeric" /></label><label>CRM used<input name="crm" placeholder="JobNimbus, AccuLynx, HubSpot, other" /></label></div>
+           <label>Preferred homeowner outreach channels<select name="outreach" defaultValue=""><option value="">Choose one</option><option>Phone / text</option><option>Email</option><option>Door-to-door only</option><option>Mixed channels</option><option>Not sure yet</option></select></label>
+           <label>Do you already use weather / storm intelligence?<select name="weather" defaultValue=""><option value="">Choose one</option><option>Yes — actively</option><option>Sometimes</option><option>No</option><option>Evaluating tools now</option></select></label>
+           <label>What would make this pilot valuable?<textarea name="notes" rows={3} /></label>
+           <input className={styles.honeypot} name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+           <button className={styles.btn+" "+styles.primary} type="submit">REQUEST PILOT ACCESS</button>
+           <p className={styles.formFine}>Submitting this form requests a pilot conversation; it does not authorize homeowner outreach or autonomous action.</p>
+         </form>
+       </div>
+     </section>
+
      <section className={styles.work} style={{marginTop:40}}>
        <div className={styles.note}><b>POSITIONING:</b> Storms create needs. The bot helps organize where a roofing team may be able to help—without confusing a weather signal with a verified damage claim.</div>
        <div className={styles.actions}>
-         <span className={styles.btn+" "+styles.primary}>PILOT ACCESS — COMING NEXT</span>
+         <a className={styles.btn+" "+styles.primary} href="#pilot">START A PILOT</a>
          <Link className={styles.btn} href="/press/interview?topic=Roof%20Weather%20Radar%20Door%20Knocker">MEDIA STATEMENT</Link>
        </div>
      </section>
