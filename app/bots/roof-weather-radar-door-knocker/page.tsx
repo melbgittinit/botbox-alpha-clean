@@ -29,6 +29,24 @@ export default function RoofWeatherRadarDoorKnocker(){
        </div>
      </header>
 
+     <section className={styles.radarMedia}>
+       <div className={styles.radarMediaMain}>
+         <img src="https://cdn.shopify.com/s/files/1/1982/3607/files/roof-weather-radar-dispenser.png?v=1791944115" alt="Roof Weather Radar Door Knocker inside The Bot Factory dispenser" />
+         <div className={styles.radarMediaCaption}><span>01</span><b>DISPENSER READY</b><small>Deploy the specialist when the storm signal matters.</small></div>
+       </div>
+       <div className={styles.radarMediaSide}>
+         <img src="https://cdn.shopify.com/s/files/1/1982/3607/files/roof-weather-radar-neighborhood-alerts.png?v=1791944099" alt="Roof Weather Radar Door Knocker scanning a storm-affected neighborhood" />
+         <div className={styles.radarMediaCaption}><span>02</span><b>NEIGHBORHOOD RADAR</b><small>Prioritize likely impact areas before the field team moves.</small></div>
+       </div>
+     </section>
+
+     <section className={styles.proofStrip}>
+       <div><b>SCAN</b><span>Storm signals</span></div>
+       <div><b>PRIORITIZE</b><span>Likely impact areas</span></div>
+       <div><b>CONNECT</b><span>Approved outreach</span></div>
+       <div><b>HUMAN CLOSE</b><span>Real rep • real homeowner</span></div>
+     </section>
+
      <section id="workflow" className={styles.work}>
        <div className={styles.heading}><div><span className={styles.eyebrow}>STORM-TO-DOOR WORKFLOW</span><h2>One clear job from signal to salesperson.</h2></div></div>
        <div className={styles.grid}>{steps.map(s=><article className={styles.card} key={s.n}>
@@ -47,6 +65,15 @@ export default function RoofWeatherRadarDoorKnocker(){
            ["Rep-ready handoff","Context a salesperson can use when a real human conversation begins."],
            ["Mission status","What was scanned, reviewed, contacted and handed to a rep."]
          ].map(([t,c])=><article className={styles.card} key={t}><h3>{t}</h3><p className={styles.desc}>{c}</p></article>)}
+       </div>
+     </section>
+
+     <section className={styles.radarAgreement}>
+       <img src="https://cdn.shopify.com/s/files/1/1982/3607/files/roof-weather-radar-homeowner-agreement.png?v=1791944108" alt="Roof Weather Radar Door Knocker supporting a salesperson and satisfied homeowners" />
+       <div>
+         <span className={styles.eyebrow}>THE HUMAN HANDOFF</span>
+         <h2>The bot finds the moment. A real person earns the customer.</h2>
+         <p className={styles.muted}>The customer-facing finish is intentionally human. The salesperson inspects, explains, answers questions, presents the estimate and earns the agreement. The bot stays in a support role.</p>
        </div>
      </section>
 
