@@ -6,7 +6,7 @@ Shopify draft product: Media Maker — Editorial Planning Pilot. Product 1541893
 One English-language audience/market edition. Delivery brief; one script targeting at most 30 seconds; written companion up to 400 words; claim/source ledger; one consolidated revision. Buyer supplies source material. Additional reporting, translation, voice/video generation and licensing excluded. No production or publication started by payment.
 
 ## Launch gates
-- Assign named human reviewer and backup; verify availability.
+- Initial final reviewer: Mel Banks II, chosen by the owner on October 14, 2026. Each exact package version needs explicit Mel approval before buyer delivery; assignment is not package approval. Backup and delivery capacity remain unconfirmed.
 - Complete one end-to-end representative delivery with elapsed time, revisions, review and provider costs recorded.
 - Confirm permission to use source material; do not redistribute source articles or unlicensed footage.
 - Agree buyer-specific scope and deadline before purchase.
