@@ -1,76 +1,48 @@
 import { NextResponse } from "next/server";
 
-function text(v: FormDataEntryValue | null){ return typeof v === "string" ? v.trim() : ""; }
+const SUPABASE_URL="https://lcuvhizjhccvzprpuoij.supabase.co";
+const SUPABASE_KEY="sb_publishable_oF6Les3a6qYmgsBtED5UPg_-NCTjck3";
 
-export async function POST(req: Request){
-  const form = await req.formData();
-  if(text(form.get("website"))) {
-    return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?submitted=1", req.url), 303);
+function val(v:FormDataEntryValue|null){ return typeof v==="string" ? v.trim() : ""; }
+
+export async function POST(req:Request){
+  const f=await req.formData();
+  if(val(f.get("website"))) return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?submitted=1",req.url),303);
+
+  const payload={
+    company:val(f.get("company")),
+    contact:val(f.get("contact")),
+    email:val(f.get("email")),
+    phone:val(f.get("phone"))||null,
+    territory:val(f.get("territory")),
+    reps:val(f.get("reps"))||null,
+    crm:val(f.get("crm"))||null,
+    outreach:val(f.get("outreach"))||null,
+    weather:val(f.get("weather"))||null,
+    notes:val(f.get("notes"))||null,
+    source:"roof-weather-radar-door-knocker"
+  };
+
+  if(!payload.company || !payload.contact || !payload.email.includes("@") || !payload.territory){
+    return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?error=required",req.url),303);
   }
 
-  const company=text(form.get("company"));
-  const contact=text(form.get("contact"));
-  const email=text(form.get("email"));
-  const phone=text(form.get("phone"));
-  const territory=text(form.get("territory"));
-  const reps=text(form.get("reps"));
-  const crm=text(form.get("crm"));
-  const outreach=text(form.get("outreach"));
-  const weather=text(form.get("weather"));
-  const notes=text(form.get("notes"));
-
-  if(!company || !contact || !email || !email.includes("@") || !territory){
-    return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?error=required", req.url), 303);
-  }
-
-  const apiKey=process.env.RESEND_API_KEY;
-  if(!apiKey){
-    return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?error=delivery", req.url), 303);
-  }
-
-  const subject=`Roof Weather Radar Pilot Request — ${company}`;
-  const body = [
-    "NEW ROOF WEATHER RADAR DOOR KNOCKER PILOT REQUEST",
-    "",
-    `Company: ${company}`,
-    `Contact: ${contact}`,
-    `Email: ${email}`,
-    `Phone: ${phone || "Not provided"}`,
-    `Service territory / ZIPs: ${territory}`,
-    `Sales reps: ${reps || "Not provided"}`,
-    `CRM: ${crm || "Not provided"}`,
-    `Preferred outreach channels: ${outreach || "Not provided"}`,
-    `Current weather/storm intelligence: ${weather || "Not provided"}`,
-    `Notes: ${notes || "None"}`,
-    "",
-    "Source: Roof Weather Radar Door Knocker product page",
-    `Submitted: ${new Date().toISOString()}`
-  ].join("\n");
-
-  const r=await fetch("https://api.resend.com/emails",{
+  const r=await fetch(SUPABASE_URL+"/rest/v1/roof_radar_pilot_requests",{
     method:"POST",
     headers:{
-      "Authorization":`Bearer ${apiKey}`,
-      "Content-Type":"application/json"
+      "apikey":SUPABASE_KEY,
+      "Authorization":"Bearer "+SUPABASE_KEY,
+      "Content-Type":"application/json",
+      "Prefer":"return=minimal"
     },
-    body:JSON.stringify({
-      from:"Roof Radar Pilot <pilot@resetmehub.com>",
-      to:["hello@urbanspirit.biz"],
-      reply_to:email,
-      subject,
-      text:body,
-      tags:[
-        {name:"product",value:"roof-weather-radar"},
-        {name:"type",value:"pilot-request"}
-      ]
-    })
+    body:JSON.stringify(payload)
   });
 
   if(!r.ok){
-    console.error("roof-radar-pilot-email-failed",r.status,await r.text());
-    return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?error=delivery", req.url), 303);
+    console.error("roof-radar-pilot-failed",r.status,await r.text());
+    return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?error=delivery",req.url),303);
   }
 
-  console.info("roof-radar-pilot-submitted",{company,territory,reps,crm});
-  return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?submitted=1", req.url), 303);
+  console.info("roof-radar-pilot-submitted",{company:payload.company,territory:payload.territory,reps:payload.reps,crm:payload.crm});
+  return NextResponse.redirect(new URL("/bots/roof-weather-radar-door-knocker?submitted=1",req.url),303);
 }
