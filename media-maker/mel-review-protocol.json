@@ -1,0 +1,22 @@
+{
+  "schema": "media-maker-owner-review/v1",
+  "decidedAt": "2026-10-14",
+  "reviewer": "Mel Banks II",
+  "policy": "Mel reviews first",
+  "stages": [
+    "prepared",
+    "awaiting_mel_review",
+    "changes_requested",
+    "mel_approved",
+    "buyer_delivered"
+  ],
+  "requirements": [
+    "Explicit approval of exact version and file list",
+    "Revised versions require fresh approval",
+    "Buyer retains publication decision",
+    "Scope and delivery deadline confirmed before purchase"
+  ],
+  "currentApproval": null,
+  "automationEnforced": false,
+  "limits": "Recorded operating policy; live owner sign-in and delivery enforcement are not connected. No package is approved by this decision."
+}
