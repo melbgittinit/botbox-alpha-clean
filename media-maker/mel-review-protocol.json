@@ -1,8 +1,8 @@
 {
   "schema": "media-maker-owner-review/v1",
   "decidedAt": "2026-10-14",
-  "reviewer": "Mel Banks II",
-  "policy": "Mel reviews first",
+  "reviewer": "Assistant-led quality workflow",
+  "policy": "Assistant handles routine package preparation, quality checks and delivery decisions under implemented acceptance rules; Mel does not approve every delivery.",
   "stages": [
     "prepared",
     "awaiting_mel_review",
@@ -11,12 +11,13 @@
     "buyer_delivered"
   ],
   "requirements": [
-    "Explicit approval of exact version and file list",
-    "Revised versions require fresh approval",
-    "Buyer retains publication decision",
-    "Scope and delivery deadline confirmed before purchase"
+    "Factual claims trace to accessible evidence; unsupported or conflicting claims are withheld or clearly labelled",
+    "Check audience fit, clarity, runtime, format, captions, pronunciation, rights and file playback",
+    "No false human-editor approval, broadcast certification or guaranteed accuracy",
+    "Buyer controls publication; unresolved high-stakes or rights issues require qualified review",
+    "Owner approval reserved for material spend, commercial changes or genuine exceptions"
   ],
   "currentApproval": null,
   "automationEnforced": false,
-  "limits": "Recorded operating policy; live owner sign-in and delivery enforcement are not connected. No package is approved by this decision."
+  "limits": "Supersedes Mel-first review policy. This is operating direction, not a completed automated QA or production connection. Existing prototype capabilities remain limited."
 }
