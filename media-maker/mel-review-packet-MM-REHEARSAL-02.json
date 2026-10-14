@@ -1,0 +1,23 @@
+{
+  "schema": "media-maker-review-packet/v1",
+  "version": "MM-REHEARSAL-02",
+  "status": "AWAITING MEL REVIEW",
+  "reviewer": "Mel Banks II",
+  "topic": "Media Maker editorial planning pilot",
+  "audience": "Local newsroom editor or producer",
+  "script": "One story can serve different audiences. Media Maker helps you prepare a delivery brief, a short script, a written companion and a source checklist. Set the market, audience and delivery style, then review the package before production. Start with an editorial planning pilot. Finished video and automated reporting are not yet part of the working service.",
+  "article": "Media Maker is available through The Bot Stores as an editorial planning workspace. A newsroom can specify the audience, market, voice direction and intended format, then organise a script structure, written companion, source ledger and production brief.\n\nThe initial proposed paid pilot covers one English-language market edition, a short script, a written companion up to 400 words, a source ledger and one consolidated revision. Scope, timing and price must be agreed before purchase. The provisional $49 product remains in draft.\n\nInternational settings record language, regional pronunciation and local-review requirements. They do not yet produce translated or voiced editions. Online video generation and automated research are also unconnected.\n\nPilot enquiries can be submitted and saved with a reference number. Each package requires Mel Banks II’s approval before buyer delivery under the selected operating policy. The buyer retains control of publication.\n\nThis is a workflow sample, not a completed broadcast package or a promise of automatic production.",
+  "checks": {
+    "factSources": [
+      "https://thebotstores.com/pages/media-maker",
+      "https://media-maker-studio-preview.onrender.com/studio",
+      "Shopify draft paid-pilot scope recorded October 13"
+    ],
+    "spokenRuntimeMeasured": false,
+    "independentReviewComplete": false,
+    "ownerApproved": false,
+    "deliveredToBuyer": false,
+    "costsMeasured": false
+  },
+  "approvalRequest": "Approve or request edits for MM-REHEARSAL-02 script and written companion only. This does not activate checkout, outreach or production."
+}
