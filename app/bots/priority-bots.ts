@@ -19,6 +19,24 @@ export type PriorityBot = {
 
 export const priorityBots:PriorityBot[] = [
   {
+    id:"roof-weather-radar-door-knocker",
+    name:"Roof Weather Radar Door Knocker™",
+    eyebrow:"STORM-TO-DOOR OPPORTUNITY BOT",
+    promise:"When weather hits, opportunity knocks.",
+    summary:"A roofing opportunity workflow that uses storm intelligence to identify likely impact areas, prioritize neighborhoods for review, prepare compliant homeowner outreach, and route qualified opportunities to a real sales representative. Remote signals indicate likely impact—not confirmed roof damage.",
+    audience:["Roofing contractors","Storm-response sales teams","Local home-service businesses","Multi-market roofing organizations"],
+    outputs:["Storm-impact watchlist","Neighborhood priority map","Property review queue","Approved outreach list","Rep-ready opportunity handoff"],
+    status:"ALPHA / DEMO READY — LIVE WEATHER, PROPERTY, CRM AND OUTREACH CONNECTIONS NOT YET ENABLED",
+    videoMode:"ui-demo",
+    videoBrief:"10-second premium sequence: bot exits dispenser → storm/tree roof damage → neighborhood radar scan → compliant alerts/lead routing → bot beside real salesperson at homeowner door → happy agreement → bot returns to dispenser, Mission Complete.",
+    access:"Designed to use approved weather feeds, permitted property data, company CRM data and customer-authorized/legally permitted contact channels when production integrations are enabled.",
+    autonomy:"Can analyze storm signals, rank likely impact areas and prepare an outreach queue. It must not treat remote weather signals as confirmed roof damage and must not independently make contractual, inspection or repair claims.",
+    approval:"Human review required before outbound contact, property-specific damage claims, appointments, estimates, contracts or other consequential external actions.",
+    spending:"None by default.",
+    limitations:["Weather/radar signals identify likely impact, not confirmed property damage.","On-site inspection or other reliable verification is required before representing that a roof is damaged.","Homeowner outreach must follow applicable consent, telemarketing, privacy and do-not-contact rules.","No guaranteed leads, appointments, sales, insurance outcomes or repair needs."],
+    mediaAngle:"A vivid real-world example of specialized AI: weather intelligence becomes a prioritized, human-controlled sales workflow rather than a generic chatbot."
+  },
+  {
     id:"elevate",
     name:"Elevate Bot™",
     eyebrow:"FLAGSHIP BOT",
