@@ -16,6 +16,16 @@ const visitorToken=(()=>{
 const localJobsKey="mb_local_jobs_"+clientId;
 let currentJob=null;
 
+async function track(eventName, metadata={}){
+  try{
+    await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-usage",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({visitor_token:visitorToken,event_name:eventName,metadata})
+    });
+  }catch{}
+}
+
 function esc(v=""){
   return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
 }
@@ -105,7 +115,7 @@ function calculateMoney(){
 }
 ["calc-cost","calc-price","calc-qty","calc-other"].forEach(id=>$("#"+id).addEventListener("input",calculateMoney));
 
-$("#printer-pack").addEventListener("click",()=>{
+$("#printer-pack").addEventListener("click",()=>{\n  track("PRINTER_BRIEF_DOWNLOADED",{job_id:currentJob?.id||null});
   if(!currentJob||!currentJob.selectedConcept)return;
   const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
   const lines=[
@@ -155,7 +165,7 @@ $("#finish-design").addEventListener("click",async()=>{
       return;
     }
     if(data.error==="checkout_temporarily_unavailable"){
-      note.textContent="Payment activation is in final verification. Your selected direction is saved; no charge was attempted.";
+      note.textContent="Payment activation is in final verification. Your selected direction is saved; no charge was attempted.";\n      track("CHECKOUT_BLOCKED",{reason:"global_checkout_gate",job_id:currentJob.id});
     }else{
       note.textContent="Checkout is not available yet. Your selected direction is saved.";
     }
@@ -182,3 +192,36 @@ async function loadMyMerch(){
 }
 
 loadMyMerch();
+
+$("#share-brief").addEventListener("click",async()=>{
+  if(!currentJob||!currentJob.selectedConcept)return;
+  const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
+  const text=[
+    "MB — MERCH BOT™",
+    currentJob.brandName+" — "+(c?.name||"Selected Direction"),
+    "Product: "+(c?.product||currentJob.recommendation?.top||""),
+    currentJob.textRequest?"Wording: "+currentJob.textRequest:"",
+    "MB Pick: "+(currentJob.recommendation?.top||""),
+    "",
+    "Design direction approved. Final production art requires vendor/template preflight."
+  ].filter(Boolean).join("\n");
+  try{
+    if(navigator.share){
+      await navigator.share({title:"MB Merch Brief — "+currentJob.brandName,text});
+    }else{
+      await navigator.clipboard.writeText(text);
+      alert("Merch brief copied.");
+    }
+    track("MERCH_BRIEF_SHARED",{job_id:currentJob.id,product:c?.product||null});
+  }catch{}
+});
+
+let calcTracked=false;
+["calc-cost","calc-price","calc-qty","calc-other"].forEach(id=>{
+  $("#"+id).addEventListener("change",()=>{
+    if(!calcTracked){
+      calcTracked=true;
+      track("PROFIT_CALCULATOR_USED",{job_id:currentJob?.id||null});
+    }
+  });
+});
