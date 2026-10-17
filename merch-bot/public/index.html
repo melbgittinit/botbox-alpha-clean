@@ -136,11 +136,33 @@
             <div><span>Printer preflight</span><b class="pending">NEXT</b></div>
           </div>
           <div class="action-stack">
+            <button class="primary" id="finish-design">FINISH THIS DESIGN — $1.99</button>
+            <div id="checkout-note" class="micro"></div>
+            <button class="secondary" id="printer-pack">DOWNLOAD PRINTER BRIEF</button>
             <button class="secondary" id="new-job">MAKE SOMETHING ELSE</button>
-            <button class="ghost" disabled>SEND TO MY PRINTER — next phase</button>
             <button class="ghost" disabled>SELL THIS — next phase</button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section hidden" id="money">
+      <div class="section-head">
+        <span class="eyebrow">IF I SELL THIS</span>
+        <h2>Check the economics before you print.</h2>
+      </div>
+      <div class="panel form-grid">
+        <label><span>Unit cost</span><input id="calc-cost" type="number" min="0" step="0.01" value="12.00" /></label>
+        <label><span>Selling price</span><input id="calc-price" type="number" min="0" step="0.01" value="34.99" /></label>
+        <label><span>Quantity</span><input id="calc-qty" type="number" min="1" step="1" value="12" /></label>
+        <label><span>Other cost per item</span><input id="calc-other" type="number" min="0" step="0.01" value="1.50" /></label>
+        <div class="wide status-list">
+          <div><span>Revenue</span><b id="calc-revenue">$0.00</b></div>
+          <div><span>Total estimated cost</span><b id="calc-total">$0.00</b></div>
+          <div><span>Estimated gross spread</span><b id="calc-spread">$0.00</b></div>
+          <div><span>Estimated spread per item</span><b id="calc-per-item">$0.00</b></div>
+        </div>
+        <p class="wide micro">Estimate only. Replace unit cost with a live vendor price or your actual printer quote when available.</p>
       </div>
     </section>
 
