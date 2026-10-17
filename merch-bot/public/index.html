@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MB — Merch Bot</title>
+  <meta name="description" content="Tell MB what you do. We'll make the merch." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">MB — MERCH BOT™</div>
+      <h1>Tell MB what you do.<br><span>We’ll make the merch.</span></h1>
+      <p class="lead">Design it. Print it. Sell it. Start with one idea, one product, or let MB pick what your business should make first.</p>
+      <div class="price-pill">STARTING AT <strong>$1.99</strong></div>
+      <div class="hero-actions">
+        <button class="primary" data-mode="BEST_SELLER">BEST SELLER MODE</button>
+        <button class="secondary" data-mode="MAKE_THIS">I KNOW WHAT I WANT</button>
+      </div>
+      <p class="micro">V1 preview: product intelligence, concepts, saved jobs, and visual previews are live. Final AI rendering, printer delivery, and POD fulfillment are the next connection phase.</p>
+    </div>
+    <div class="hero-art">
+      <img src="https://cdn.shopify.com/s/files/1/1982/3607/files/mb-merch-bot-hero.png?v=1792249486" alt="MB Merch Bot luxury merchandise studio" />
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="intake">
+      <div class="section-head">
+        <span class="eyebrow">MAKE SOMETHING</span>
+        <h2>Give MB the minimum. Let the merch intelligence do the rest.</h2>
+      </div>
+      <form id="merch-form" class="panel form-grid">
+        <input type="hidden" name="mode" id="mode" value="BEST_SELLER" />
+        <label>
+          <span>Brand / business name</span>
+          <input name="brandName" required placeholder="e.g. Midnight Bakery" />
+        </label>
+        <label>
+          <span>What do you do?</span>
+          <input name="businessType" placeholder="bakery, salon, church, musician, realtor..." />
+        </label>
+        <label>
+          <span>Who is this merch for?</span>
+          <select name="audience">
+            <option>Customers</option>
+            <option>Fans</option>
+            <option>Staff</option>
+            <option>Members</option>
+            <option>Event guests</option>
+            <option>Gifts</option>
+            <option>To sell for profit</option>
+            <option>Mixed</option>
+          </select>
+        </label>
+        <label>
+          <span>What will it be used for?</span>
+          <select name="useCase">
+            <option>Retail / sell it</option>
+            <option>Brand building</option>
+            <option>Staff</option>
+            <option>Gift / giveaway</option>
+            <option>Event</option>
+            <option>Launch / drop</option>
+          </select>
+        </label>
+        <label>
+          <span>Style</span>
+          <select name="style">
+            <option>MB Choose</option>
+            <option>Luxury</option>
+            <option>Street</option>
+            <option>Bold</option>
+            <option>Elegant</option>
+            <option>Fun</option>
+            <option>Minimal</option>
+            <option>Vintage</option>
+          </select>
+        </label>
+        <label>
+          <span>Product</span>
+          <select name="productChoice">
+            <option>MB Choose</option>
+            <option>Tee</option>
+            <option>Hoodie</option>
+            <option>Crewneck</option>
+            <option>Tote</option>
+            <option>Mug</option>
+            <option>Tumbler</option>
+            <option>Hat</option>
+            <option>Apron</option>
+            <option>Pillow</option>
+            <option>Poster</option>
+          </select>
+        </label>
+        <label class="wide">
+          <span>Words / phrase / idea to use (optional)</span>
+          <input name="textRequest" placeholder="e.g. Baked After Dark" maxlength="120" />
+        </label>
+        <div class="wide submit-row">
+          <button class="primary" type="submit">MERCH ME — V1 PREVIEW</button>
+          <span>No charge in this build preview.</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="section hidden" id="results">
+      <div class="section-head">
+        <span class="eyebrow">SMART DROP</span>
+        <h2>What MB thinks you should make first.</h2>
+      </div>
+      <div id="smart-drop" class="cards"></div>
+
+      <div class="section-head spacer">
+        <span class="eyebrow">THREE DIRECTIONS</span>
+        <h2>Choose the direction worth finishing.</h2>
+      </div>
+      <div id="concepts" class="cards"></div>
+    </section>
+
+    <section class="section hidden" id="preview">
+      <div class="section-head">
+        <span class="eyebrow">YOUR MERCH</span>
+        <h2>Selected direction saved.</h2>
+      </div>
+      <div class="preview-grid panel">
+        <img id="preview-img" alt="Selected Merch Bot design preview" />
+        <div>
+          <h3 id="preview-title"></h3>
+          <p>This V1 proves the intake → recommendation → concept → selection → saved-job loop without spending image-generation credits.</p>
+          <div class="status-list">
+            <div><span>Design direction</span><b>READY</b></div>
+            <div><span>Saved to My Merch</span><b>READY</b></div>
+            <div><span>Final AI render</span><b class="pending">NEXT</b></div>
+            <div><span>Printer preflight</span><b class="pending">NEXT</b></div>
+          </div>
+          <div class="action-stack">
+            <button class="secondary" id="new-job">MAKE SOMETHING ELSE</button>
+            <button class="ghost" disabled>SEND TO MY PRINTER — next phase</button>
+            <button class="ghost" disabled>SELL THIS — next phase</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">MY MERCH</span>
+        <h2>Your recent MB jobs on this browser.</h2>
+      </div>
+      <div id="my-merch" class="cards"></div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>MB — MERCH BOT™</strong>
+    <span>Design it. Print it. Sell it.</span>
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>
