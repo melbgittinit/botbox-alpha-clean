@@ -169,6 +169,38 @@ app.get("/api/jobs/:id/preview.svg", async function(req,res) {
   res.type("image/svg+xml").send(svg);
 });
 
+app.post("/api/checkout", async function(req,res) {
+  try {
+    const body=req.body||{};
+    const visitorToken=clean(body.visitorToken);
+    const jobId=clean(body.jobId);
+    const conceptId=Number(body.conceptId);
+    if(!visitorToken||!jobId||![1,2,3].includes(conceptId)) {
+      return res.status(400).json({error:"checkout_context_required"});
+    }
+    const upstream=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/tbs-checkout-context",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        action:"create",
+        visitor_token:visitorToken,
+        bot_slug:"merch-bot",
+        tier_key:"POWER",
+        action_key:"make_one",
+        return_path:"/",
+        state_payload:{merch_job_id:jobId,concept_id:conceptId}
+      })
+    });
+    const text=await upstream.text();
+    let data={};
+    try{data=JSON.parse(text)}catch{data={error:"checkout_response_invalid"}}
+    return res.status(upstream.status).json(data);
+  } catch(e) {
+    console.error("MB checkout error",e);
+    res.status(502).json({error:"checkout_bridge_unavailable"});
+  }
+});
+
 app.get("*", function(req,res) {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
