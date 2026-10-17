@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s);const $$=s=>[...document.querySelectorAll(s)];
 const clientId=(()=>{let id=localStorage.getItem("mb_client_id");if(!id){id="client_"+crypto.randomUUID();localStorage.setItem("mb_client_id",id)}return id})();
-let currentJob=null;
+const visitorToken=(()=>{let v=localStorage.getItem("mb_tbs_visitor");if(!v){v="mbv_"+crypto.randomUUID();localStorage.setItem("mb_tbs_visitor",v)}return v})();\nlet currentJob=null;
 $$("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{$("#mode").value=btn.dataset.mode;$("#intake").scrollIntoView({behavior:"smooth"})}));
 $("#merch-form").addEventListener("submit",async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;button.textContent="MB IS THINKING…";try{const data=Object.fromEntries(new FormData(e.currentTarget).entries());data.clientId=clientId;const res=await fetch("/api/jobs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});if(!res.ok)throw new Error();currentJob=await res.json();renderJob(currentJob);await loadMyMerch();$("#results").classList.remove("hidden");$("#results").scrollIntoView({behavior:"smooth"})}catch{alert("MB could not start this job yet. Please try again.")}finally{button.disabled=false;button.textContent="MERCH ME — V1 PREVIEW"}});
 function esc(v=""){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
@@ -10,3 +10,31 @@ async function selectConcept(id){const res=await fetch(`/api/jobs/${currentJob.i
 $("#new-job").addEventListener("click",()=>{$("#merch-form").reset();$("#results").classList.add("hidden");$("#preview").classList.add("hidden");$("#intake").scrollIntoView({behavior:"smooth"})});
 async function loadMyMerch(){try{const res=await fetch(`/api/jobs?clientId=${encodeURIComponent(clientId)}`);const data=await res.json();const jobs=data.jobs||[];$("#my-merch").innerHTML=jobs.length?jobs.map(job=>{const selected=job.concepts?.find(c=>c.id===job.selectedConcept);return `<article class="card"><div class="rank">${esc(job.status)}</div><h3>${esc(job.brandName)}</h3><p>${esc(selected?.name||"Direction not selected yet")}</p><p><strong>MB pick:</strong> ${esc(job.recommendation?.top||"")}</p>${job.selectedConcept?`<a class="link" href="/api/jobs/${job.id}/preview.svg" target="_blank">View preview</a>`:""}</article>`}).join(""):`<article class="card"><p>Your saved MB jobs will appear here.</p></article>`}catch{}}
 loadMyMerch();
+document.querySelector("#finish-design").addEventListener("click",async()=>{
+  if(!currentJob||!currentJob.selectedConcept)return;
+  const btn=document.querySelector("#finish-design");
+  const note=document.querySelector("#checkout-note");
+  btn.disabled=true;btn.textContent="PREPARING CHECKOUT…";note.textContent="";
+  try{
+    const res=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      visitorToken,
+      jobId:currentJob.id,
+      conceptId:currentJob.selectedConcept
+    })});
+    const data=await res.json().catch(()=>({}));
+    if(res.ok&&data.checkout_url){
+      localStorage.setItem("mb_checkout_context",JSON.stringify({token:data.context_token,jobId:currentJob.id,conceptId:currentJob.selectedConcept}));
+      location.href=data.checkout_url;
+      return;
+    }
+    if(data.error==="checkout_temporarily_unavailable"){
+      note.textContent="Payment activation is in final verification. Your selected direction is saved; no charge was attempted.";
+    } else {
+      note.textContent="Checkout is not available yet. Your selected direction is saved.";
+    }
+  }catch{
+    note.textContent="Checkout connection is temporarily unavailable. Your selected direction is saved.";
+  }finally{
+    btn.disabled=false;btn.textContent="FINISH THIS DESIGN — $1.99";
+  }
+});
