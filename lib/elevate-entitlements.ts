@@ -39,6 +39,7 @@ export async function fetchElevateEntitlements(
             orders(first: 100, after: $after) {
               nodes {
                 cancelledAt
+                financialStatus
                 lineItems(first: 100) {
                   nodes {
                     productId
@@ -67,6 +68,7 @@ export async function fetchElevateEntitlements(
           orders?: {
             nodes?: Array<{
               cancelledAt?: string | null;
+              financialStatus?: string | null;
               lineItems?: {
                 nodes?: Array<{
                   productId?: string | null;
@@ -89,6 +91,9 @@ export async function fetchElevateEntitlements(
 
     for (const order of payload.data?.customer?.orders?.nodes || []) {
       if (order.cancelledAt) continue;
+      // Fail closed on unpaid, pending, partially paid, voided or unknown orders.
+      // This is a payment-status eligibility gate, not proof of bank settlement.
+      if (order.financialStatus !== "PAID" && order.financialStatus !== "PARTIALLY_REFUNDED") continue;
 
       for (const item of order.lineItems?.nodes || []) {
         if (item.productId !== ELEVATE_PRODUCT_ID) continue;
