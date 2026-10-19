@@ -368,8 +368,28 @@ export default function ElevateMeBotPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const entrySurface: Surface = params.get("surface") === "botstores" ? "botstores" : "hub";
+    const quickKey = String(params.get("quick") || "").toLowerCase();
+    const quickMap: Record<string, string> = {
+      customers: "GET MORE CUSTOMERS",
+      money: "TURN AN IDEA INTO MONEY",
+      unstuck: "GET UNSTUCK TODAY",
+    };
+    const incomingQuick = quickStarts.find(example => example.label === quickMap[quickKey]);
+
     setSurface(entrySurface);
-    trackElevateEvent("page_view", entrySurface, undefined, { path: window.location.pathname });
+    if (incomingQuick) {
+      setNeed(incomingQuick.need);
+      setMission(incomingQuick.mission);
+      setOutcome(incomingQuick.outcome);
+      setBlocker(incomingQuick.blocker);
+      setContext(incomingQuick.context);
+      setQuickStartUsed(true);
+    }
+
+    trackElevateEvent("page_view", entrySurface, undefined, {
+      path: window.location.pathname,
+      quick_start: incomingQuick?.label || null,
+    });
     fetch("/api/elevate/entitlements", { cache: "no-store" })
       .then(async response => {
         if (!response.ok) throw new Error("NOT_AUTHENTICATED");
@@ -383,18 +403,20 @@ export default function ElevateMeBotPage() {
       }))
       .finally(() => setCheckingAccess(false));
 
-    try {
-      const saved = localStorage.getItem("elevate_me_bot_profile");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.botName) setBotName(parsed.botName);
-        if (parsed.mission) setMission(parsed.mission);
-        if (parsed.outcome) setOutcome(parsed.outcome);
-        if (parsed.blocker) setBlocker(parsed.blocker);
-        if (parsed.context) setContext(parsed.context);
-        if (parsed.need) setNeed(parsed.need);
-      }
-    } catch {}
+    if (!incomingQuick) {
+      try {
+        const saved = localStorage.getItem("elevate_me_bot_profile");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.botName) setBotName(parsed.botName);
+          if (parsed.mission) setMission(parsed.mission);
+          if (parsed.outcome) setOutcome(parsed.outcome);
+          if (parsed.blocker) setBlocker(parsed.blocker);
+          if (parsed.context) setContext(parsed.context);
+          if (parsed.need) setNeed(parsed.need);
+        }
+      } catch {}
+    }
   }, []);
 
   useEffect(() => {
