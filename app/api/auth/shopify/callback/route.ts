@@ -144,41 +144,43 @@ export async function GET(request: Request) {
         },
       });
 
-      const verified: Array<{ offer: string; amountCents: number }> = [];
-      if (!existingElevate?.activated && elevateEntitlements.activated) verified.push({ offer: "activate", amountCents: 100 });
-      if (!existingElevate?.powerUp && elevateEntitlements.powerUp) verified.push({ offer: "power", amountCents: 299 });
-      if (!existingElevate?.makeItReal && elevateEntitlements.makeItReal) verified.push({ offer: "real", amountCents: 799 });
+      // Customer-order entitlements are not a settled-transaction ledger.
+      // Do not fabricate verified gross revenue from catalog list prices or
+      // initial permission changes. Real amounts must come from a separately
+      // reconciled payment/refund feed with transaction IDs and currency.
+      const inferred: Array<{ offer: string; listPriceCents: number }> = [];
+      if (!existingElevate?.activated && elevateEntitlements.activated) inferred.push({ offer: "activate", listPriceCents: 100 });
+      if (!existingElevate?.powerUp && elevateEntitlements.powerUp) inferred.push({ offer: "power", listPriceCents: 299 });
+      if (!existingElevate?.makeItReal && elevateEntitlements.makeItReal) inferred.push({ offer: "real", listPriceCents: 799 });
       const giftDelta = elevateEntitlements.giftCreditsPurchased - (existingElevate?.giftCreditsPurchased || 0);
-      if (giftDelta > 0) verified.push({ offer: "gift", amountCents: 199 * giftDelta });
+      if (giftDelta > 0) inferred.push({ offer: "gift", listPriceCents: 199 * giftDelta });
 
-      for (const conversion of verified) {
+      for (const conversion of inferred) {
         await recordElevateEvent({
           userId: user.id,
           cycleKey,
-          eventType: "purchase_verified",
+          eventType: "entitlement_inferred_from_orders",
           offer: conversion.offer,
-          amountCents: conversion.amountCents,
           success: true,
           channel: "shopify",
           source: "shopify_customer_account",
+          payload: { listPriceCents: conversion.listPriceCents, paymentSettlementVerified: false },
         });
         await recordElevateEconomicEntry({
-          idempotencyKey:
-            conversion.offer === "gift"
-              ? `shopify:${user.id}:gift-total:${elevateEntitlements.giftCreditsPurchased}`
-              : `shopify:${user.id}:${conversion.offer}:verified`,
+          idempotencyKey: `shopify:${user.id}:${conversion.offer}:entitlement-inferred:${conversion.offer === "gift" ? elevateEntitlements.giftCreditsPurchased : "first"}`,
           userId: user.id,
           cycleKey,
-          entryType: "REVENUE",
-          category: "SHOPIFY_PRODUCT_REVENUE",
-          amountCents: conversion.amountCents,
-          verified: true,
-          contributionEligible: true,
+          entryType: "ESTIMATE",
+          category: "CATALOG_PRICE_NOT_SETTLED_REVENUE",
+          amountCents: conversion.listPriceCents,
+          verified: false,
+          contributionEligible: false,
           offer: conversion.offer,
           channel: "shopify",
           source: "shopify_customer_account",
           referenceType: "ELEVATE_ENTITLEMENT_SYNC",
           referenceId: user.id,
+          payload: { paymentSettlementVerified: false, requiresTransactionReconciliation: true },
         });
       }
 
