@@ -27,3 +27,8 @@ footer{padding:40px 24px 70px;border-top:1px solid #232329;display:flex;justify-
 .watch-cta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:22px}
 @media(max-width:900px){.trust-strip{grid-template-columns:1fr 1fr}.video-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.trust-strip,.video-grid{grid-template-columns:1fr}}
+
+.example-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+.example-bar>span{color:var(--muted);font-weight:700;margin-right:4px}
+.example-chip{padding:10px 13px;border-radius:999px;background:#18181d;color:var(--gold2);border:1px solid #4b4230;font-size:.78rem}
+.example-chip:hover{border-color:var(--gold2)}
