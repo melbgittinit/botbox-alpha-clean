@@ -115,7 +115,8 @@ function calculateMoney(){
 }
 ["calc-cost","calc-price","calc-qty","calc-other"].forEach(id=>$("#"+id).addEventListener("input",calculateMoney));
 
-$("#printer-pack").addEventListener("click",()=>{\n  track("PRINTER_BRIEF_DOWNLOADED",{job_id:currentJob?.id||null});
+$("#printer-pack").addEventListener("click",()=>{
+  track("PRINTER_BRIEF_DOWNLOADED",{job_id:currentJob?.id||null});
   if(!currentJob||!currentJob.selectedConcept)return;
   const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
   const lines=[
@@ -165,7 +166,8 @@ $("#finish-design").addEventListener("click",async()=>{
       return;
     }
     if(data.error==="checkout_temporarily_unavailable"){
-      note.textContent="Payment activation is in final verification. Your selected direction is saved; no charge was attempted.";\n      track("CHECKOUT_BLOCKED",{reason:"global_checkout_gate",job_id:currentJob.id});
+      note.textContent="Payment activation is in final verification. Your selected direction is saved; no charge was attempted.";
+      track("CHECKOUT_BLOCKED",{reason:"global_checkout_gate",job_id:currentJob.id});
     }else{
       note.textContent="Checkout is not available yet. Your selected direction is saved.";
     }
