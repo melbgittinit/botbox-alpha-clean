@@ -227,3 +227,21 @@ let calcTracked=false;
     }
   });
 });
+
+const examples={
+  bakery:{brandName:"Midnight Bakery",businessType:"upscale neighborhood bakery",audience:"Customers",useCase:"Retail / sell it",style:"Elegant",productChoice:"MB Choose",textRequest:"Baked After Dark"},
+  salon:{brandName:"Glow House Beauty",businessType:"beauty salon",audience:"Customers",useCase:"Retail / sell it",style:"Luxury",productChoice:"MB Choose",textRequest:"Glow Is The Standard"},
+  church:{brandName:"New Hope Community Church",businessType:"church ministry",audience:"Members",useCase:"Event",style:"Bold",productChoice:"MB Choose",textRequest:"Faith In Motion"},
+  music:{brandName:"After Midnight",businessType:"music artist",audience:"Fans",useCase:"Launch / drop",style:"Street",productChoice:"MB Choose",textRequest:"After Midnight"}
+};
+document.querySelectorAll(".example-chip").forEach(btn=>btn.addEventListener("click",()=>{
+  const ex=examples[btn.dataset.example];
+  if(!ex)return;
+  const form=$("#merch-form");
+  Object.entries(ex).forEach(([k,v])=>{
+    const el=form.elements.namedItem(k);
+    if(el)el.value=v;
+  });
+  $("#mode").value="BEST_SELLER";
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+}));
