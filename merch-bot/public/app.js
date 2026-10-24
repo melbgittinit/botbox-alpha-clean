@@ -84,6 +84,32 @@ $("#merch-form").addEventListener("submit",async e=>{
   }
 });
 
+function previewSvgData(job){
+  const c=job.concepts?.find(x=>x.id===job.selectedConcept);
+  const safe=v=>String(v||"").replace(/[<>&"]/g,"").slice(0,42);
+  const brand=safe(job.brandName||"YOUR BRAND");
+  const phrase=safe(job.textRequest||"DESIGNED WITH MB");
+  const product=safe(c?.product||job.recommendation?.top||"Merch");
+  const direction=safe(c?.name||"MB DESIGN");
+  const svg=[
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">',
+    '<defs><linearGradient id="g"><stop stop-color="#9d7429"/><stop offset=".5" stop-color="#f0cf71"/><stop offset="1" stop-color="#9d7429"/></linearGradient></defs>',
+    '<rect width="1200" height="900" fill="#0b0b0d"/>',
+    '<text x="70" y="100" font-family="Arial" font-size="72" font-weight="700" fill="url(#g)">MB</text>',
+    '<text x="70" y="145" font-family="Arial" font-size="28" fill="#f4f1e9">MERCH BOT — DESIGN PREVIEW</text>',
+    '<rect x="330" y="205" width="540" height="510" rx="50" fill="#17171b" stroke="#d3aa45" stroke-width="3"/>',
+    '<path d="M390 300 L475 250 L525 300 L675 300 L725 250 L810 300 L770 390 L725 365 L725 650 L475 650 L475 365 L430 390 Z" fill="#0f0f12" stroke="#eee8da" stroke-width="6"/>',
+    '<text x="600" y="450" text-anchor="middle" font-family="Arial" font-size="44" font-weight="700" fill="#e5c05f">'+brand+'</text>',
+    '<text x="600" y="505" text-anchor="middle" font-family="Arial" font-size="25" fill="#f4f1e9">'+phrase+'</text>',
+    '<text x="600" y="600" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#c99e3e">'+direction+'</text>',
+    '<text x="70" y="790" font-family="Arial" font-size="30" font-weight="700" fill="#f4f1e9">'+product+'</text>',
+    '<text x="70" y="832" font-family="Arial" font-size="20" fill="#a8a8ad">Concept visualization only — final production art comes after rendering + preflight.</text>',
+    '</svg>'
+  ].join("");
+  return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+
 function renderJob(job){
   $("#smart-drop").innerHTML=job.recommendation.items.slice(0,5).map((item,i)=>
     `<article class="card ${i===0?"active":""}">
@@ -112,7 +138,7 @@ async function selectConcept(id){
   $("#text-confirm").checked=false;
   $("#finish-design").disabled=true;
   $("#checkout-note").textContent="Confirm the exact wording above before any paid finish action.";
-  $("#preview-img").src=`/api/jobs/${currentJob.id}/preview.svg?t=${Date.now()}`;
+  $("#preview-img").src=previewSvgData(currentJob);
   $("#preview").classList.remove("hidden");
   $("#money").classList.remove("hidden");
   calculateMoney();
@@ -255,7 +281,7 @@ async function loadMyMerch(){
     if(job.selectedConcept){
       const c=job.concepts.find(x=>x.id===job.selectedConcept);
       $("#preview-title").textContent=job.brandName+" — "+(c?.name||"Selected Direction");
-      $("#preview-img").src=`/api/jobs/${job.id}/preview.svg?t=${Date.now()}`;
+      $("#preview-img").src=previewSvgData(job);
       const exactText=job.textRequest||job.brandName;
       $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
       $("#text-confirm").checked=false;
