@@ -58,3 +58,82 @@ body{padding-bottom:150px}
 
 .offer-line{margin-top:12px;padding-top:12px;border-top:1px solid #343238}
 .offer-line strong{color:var(--gold2)}
+
+/* Adaptive / foldable layout */
+@media (min-width: 900px) and (max-width: 1500px){
+  .section{scroll-margin-top:90px}
+  .preview-grid{grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr)}
+  .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media (min-width: 1200px){
+  body.mb-studio main{max-width:1480px}
+  body.mb-studio .section{padding-top:56px}
+  body.mb-studio .preview-grid{
+    grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);
+    align-items:start
+  }
+  body.mb-studio #preview-img{
+    position:sticky;
+    top:88px;
+    max-height:calc(100vh - 120px);
+    object-fit:contain
+  }
+}
+
+/* Safe-area aware companion dock */
+.mb-control-dock{
+  right:max(18px,env(safe-area-inset-right,0px));
+  bottom:max(18px,env(safe-area-inset-bottom,0px));
+}
+@media(max-width:620px){
+  .mb-control-dock{
+    right:max(10px,env(safe-area-inset-right,0px));
+    bottom:max(10px,env(safe-area-inset-bottom,0px));
+  }
+}
+
+/* Fold/hinge segmented viewports: keep dock and major content in one segment */
+@media (horizontal-viewport-segments: 2){
+  main{
+    max-width:none;
+    padding-left:max(20px,env(viewport-segment-left 0 0,20px));
+    padding-right:max(20px,calc(100vw - env(viewport-segment-right 1 0,100vw) + 20px));
+  }
+  .hero{
+    grid-template-columns:env(viewport-segment-width 0 0,1fr) env(viewport-segment-width 1 0,1fr);
+    column-gap:max(24px,calc(env(viewport-segment-left 1 0,50vw) - env(viewport-segment-right 0 0,50vw)));
+  }
+  .hero-copy{grid-column:1}
+  .hero-art{grid-column:2}
+  .preview-grid{
+    grid-template-columns:env(viewport-segment-width 0 0,1fr) env(viewport-segment-width 1 0,1fr);
+    column-gap:max(24px,calc(env(viewport-segment-left 1 0,50vw) - env(viewport-segment-right 0 0,50vw)));
+  }
+  .mb-control-dock{
+    width:min(380px,calc(env(viewport-segment-width 1 0,50vw) - 24px));
+    right:max(12px,calc(100vw - env(viewport-segment-right 1 0,100vw) + 12px));
+  }
+}
+
+@media (vertical-viewport-segments: 2){
+  .mb-control-dock{
+    bottom:max(12px,calc(100vh - env(viewport-segment-bottom 0 1,100vh) + 12px));
+  }
+  .preview-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+/* Compact outer-screen / pocket mode */
+@media (max-width: 480px){
+  .hero{min-height:auto;padding:24px 16px 32px}
+  .hero-art img{max-height:300px}
+  h1{font-size:clamp(2.5rem,13vw,3.5rem)}
+  .section{padding:48px 0 16px}
+  main{padding-left:16px;padding-right:16px}
+  .panel,.card{border-radius:16px;padding:18px}
+  .mb-control-dock{border-radius:16px}
+}
