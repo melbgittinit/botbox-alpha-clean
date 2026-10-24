@@ -32,10 +32,32 @@ function smartDrop(input) {
   } else {
     rows = [["Tee",86,"Flexible first item"],["Tumbler",84,"Useful with a good retail ceiling"],["Tote",82,"Visible low-complexity brand builder"],["Hoodie",76,"Premium but higher-cost"],["Mug",74,"Easy gift/add-on"]];
   }
+  const audience=String(input.audience||"").toLowerCase();
+  if(audience.includes("staff")){
+    rows=rows.map(r=>[r[0],r[1]+(["Apron","Crewneck","Tee"].includes(r[0])?5:0),r[2]]);
+  }
+  if(audience.includes("gift")){
+    rows=rows.map(r=>[r[0],r[1]+(["Tumbler","Mug","Tote"].includes(r[0])?5:0),r[2]]);
+  }
+  rows.sort((a,b)=>b[1]-a[1]);
+
+  function fitLabel(score,index){
+    if(index===0 && score>=88) return "EXCELLENT FIT";
+    if(score>=82) return "STRONG FIT";
+    if(score>=72) return "TEST FIRST";
+    return "HIGHER RISK";
+  }
+
   return {
     top: rows[0][0],
     items: rows.map(function(r,i) {
-      return { product:r[0], score:r[1], reason:r[2], status:i===0?"MAKE FIRST":(i<3?"DROP NEXT":"HOLD / TEST") };
+      return {
+        product:r[0],
+        score:r[1],
+        fitLabel:fitLabel(r[1],i),
+        reason:r[2],
+        status:i===0?"MAKE FIRST":(i<3?"DROP NEXT":"HOLD FOR NOW")
+      };
     })
   };
 }
