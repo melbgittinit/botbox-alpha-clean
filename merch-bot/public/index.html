@@ -263,6 +263,13 @@
       </div>
       <div class="panel form-grid">
         <label><span>Unit cost</span><input id="calc-cost" type="number" min="0" step="0.01" value="12.00" /></label>
+        <label><span>Cost source</span>
+          <select id="calc-source">
+            <option value="estimate">MB ESTIMATE</option>
+            <option value="quote">CUSTOMER-ENTERED QUOTE</option>
+            <option value="live">LIVE VENDOR PRICE</option>
+          </select>
+        </label>
         <label><span>Selling price</span><input id="calc-price" type="number" min="0" step="0.01" value="34.99" /></label>
         <label><span>Quantity</span><input id="calc-qty" type="number" min="1" step="1" value="12" /></label>
         <label><span>Other cost per item</span><input id="calc-other" type="number" min="0" step="0.01" value="1.50" /></label>
@@ -271,6 +278,7 @@
           <div><span>Total estimated cost</span><b id="calc-total">$0.00</b></div>
           <div><span>Estimated gross spread</span><b id="calc-spread">$0.00</b></div>
           <div><span>Estimated spread per item</span><b id="calc-per-item">$0.00</b></div>
+          <div><span>Cost source</span><b id="calc-source-label">MB ESTIMATE</b></div>
         </div>
         <p class="wide micro">Estimate only. Replace unit cost with a live vendor price or your actual printer quote when available.</p>
       </div>
