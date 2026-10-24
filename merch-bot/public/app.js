@@ -140,6 +140,7 @@ async function selectConcept(id){
   $("#checkout-note").textContent="Confirm the exact wording above before any paid finish action.";
   $("#preview-img").src=previewSvgData(currentJob);
   $("#preview").classList.remove("hidden");
+  $("#next-offers").classList.remove("hidden");
   $("#money").classList.remove("hidden");
   calculateMoney();
   $("#preview").scrollIntoView({behavior:"smooth"});
@@ -150,6 +151,7 @@ $("#new-job").addEventListener("click",()=>{
   $("#merch-form").reset();
   $("#results").classList.add("hidden");
   $("#preview").classList.add("hidden");
+  $("#next-offers").classList.add("hidden");
   $("#money").classList.add("hidden");
   $("#intake").scrollIntoView({behavior:"smooth"});
 });
@@ -569,3 +571,63 @@ const savedCheckout=JSON.parse(localStorage.getItem("mb_checkout_context")||"nul
 if(savedCheckout?.token && localStorage.getItem("mb_paid_finish_ready")!=="1"){
   $("#check-purchase")?.classList.remove("hidden");
 }
+
+function selectedProduct(){
+  if(!currentJob?.selectedConcept)return currentJob?.recommendation?.top||"Merch";
+  return currentJob.concepts.find(x=>x.id===currentJob.selectedConcept)?.product||currentJob.recommendation?.top||"Merch";
+}
+
+function matchPlan(product){
+  const easy={
+    "Tee":["Hoodie","Tote","Poster"],
+    "Hoodie":["Tee","Tote","Crewneck"],
+    "Crewneck":["Tee","Hoodie","Tote"],
+    "Tote":["Tee","Poster","Mug"],
+    "Mug":["Tumbler","Tote","Poster"],
+    "Tumbler":["Mug","Tote","Poster"],
+    "Hat":["Apron","Tote","Tee"],
+    "Apron":["Tote","Tee","Mug"],
+    "Pillow":["Poster","Tote","Mug"],
+    "Poster":["Tee","Tote","Mug"]
+  };
+  const options=easy[product]||["Tee","Tumbler","Tote"];
+  return options.map((p,i)=>({
+    product:p,
+    fit:i===0?"EASY MATCH":i===1?"GOOD MATCH":"RECOMPOSE",
+    note:i===2?"Layout should be adapted rather than copied directly.":"The approved direction can transfer with light adaptation."
+  }));
+}
+
+$("#preview-match")?.addEventListener("click",()=>{
+  if(!currentJob)return;
+  const product=selectedProduct();
+  const rows=matchPlan(product);
+  $("#match-preview").innerHTML=
+    '<div class="offer-line"><strong>Starting from '+esc(product)+'</strong></div>'+
+    rows.map(r=>'<div class="offer-line"><strong>'+esc(r.product)+' · '+esc(r.fit)+'</strong><br>'+esc(r.note)+'</div>').join("");
+});
+
+$("#preview-three")?.addEventListener("click",()=>{
+  if(!currentJob)return;
+  const items=(currentJob.recommendation?.items||[]).slice(0,3);
+  $("#three-preview").innerHTML=items.map((x,i)=>
+    '<div class="offer-line"><strong>'+(i+1)+'. '+esc(x.product)+'</strong><br>'+esc(x.fitLabel||x.status||"MB pick")+' · '+esc(x.reason||"")+'</div>'
+  ).join("");
+});
+
+$("#preview-smallbiz")?.addEventListener("click",()=>{
+  if(!currentJob)return;
+  const items=(currentJob.recommendation?.items||[]);
+  const fallback=["Tee","Tumbler","Tote","Hoodie","Poster"];
+  const products=[...items.map(x=>x.product),...fallback].filter((v,i,a)=>a.indexOf(v)===i).slice(0,5);
+  const roles=["HERO SELLER","EASY ADD-ON","BRAND BUILDER","HIGHER-TICKET","SPECIAL / DIFFERENT"];
+  $("#smallbiz-preview").innerHTML=products.map((p,i)=>
+    '<div class="offer-line"><strong>'+roles[i]+' · '+esc(p)+'</strong><br>'+(
+      i===0?"Start here first.":
+      i===1?"Easy second purchase or gift.":
+      i===2?"Keeps the brand visible.":
+      i===3?"Raises the potential order value.":
+      "Gives the line one less-expected item."
+    )+'</div>'
+  ).join("");
+});
