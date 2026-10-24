@@ -162,7 +162,12 @@ $("#finish-design").addEventListener("click",async()=>{
       localStorage.setItem("mb_checkout_context",JSON.stringify({
         token:data.context_token,jobId:currentJob.id,conceptId:currentJob.selectedConcept
       }));
-      location.href=data.checkout_url;
+      const purchaseWindow=window.open(data.checkout_url,"_blank","noopener");
+      $("#check-purchase").classList.remove("hidden");
+      note.textContent=purchaseWindow
+        ?"Shopify checkout opened in a new tab. After payment, come back here and tap Check My Purchase."
+        :"Your checkout is ready. Open it, complete payment, then tap Check My Purchase.";
+      track("CHECKOUT_OPENED",{job_id:currentJob.id,concept_id:currentJob.selectedConcept});
       return;
     }
     if(data.error==="checkout_temporarily_unavailable"){
@@ -409,3 +414,60 @@ document.getElementById("mb-talk")?.addEventListener("click",()=>{
   }
   try{recognition.start()}catch{}
 });
+
+async function verifySavedPurchase(){
+  const saved=JSON.parse(localStorage.getItem("mb_checkout_context")||"null");
+  const note=$("#checkout-note");
+  const btn=$("#check-purchase");
+  if(!saved?.token){
+    note.textContent="No purchase is waiting to be checked.";
+    return;
+  }
+  btn.disabled=true;
+  btn.textContent="CHECKING…";
+  note.textContent="Checking The Bot Stores for your paid order…";
+  try{
+    const verifyRes=await fetch("/api/verify-purchase",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({contextToken:saved.token})
+    });
+    const verify=await verifyRes.json().catch(()=>({}));
+    if(!verifyRes.ok){
+      note.textContent="Purchase verification is temporarily unavailable. Your selected direction is still saved.";
+      return;
+    }
+    if(!verify.paid){
+      note.textContent="No completed $1.99 order found yet. If you just paid, wait a moment and check again.";
+      return;
+    }
+    const entRes=await fetch("/api/entitlement-status",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({visitorToken})
+    });
+    const ent=await entRes.json().catch(()=>({}));
+    if(entRes.ok&&ent.make_one_available){
+      note.textContent="Payment verified. Your Finish One credit is ready.";
+      btn.classList.add("hidden");
+      $("#finish-design").textContent="FINISH CREDIT READY";
+      $("#finish-design").disabled=true;
+      localStorage.setItem("mb_paid_finish_ready","1");
+      track("PURCHASE_VERIFIED",{job_id:saved.jobId||null,order_id:verify.orderId||null});
+    }else{
+      note.textContent="Payment is verified. Your finish credit is being attached; check again shortly.";
+    }
+  }catch{
+    note.textContent="Could not verify the purchase right now. Your selected direction remains saved.";
+  }finally{
+    btn.disabled=false;
+    btn.textContent="CHECK MY PURCHASE";
+  }
+}
+
+$("#check-purchase").addEventListener("click",verifySavedPurchase);
+
+const savedCheckout=JSON.parse(localStorage.getItem("mb_checkout_context")||"null");
+if(savedCheckout?.token && localStorage.getItem("mb_paid_finish_ready")!=="1"){
+  $("#check-purchase")?.classList.remove("hidden");
+}
