@@ -177,11 +177,21 @@ function renderJob(job){
 }
 
 async function selectConcept(id){
-  const res=await fetch(`/api/jobs/${currentJob.id}/select`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({conceptId:id})});
-  if(!res.ok)return alert("Could not save that direction.");
-  currentJob=await res.json();
-  saveLocalJob(currentJob);
+  if(!currentJob)return;
   const c=currentJob.concepts.find(x=>x.id===id);
+  if(!c)return;
+  let production=null;
+  let matchPlan=[];
+  try{
+    const res=await fetch("/api/product-guidance?product="+encodeURIComponent(c.product||currentJob.recommendation?.top||""));
+    if(res.ok){
+      const data=await res.json();
+      production=data.production||null;
+      matchPlan=data.matchPlan||[];
+    }
+  }catch{}
+  currentJob={...currentJob,selectedConcept:id,status:"DESIGN_PREVIEW_READY",production,matchPlan};
+  saveLocalJob(currentJob);
   $("#preview-title").textContent=currentJob.brandName+" — "+c.name;
   renderProductionGuidance(currentJob);
   const proofBrand=currentJob.brandName||"";
@@ -350,7 +360,7 @@ async function loadMyMerch(){
       <p><strong>MB pick:</strong> ${esc(job.recommendation?.top||"")}</p>
       <div class="action-stack">
         <button class="secondary reopen-job" data-job-id="${esc(job.id)}">REOPEN</button>
-        ${job.selectedConcept?`<a class="link" href="/api/jobs/${job.id}/preview.svg" target="_blank">View preview</a>`:""}
+        
       </div>
     </article>`;
   }).join(""):`<article class="card"><p>Your saved MB jobs will appear here.</p></article>`;
