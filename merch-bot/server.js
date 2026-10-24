@@ -150,6 +150,13 @@ app.post("/api/jobs", async function(req,res) {
   }
 });
 
+app.get("/api/product-guidance", function(req,res) {
+  const product=clean(req.query.product);
+  const production=getTemplate(product);
+  if(!production) return res.status(404).json({error:"unsupported_product"});
+  res.json({product,production,matchPlan:getMatchPlan(product)});
+});
+
 app.post("/api/jobs/:id/select", async function(req,res) {
   try {
     const job = await getJob(req.params.id);
