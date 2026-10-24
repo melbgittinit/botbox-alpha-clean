@@ -188,8 +188,11 @@ function calculateMoney(){
   $("#calc-total").textContent="$"+total.toFixed(2);
   $("#calc-spread").textContent="$"+spread.toFixed(2);
   $("#calc-per-item").textContent="$"+(qty?spread/qty:0).toFixed(2);
+  const source=$("#calc-source")?.value||"estimate";
+  const labels={estimate:"MB ESTIMATE",quote:"CUSTOMER-ENTERED QUOTE",live:"LIVE VENDOR PRICE"};
+  $("#calc-source-label").textContent=labels[source]||"MB ESTIMATE";
 }
-["calc-cost","calc-price","calc-qty","calc-other"].forEach(id=>$("#"+id).addEventListener("input",calculateMoney));
+["calc-cost","calc-price","calc-qty","calc-other","calc-source"].forEach(id=>$("#"+id).addEventListener("input",calculateMoney));
 
 $("#printer-pack").addEventListener("click",()=>{
   track("PRINTER_BRIEF_DOWNLOADED",{job_id:currentJob?.id||null});
