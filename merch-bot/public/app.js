@@ -36,6 +36,23 @@ function saveLocalJob(job){
   const jobs=readLocalJobs().filter(j=>j.id!==job.id);
   jobs.unshift(job);
   localStorage.setItem(localJobsKey,JSON.stringify(jobs.slice(0,30)));
+  saveVaultJob(job);
+}
+
+async function vaultRequest(action,payload={}){
+  try{
+    const res=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-job-vault",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action,visitor_token:visitorToken,...payload})
+    });
+    if(!res.ok)return null;
+    return await res.json();
+  }catch{return null}
+}
+
+async function saveVaultJob(job){
+  await vaultRequest("save",{job});
 }
 
 $$("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -207,6 +224,8 @@ $("#finish-design").addEventListener("click",async()=>{
 
 async function loadMyMerch(){
   let remote=[];
+  const vault=await vaultRequest("list");
+  if(vault?.jobs?.length) remote.push(...vault.jobs);
   try{
     const res=await fetch(`/api/jobs?clientId=${encodeURIComponent(clientId)}`);
     if(res.ok){const data=await res.json();remote=data.jobs||[]}
