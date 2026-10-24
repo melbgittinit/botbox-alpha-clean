@@ -837,3 +837,60 @@ $("#delete-saved-work")?.addEventListener("click",async()=>{
     note.textContent="Local saved work was cleared, but the vault could not be confirmed. Try again before assuming remote deletion is complete.";
   }
 });
+
+
+function updateAdaptiveMode(){
+  const wide=window.matchMedia("(min-width: 1200px)").matches;
+  document.body.classList.toggle("mb-studio",wide);
+}
+window.addEventListener("resize",updateAdaptiveMode);
+updateAdaptiveMode();
+
+async function openMbCompanion(){
+  const status=document.getElementById("mb-voice-status");
+  if(!("documentPictureInPicture" in window)){
+    if(status)status.textContent="Always-on-top companion mode is not supported in this browser. The floating MB dock will stay with you here.";
+    return;
+  }
+  try{
+    const pip=await window.documentPictureInPicture.requestWindow({width:360,height:520});
+    pip.document.title="MB — Take With You";
+    const style=pip.document.createElement("style");
+    style.textContent=`
+      body{margin:0;background:#0b0b0d;color:#f7f5ef;font-family:system-ui,-apple-system,sans-serif;padding:16px}
+      .mbc{display:grid;gap:12px}
+      .rank{font-size:12px;letter-spacing:.14em;color:#f0d47e;font-weight:800}
+      h2{font-size:22px;margin:0}
+      p{color:#c8c4bb;line-height:1.45}
+      button{border:0;border-radius:12px;padding:12px;font-weight:800;cursor:pointer}
+      .primary{background:linear-gradient(135deg,#b8872d,#f0d47e);color:#111}
+      .secondary{background:#24242a;color:#f7f5ef;border:1px solid #3a3940}
+      .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    `;
+    pip.document.head.appendChild(style);
+    const wrap=pip.document.createElement("div");
+    wrap.className="mbc";
+    wrap.innerHTML='<div class="rank">TAKE MB WITH YOU™</div><h2>MB Companion</h2><p id="mbc-section"></p><button class="primary" id="mbc-read">READ THIS</button><div class="row"><button class="secondary" id="mbc-back">← BACK</button><button class="secondary" id="mbc-next">NEXT →</button></div><button class="secondary" id="mbc-top">TOP ↑</button>';
+    pip.document.body.appendChild(wrap);
+
+    const sync=()=>{
+      const s=currentSectionIndex();
+      const section=s.sections[s.index];
+      const el=pip.document.getElementById("mbc-section");
+      if(el)el.textContent=section?"Current: "+section.label:"MB is ready.";
+    };
+    sync();
+    window.addEventListener("scroll",sync,{passive:true});
+
+    pip.document.getElementById("mbc-read").onclick=()=>speak(currentSectionText());
+    pip.document.getElementById("mbc-back").onclick=()=>{goSection(-1);sync();};
+    pip.document.getElementById("mbc-next").onclick=()=>{goSection(1);sync();};
+    pip.document.getElementById("mbc-top").onclick=()=>{window.scrollTo({top:0,behavior:"smooth"});setTimeout(sync,250);};
+
+    pip.addEventListener("pagehide",()=>window.removeEventListener("scroll",sync));
+    if(status)status.textContent="MB Companion is open in an always-on-top window.";
+  }catch{
+    if(status)status.textContent="Companion mode could not open. The floating MB dock is still available.";
+  }
+}
+document.getElementById("mb-companion")?.addEventListener("click",openMbCompanion);
