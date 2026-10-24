@@ -384,6 +384,7 @@ const mbSections=[
   {id:"preview",label:"Your Merch"},
   {id:"next-offers",label:"What Could This Become?"},
   {id:"money",label:"If I Sell This"},
+  {id:"offer-ladder",label:"Your MB Options"},
   {id:"my-merch-section",label:"My Merch"},
   {id:"mb-footer",label:"Finish"}
 ];
