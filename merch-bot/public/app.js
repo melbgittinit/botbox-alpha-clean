@@ -84,6 +84,11 @@ async function selectConcept(id){
   saveLocalJob(currentJob);
   const c=currentJob.concepts.find(x=>x.id===id);
   $("#preview-title").textContent=currentJob.brandName+" — "+c.name;
+  const exactText=currentJob.textRequest||currentJob.brandName;
+  $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
+  $("#text-confirm").checked=false;
+  $("#finish-design").disabled=true;
+  $("#checkout-note").textContent="Confirm the exact wording above before any paid finish action.";
   $("#preview-img").src=`/api/jobs/${currentJob.id}/preview.svg?t=${Date.now()}`;
   $("#preview").classList.remove("hidden");
   $("#money").classList.remove("hidden");
@@ -129,6 +134,8 @@ $("#printer-pack").addEventListener("click",()=>{
     "Product: "+(c?.product||currentJob.recommendation?.top||""),
     "Direction: "+(c?.name||""),
     "Requested wording: "+(currentJob.textRequest||"(none)"),
+    "Brand handling: "+(currentJob.brandLock||"elevate"),
+    "Commercial rights confirmed: "+(currentJob.rightsConfirmed?"Yes":"No"),
     "",
     "STATUS: DESIGN DIRECTION APPROVED — FINAL VENDOR TEMPLATE REQUIRED",
     "",
@@ -144,8 +151,16 @@ $("#printer-pack").addEventListener("click",()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href),500);
 });
 
+$("#text-confirm").addEventListener("change",()=>{
+  const ready=$("#text-confirm").checked;
+  $("#finish-design").disabled=!ready;
+  $("#checkout-note").textContent=ready
+    ?"Wording confirmed. Paid finishing remains gated until fulfillment verification is complete."
+    :"Confirm the exact wording above before any paid finish action.";
+});
+
 $("#finish-design").addEventListener("click",async()=>{
-  if(!currentJob||!currentJob.selectedConcept)return;
+  if(!currentJob||!currentJob.selectedConcept||!$("#text-confirm").checked)return;
   const btn=$("#finish-design");
   const note=$("#checkout-note");
   btn.disabled=true;
