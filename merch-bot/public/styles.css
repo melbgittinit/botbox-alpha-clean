@@ -55,3 +55,6 @@ body{padding-bottom:150px}
   .mb-dock-row button{font-size:.68rem;padding:10px 4px}
   body{padding-bottom:175px}
 }
+
+.offer-line{margin-top:12px;padding-top:12px;border-top:1px solid #343238}
+.offer-line strong{color:var(--gold2)}
