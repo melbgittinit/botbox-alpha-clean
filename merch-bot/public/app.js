@@ -342,13 +342,6 @@ async function loadMyMerch(){
   let remote=[];
   const vault=await vaultRequest("list");
   if(vault?.jobs?.length) remote.push(...vault.jobs);
-  try{
-    const res=await fetch(`/api/jobs?clientId=${encodeURIComponent(clientId)}`);
-    if(res.ok){
-      const data=await res.json();
-      if(data.jobs?.length) remote.push(...data.jobs);
-    }
-  }catch{}
   const merged=[...remote,...readLocalJobs()].filter((j,i,a)=>a.findIndex(x=>x.id===j.id)===i);
   localStorage.setItem(localJobsKey,JSON.stringify(merged.slice(0,30)));
   $("#my-merch").innerHTML=merged.length?merged.map(job=>{
@@ -365,17 +358,29 @@ async function loadMyMerch(){
     </article>`;
   }).join(""):`<article class="card"><p>Your saved MB jobs will appear here.</p></article>`;
 
-  document.querySelectorAll(".reopen-job").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".reopen-job").forEach(btn=>btn.addEventListener("click",async()=>{
     const job=merged.find(x=>x.id===btn.dataset.jobId);
     if(!job)return;
     currentJob=job;
-    renderJob(job);
+    if(currentJob.selectedConcept && !currentJob.production){
+      const selected=currentJob.concepts?.find(x=>x.id===currentJob.selectedConcept);
+      const product=selected?.product||currentJob.recommendation?.top||currentJob.productChoice||"";
+      try{
+        const res=await fetch("/api/product-guidance?product="+encodeURIComponent(product));
+        if(res.ok){
+          const data=await res.json();
+          currentJob={...currentJob,production:data.production||null,matchPlan:data.matchPlan||[]};
+          saveLocalJob(currentJob);
+        }
+      }catch{}
+    }
+    renderJob(currentJob);
     $("#results").classList.remove("hidden");
-    if(job.selectedConcept){
-      const c=job.concepts.find(x=>x.id===job.selectedConcept);
-      $("#preview-title").textContent=job.brandName+" — "+(c?.name||"Selected Direction");
-      renderProductionGuidance(job);
-      $("#preview-img").src=previewSvgData(job);
+    if(currentJob.selectedConcept){
+      const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
+      $("#preview-title").textContent=currentJob.brandName+" — "+(c?.name||"Selected Direction");
+      renderProductionGuidance(currentJob);
+      $("#preview-img").src=previewSvgData(currentJob);
       const proofBrand=currentJob.brandName||"";
       const proofPhrase=currentJob.textRequest||"";
       $("#text-confirm-copy").textContent=proofPhrase
