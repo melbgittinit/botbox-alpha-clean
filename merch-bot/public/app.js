@@ -245,3 +245,158 @@ document.querySelectorAll(".example-chip").forEach(btn=>btn.addEventListener("cl
   $("#mode").value="BEST_SELLER";
   form.scrollIntoView({behavior:"smooth",block:"center"});
 }));
+
+
+const mbSections=[
+  {id:"how-it-works",label:"How MB Works"},
+  {id:"intake",label:"Make Something"},
+  {id:"results",label:"Smart Drop"},
+  {id:"preview",label:"Your Merch"},
+  {id:"money",label:"If I Sell This"},
+  {id:"my-merch-section",label:"My Merch"},
+  {id:"mb-footer",label:"Finish"}
+];
+
+function visibleMbSections(){
+  return mbSections.filter(s=>{
+    const el=document.getElementById(s.id);
+    return el && !el.classList.contains("hidden");
+  });
+}
+
+function currentSectionIndex(){
+  const sections=visibleMbSections();
+  let best=0;
+  let bestDist=Infinity;
+  sections.forEach((s,i)=>{
+    const el=document.getElementById(s.id);
+    const r=el.getBoundingClientRect();
+    const dist=Math.abs(r.top-110);
+    if(dist<bestDist){bestDist=dist;best=i}
+  });
+  return {sections,index:best};
+}
+
+function goSection(delta){
+  const {sections,index}=currentSectionIndex();
+  const target=Math.max(0,Math.min(sections.length-1,index+delta));
+  document.getElementById(sections[target].id)?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function updateScrollUi(){
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=max>0?(window.scrollY/max)*100:0;
+  const bar=document.getElementById("scroll-progress-bar");
+  if(bar)bar.style.width=Math.max(0,Math.min(100,pct))+"%";
+
+  const {sections,index}=currentSectionIndex();
+  const label=document.getElementById("mb-section-label");
+  if(label && sections[index]) label.textContent=sections[index].label;
+}
+window.addEventListener("scroll",updateScrollUi,{passive:true});
+window.addEventListener("resize",updateScrollUi);
+updateScrollUi();
+
+document.getElementById("mb-next")?.addEventListener("click",()=>goSection(1));
+document.getElementById("mb-back")?.addEventListener("click",()=>goSection(-1));
+document.getElementById("mb-top")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+function currentSectionText(){
+  const {sections,index}=currentSectionIndex();
+  const el=sections[index]?document.getElementById(sections[index].id):null;
+  if(!el)return "Merch Bot is ready.";
+  const raw=el.innerText||"";
+  return raw.replace(/\s+/g," ").trim().slice(0,1200);
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window))return false;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=.98;
+  u.pitch=1;
+  u.onstart=()=>document.getElementById("mb-voice-dot")?.classList.add("speaking");
+  u.onend=()=>document.getElementById("mb-voice-dot")?.classList.remove("speaking");
+  window.speechSynthesis.speak(u);
+  return true;
+}
+document.getElementById("mb-read")?.addEventListener("click",()=>{
+  const ok=speak(currentSectionText());
+  const status=document.getElementById("mb-voice-status");
+  if(status)status.textContent=ok?"Reading this section aloud.":"Voice playback is not available in this browser.";
+});
+
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null;
+if(SpeechRecognition){
+  recognition=new SpeechRecognition();
+  recognition.continuous=false;
+  recognition.interimResults=false;
+  recognition.lang="en-US";
+
+  recognition.onstart=()=>{
+    document.getElementById("mb-voice-dot")?.classList.add("listening");
+    const s=document.getElementById("mb-voice-status");
+    if(s)s.textContent="Listening…";
+  };
+  recognition.onend=()=>{
+    document.getElementById("mb-voice-dot")?.classList.remove("listening");
+  };
+  recognition.onerror=()=>{
+    const s=document.getElementById("mb-voice-status");
+    if(s)s.textContent="I didn’t catch that. You can use the buttons anytime.";
+  };
+  recognition.onresult=e=>{
+    const phrase=String(e.results?.[0]?.[0]?.transcript||"").toLowerCase().trim();
+    handleVoiceCommand(phrase);
+  };
+}
+
+function useExample(key){
+  const ex=examples[key];
+  if(!ex)return false;
+  const form=document.getElementById("merch-form");
+  Object.entries(ex).forEach(([k,v])=>{
+    const el=form.elements.namedItem(k);
+    if(el)el.value=v;
+  });
+  document.getElementById("mode").value="BEST_SELLER";
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+  return true;
+}
+
+function handleVoiceCommand(phrase){
+  const status=document.getElementById("mb-voice-status");
+  let response="";
+  if(/\b(next|forward|keep going)\b/.test(phrase)){
+    goSection(1); response="Moving to the next section.";
+  }else if(/\b(back|previous|go back)\b/.test(phrase)){
+    goSection(-1); response="Going back one section.";
+  }else if(/\b(top|home|start over)\b/.test(phrase)){
+    window.scrollTo({top:0,behavior:"smooth"}); response="Going to the top.";
+  }else if(/\b(read|read this|tell me about this)\b/.test(phrase)){
+    speak(currentSectionText()); response="Reading this section.";
+  }else if(/\b(start|try free|begin|make something)\b/.test(phrase)){
+    document.getElementById("intake")?.scrollIntoView({behavior:"smooth",block:"start"}); response="Opening the free preview.";
+  }else if(/\bbakery\b/.test(phrase)){
+    useExample("bakery"); response="I loaded the bakery example.";
+  }else if(/\b(salon|beauty)\b/.test(phrase)){
+    useExample("salon"); response="I loaded the salon example.";
+  }else if(/\b(church|ministry)\b/.test(phrase)){
+    useExample("church"); response="I loaded the church example.";
+  }else if(/\b(music|artist|singer)\b/.test(phrase)){
+    useExample("music"); response="I loaded the music artist example.";
+  }else{
+    response='Try saying “start”, “bakery”, “salon”, “church”, “music artist”, “next”, “back”, “read this”, or “top”.';
+  }
+  if(status)status.textContent=response;
+}
+
+document.getElementById("mb-talk")?.addEventListener("click",()=>{
+  const status=document.getElementById("mb-voice-status");
+  if(!recognition){
+    if(status)status.textContent="Voice commands are not supported in this browser. Use Next, Back, Read, or Top.";
+    return;
+  }
+  try{recognition.start()}catch{}
+});
