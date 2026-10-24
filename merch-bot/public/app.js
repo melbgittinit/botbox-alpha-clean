@@ -775,3 +775,24 @@ async function loadTrustStatus(){
 }
 
 loadTrustStatus();
+
+
+$("#delete-saved-work")?.addEventListener("click",async()=>{
+  const note=$("#delete-saved-work-note");
+  const ok=confirm("Delete the saved MB preview jobs for this browser from local storage and the MB job vault?");
+  if(!ok)return;
+  note.textContent="Deleting saved MB work…";
+  localStorage.removeItem(localJobsKey);
+  const result=await vaultRequest("delete_all");
+  if(result?.ok){
+    currentJob=null;
+    $("#my-merch").innerHTML='<article class="card"><p>Your saved MB jobs have been deleted for this browser.</p></article>';
+    $("#results")?.classList.add("hidden");
+    $("#preview")?.classList.add("hidden");
+    $("#next-offers")?.classList.add("hidden");
+    $("#money")?.classList.add("hidden");
+    note.textContent="Saved preview jobs deleted from this browser and the MB job vault.";
+  }else{
+    note.textContent="Local saved work was cleared, but the vault could not be confirmed. Try again before assuming remote deletion is complete.";
+  }
+});
