@@ -1,16 +1,10 @@
 const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
-const { Pool } = require("pg");
 const { getTemplate, getMatchPlan } = require("./lib/productCatalog");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-const pool = process.env.DATABASE_URL
-  ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
-  : null;
-const memory = new Map();
-
 app.use(function(req,res,next){
   res.setHeader("X-Content-Type-Options","nosniff");
   res.setHeader("X-Frame-Options","DENY");
@@ -97,30 +91,6 @@ function concepts(input, product) {
     { id:2, name:"BIG STATEMENT", product:chosen, description:"A bolder phrase-led direction" + (phrase ? " built around “" + phrase + "”." : "."), bestFor:"Events, attention and strong readability." },
     { id:3, name:"SIGNATURE ART", product:chosen, description:"A more distinctive illustrated direction that gives " + brand + " its own merch language.", bestFor:"Drops, gifting, music/story worlds and collector appeal." }
   ];
-}
-
-async function initDb() {
-  if (!pool) return;
-  await pool.query("CREATE TABLE IF NOT EXISTS merch_jobs (id TEXT PRIMARY KEY, client_id TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), status TEXT NOT NULL, payload JSONB NOT NULL)");
-  await pool.query("CREATE INDEX IF NOT EXISTS merch_jobs_client_idx ON merch_jobs(client_id, created_at DESC)");
-}
-
-async function save(job) {
-  memory.set(job.id, job);
-  if (pool) {
-    await pool.query(
-      "INSERT INTO merch_jobs (id, client_id, status, payload) VALUES ($1,$2,$3,$4::jsonb) ON CONFLICT (id) DO UPDATE SET updated_at=NOW(), status=EXCLUDED.status, payload=EXCLUDED.payload",
-      [job.id, job.clientId, job.status, JSON.stringify(job)]
-    );
-  }
-}
-
-async function getJob(id) {
-  if (pool) {
-    const q = await pool.query("SELECT payload FROM merch_jobs WHERE id=$1", [id]);
-    if (q.rows[0]) return q.rows[0].payload;
-  }
-  return memory.get(id) || null;
 }
 
 app.get("/health", function(req,res) {
@@ -269,9 +239,4 @@ app.get("*", function(req,res) {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-initDb().then(function() {
-  app.listen(PORT, "0.0.0.0", function(){ console.log("Merch Bot V1 listening on " + PORT); });
-}).catch(function(err) {
-  console.error("DB init failed; memory fallback:", err.message);
-  app.listen(PORT, "0.0.0.0", function(){ console.log("Merch Bot V1 listening on " + PORT + " (memory)"); });
-});
+app.listen(PORT, "0.0.0.0", function(){ console.log("Merch Bot V1 listening on " + PORT); });
