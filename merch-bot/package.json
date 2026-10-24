@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "verify": "node --check server.js && node --check public/app.js && node --check lib/productCatalog.js",
+    "prestart": "npm run verify",
     "start": "node server.js"
   },
   "dependencies": {
