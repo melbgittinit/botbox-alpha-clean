@@ -32,3 +32,26 @@ footer{padding:40px 24px 70px;border-top:1px solid #232329;display:flex;justify-
 .example-bar>span{color:var(--muted);font-weight:700;margin-right:4px}
 .example-chip{padding:10px 13px;border-radius:999px;background:#18181d;color:var(--gold2);border:1px solid #4b4230;font-size:.78rem}
 .example-chip:hover{border-color:var(--gold2)}
+
+html{scroll-behavior:smooth;scroll-padding-top:86px}
+.scroll-progress{position:fixed;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,.06);z-index:9998}
+.scroll-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#9d7429,#f0d47e);transition:width .15s ease}
+.mb-control-dock{position:fixed;right:18px;bottom:18px;width:min(420px,calc(100vw - 28px));z-index:9999;background:rgba(13,13,16,.96);backdrop-filter:blur(16px);border:1px solid #5d4a27;border-radius:22px;padding:12px;box-shadow:0 18px 60px rgba(0,0,0,.48)}
+.mb-dock-status{display:flex;align-items:center;gap:8px;color:#d7d3cb;font-size:.78rem;font-weight:800;letter-spacing:.06em;margin:0 4px 8px}
+.mb-status-dot{width:9px;height:9px;border-radius:50%;background:#5b5b62;box-shadow:0 0 0 4px rgba(255,255,255,.03)}
+.mb-status-dot.listening{background:#f0d47e;box-shadow:0 0 0 5px rgba(240,212,126,.12)}
+.mb-status-dot.speaking{background:#69d08b;box-shadow:0 0 0 5px rgba(105,208,139,.12)}
+.mb-talk{width:100%;display:flex;justify-content:center;align-items:center;gap:10px;background:linear-gradient(135deg,#b8872d,#f0d47e);color:#111;padding:16px 18px;border-radius:16px;font-size:1rem}
+.mb-mic{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#111;color:#f0d47e;font-size:.65rem}
+.mb-dock-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
+.mb-dock-row button{padding:11px 8px;border-radius:12px;background:#25252a;color:#f3f0e8;border:1px solid #35353b;font-size:.72rem}
+.mb-dock-row button:hover{border-color:#8d6b2c;color:#f0d47e}
+.mb-voice-status{min-height:30px;padding:8px 5px 2px;color:#9f9ea4;font-size:.72rem;line-height:1.35}
+body{padding-bottom:150px}
+@media(max-width:620px){
+  .mb-control-dock{right:10px;bottom:10px;width:calc(100vw - 20px);border-radius:18px}
+  .mb-talk{font-size:.95rem;padding:15px}
+  .mb-dock-row{grid-template-columns:repeat(4,1fr)}
+  .mb-dock-row button{font-size:.68rem;padding:10px 4px}
+  body{padding-bottom:175px}
+}
