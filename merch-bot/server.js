@@ -124,23 +124,11 @@ async function getJob(id) {
 }
 
 app.get("/health", function(req,res) {
-  res.json({ ok:true, service:"merch-bot-v1", persistence:pool ? "postgres" : "memory" });
+  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault" });
 });
 
-app.get("/api/jobs", async function(req,res) {
-  try {
-    const clientId = clean(req.query.clientId);
-    if (!clientId) return res.status(400).json({ error:"clientId_required" });
-    if (pool) {
-      const q = await pool.query("SELECT payload FROM merch_jobs WHERE client_id=$1 ORDER BY created_at DESC LIMIT 30", [clientId]);
-      return res.json({ jobs:q.rows.map(function(x){return x.payload;}) });
-    }
-    const jobs = Array.from(memory.values()).filter(function(j){return j.clientId===clientId;});
-    res.json({ jobs:jobs.reverse() });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error:"jobs_unavailable" });
-  }
+app.get("/api/jobs", function(req,res) {
+  res.status(410).json({error:"deprecated_use_mb_job_vault"});
 });
 
 app.post("/api/jobs", async function(req,res) {
@@ -185,7 +173,6 @@ app.post("/api/jobs", async function(req,res) {
       concepts:concepts(normalized, rec.top),
       selectedConcept:null
     };
-    await save(job);
     res.status(201).json(job);
   } catch (e) {
     console.error(e);
@@ -200,52 +187,12 @@ app.get("/api/product-guidance", function(req,res) {
   res.json({product,production,matchPlan:getMatchPlan(product)});
 });
 
-app.post("/api/jobs/:id/select", async function(req,res) {
-  try {
-    const job = await getJob(req.params.id);
-    if (!job) return res.status(404).json({ error:"not_found" });
-    const n = Number(req.body && req.body.conceptId);
-    if (![1,2,3].includes(n)) return res.status(400).json({ error:"invalid_concept" });
-    job.selectedConcept = n;
-    job.status = "DESIGN_PREVIEW_READY";
-    const selected = job.concepts.find(function(x){ return x.id===n; });
-    const product = selected?.product || job.recommendation?.top || "";
-    job.production = getTemplate(product);
-    job.matchPlan = getMatchPlan(product);
-    await save(job);
-    res.json(job);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error:"select_failed" });
-  }
+app.post("/api/jobs/:id/select", function(req,res) {
+  res.status(410).json({error:"deprecated_selection_is_client_vault_managed"});
 });
 
-app.get("/api/jobs/:id/preview.svg", async function(req,res) {
-  const job = await getJob(req.params.id);
-  if (!job || !job.selectedConcept) return res.status(404).send("Preview not ready");
-  const c = job.concepts.find(function(x){return x.id===job.selectedConcept;});
-  const safe = function(v){return String(v||"").replace(/[<>&"]/g,"").slice(0,42);};
-  const brand = safe(job.brandName);
-  const phrase = safe(job.textRequest || "DESIGNED WITH MB");
-  const product = safe(c.product || job.recommendation.top);
-  const direction = safe(c.name);
-  const svg = [
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">',
-    '<defs><linearGradient id="g"><stop stop-color="#9d7429"/><stop offset=".5" stop-color="#f0cf71"/><stop offset="1" stop-color="#9d7429"/></linearGradient></defs>',
-    '<rect width="1200" height="900" fill="#0b0b0d"/>',
-    '<text x="70" y="100" font-family="Arial" font-size="72" font-weight="700" fill="url(#g)">MB</text>',
-    '<text x="70" y="145" font-family="Arial" font-size="28" fill="#f4f1e9">MERCH BOT — DESIGN PREVIEW</text>',
-    '<rect x="330" y="205" width="540" height="510" rx="50" fill="#17171b" stroke="#d3aa45" stroke-width="3"/>',
-    '<path d="M390 300 L475 250 L525 300 L675 300 L725 250 L810 300 L770 390 L725 365 L725 650 L475 650 L475 365 L430 390 Z" fill="#0f0f12" stroke="#eee8da" stroke-width="6"/>',
-    '<text x="600" y="450" text-anchor="middle" font-family="Arial" font-size="44" font-weight="700" fill="#e5c05f">' + brand + '</text>',
-    '<text x="600" y="505" text-anchor="middle" font-family="Arial" font-size="25" fill="#f4f1e9">' + phrase + '</text>',
-    '<text x="600" y="600" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#c99e3e">' + direction + '</text>',
-    '<text x="70" y="790" font-family="Arial" font-size="30" font-weight="700" fill="#f4f1e9">' + product + '</text>',
-    '<text x="70" y="832" font-family="Arial" font-size="20" fill="#a8a8ad">Concept visualization only — final production art comes after rendering + preflight.</text>',
-    '</svg>'
-  ].join("");
-  res.type("image/svg+xml").send(svg);
+app.get("/api/jobs/:id/preview.svg", function(req,res) {
+  res.status(410).send("Deprecated: preview is rendered from the saved MB job in the client.");
 });
 
 app.post("/api/checkout", async function(req,res) {
