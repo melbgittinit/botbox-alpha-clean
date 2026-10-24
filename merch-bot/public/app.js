@@ -771,6 +771,19 @@ async function loadTrustStatus(){
     $("#bbb-certified").textContent=c.certified?"YES":"NO";
     $("#bbb-cert-statement").textContent=c.statement||"Certification facts unavailable.";
 
+    const levels=data.release_levels||{};
+    const order=["preview","commerce","production","fulfillment"];
+    $("#bbb-release-levels").innerHTML=order.map(key=>{
+      const level=levels[key]||{};
+      const status=level.certified?"CERTIFIED":"NOT YET CERTIFIED";
+      return `<article class="card ${level.certified?"active":""}">
+        <div class="rank">${status}</div>
+        <h3>${esc(level.name||key)}</h3>
+        <p><strong>${level.passed??0} of ${level.total??0}</strong> required gates passed · ${level.progress_percent??0}%</p>
+        <p class="micro">${level.certified?"This release level has passed all of its required BOTS BUILT BETTER™ gates.":"Higher release capabilities are not implied until every required gate for this level passes."}</p>
+      </article>`;
+    }).join("");
+
     const gates=data.gates||[];
     $("#bbb-gates").innerHTML=gates.map(g=>`
       <article class="card ${g.passed?"active":""}">
