@@ -79,6 +79,7 @@ $("#merch-form").addEventListener("submit",async e=>{
     currentJob=await res.json();
     saveLocalJob(currentJob);
     renderJob(currentJob);
+    renderBusinessPlaybook(currentJob);
     await loadMyMerch();
     $("#results").classList.remove("hidden");
     $("#results").scrollIntoView({behavior:"smooth"});
@@ -170,6 +171,19 @@ function previewSvgData(job){
     '</svg>'
   ].join("");
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+
+function renderBusinessPlaybook(job){
+  const p=job?.playbook;
+  const section=$("#business-playbook");
+  if(!section||!p)return;
+  section.classList.remove("hidden");
+  $("#playbook-title").textContent=(p.label||"Business")+" playbook";
+  $("#playbook-copy").textContent="MB inferred this lane from your current project and adjusted the advice underneath.";
+  const renderList=items=>(items||[]).map(x=>'<p>• '+esc(x)+'</p>').join("");
+  $("#playbook-priorities").innerHTML=renderList(p.priorities);
+  $("#playbook-cautions").innerHTML=renderList(p.cautions);
+  $("#playbook-next").innerHTML=renderList(p.nextMoves);
 }
 
 function renderJob(job){
@@ -387,6 +401,7 @@ async function loadMyMerch(){
       }catch{}
     }
     renderJob(currentJob);
+    renderBusinessPlaybook(currentJob);
     $("#results").classList.remove("hidden");
     if(currentJob.selectedConcept){
       const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
@@ -469,6 +484,7 @@ const mbSections=[
   {id:"how-it-works",label:"How MB Works"},
   {id:"intake",label:"Make Something"},
   {id:"results",label:"Smart Drop"},
+  {id:"business-playbook",label:"Your Business Playbook"},
   {id:"preview",label:"Your Merch"},
   {id:"next-offers",label:"What Could This Become?"},
   {id:"money",label:"If I Sell This"},
