@@ -289,90 +289,34 @@
     <section class="section" id="trust-standards">
       <div class="section-head">
         <span class="eyebrow">BOTS BUILT BETTER™</span>
-        <h2>Built to a visible Bot Stores Factory standard.</h2>
-        <p class="lead-small">This is our internal factory certification ladder. It is separate from external certifications such as ISO or SOC 2. We show what is implemented, evidenced, still partial, and not yet externally certified.</p>
+        <h2>Bot Stores Factory trust facts.</h2>
+        <p class="lead-small">This is an internal Bot Stores Factory certification system. It is separate from outside frameworks and certifications. The facts below update from MB’s live trust controls.</p>
       </div>
 
-      <div class="trust-strip">
-        <div><strong>LEVEL 0</strong><span>Undocumented</span></div>
-        <div><strong>LEVEL 1</strong><span>Declared / partial</span></div>
-        <div><strong>LEVEL 2</strong><span>Implemented</span></div>
-        <div><strong>LEVEL 3</strong><span>Evidenced</span></div>
+      <div class="panel" id="bbb-cert-panel">
+        <div class="rank">FACTORY CERTIFICATION STATUS</div>
+        <h3 id="bbb-cert-status">Checking current factory gates…</h3>
+        <div class="status-list">
+          <div><span>Required gates passed</span><b id="bbb-gates-passed">—</b></div>
+          <div><span>Required gates total</span><b id="bbb-gates-total">—</b></div>
+          <div><span>Certification progress</span><b id="bbb-progress">—</b></div>
+          <div><span>Certification granted?</span><b id="bbb-certified">—</b></div>
+        </div>
+        <p class="micro" id="bbb-cert-statement">Loading trust facts…</p>
       </div>
 
-      <div class="cards">
-        <article class="card active">
-          <div class="rank">BOTS BUILT BETTER™</div>
-          <h3>Factory review in progress</h3>
-          <p>MB currently passes several preview-level factory gates, but paid-commerce and fulfillment gates are not complete.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">EVIDENCED</div>
-          <h3>Truth-in-status</h3>
-          <p>LIVE, PREVIEW, DRAFT, ESTIMATE, DESIGN READY and PRINT READY are kept separate.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">EVIDENCED</div>
-          <h3>Human control</h3>
-          <p>Nothing gets paid, printed, published, sent, ordered or shared without a customer choice.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">IMPLEMENTED</div>
-          <h3>Privacy by design</h3>
-          <p>MB limits intake, avoids card collection, and uses a hashed private token for saved preview jobs.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">IMPLEMENTED</div>
-          <h3>Security by design</h3>
-          <p>Privileged commerce credentials stay server-side and paid actions fail closed when verification is incomplete.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">EVIDENCED</div>
-          <h3>Cost guard</h3>
-          <p>MB distinguishes estimates, customer quotes and live vendor prices before showing economics.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">IMPLEMENTED</div>
-          <h3>Rights & brand protection</h3>
-          <p>Commercial-rights confirmation and Brand Lock settings are part of the intake.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">EVIDENCED</div>
-          <h3>Production honesty</h3>
-          <p>Product-specific production guidance is shown, and PRINT READY is never claimed before vendor/template preflight.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">IMPLEMENTED</div>
-          <h3>Persistence & recovery</h3>
-          <p>My Merch is backed by browser storage plus a Supabase job vault with REOPEN support.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">PARTIAL / GATED</div>
-          <h3>Commerce integrity</h3>
-          <p>The SKU, offer and entitlement architecture exists, but paid verification remains gated until the secure Shopify Admin backend credential is configured.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">PLANNED / NOT VERIFIED</div>
-          <h3>Vendor & fulfillment integrity</h3>
-          <p>POD provider mapping, physical fulfillment and final variant integrity are not yet verified.</p>
-        </article>
-
-        <article class="card">
-          <div class="rank">EXTERNAL ASSURANCE</div>
-          <h3>Not externally certified yet</h3>
-          <p>ISO/IEC 27001, ISO/IEC 27701, ISO/IEC 42001 and SOC 2 are future independent-assurance targets, not current certifications.</p>
-        </article>
+      <div class="section-head spacer">
+        <span class="eyebrow">REQUIRED FACTORY GATES</span>
+        <h2>What has actually passed?</h2>
       </div>
+      <div id="bbb-gates" class="cards"></div>
+
+      <div class="section-head spacer">
+        <span class="eyebrow">EXTERNAL ASSURANCE</span>
+        <h2>Separate from our internal certification.</h2>
+        <p class="lead-small">Outside frameworks can guide or independently assess parts of the system, but they are not the same thing as BOTS BUILT BETTER™.</p>
+      </div>
+      <div id="external-assurance" class="cards"></div>
     </section>
 
     <section class="section" id="offer-ladder">
