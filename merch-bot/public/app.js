@@ -365,6 +365,15 @@ function useExample(key){
   return true;
 }
 
+const entryParams=new URLSearchParams(location.search);
+const entryExample=entryParams.get("example");
+if(entryExample&&examples[entryExample]){
+  useExample(entryExample);
+  if(entryParams.get("autorun")!=="0"){
+    setTimeout(()=>document.getElementById("merch-form")?.requestSubmit(),500);
+  }
+}
+
 function handleVoiceCommand(phrase){
   const status=document.getElementById("mb-voice-status");
   let response="";
