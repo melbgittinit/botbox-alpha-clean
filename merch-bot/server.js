@@ -220,6 +220,25 @@ app.post("/api/verify-purchase", async function(req,res) {
   }
 });
 
+app.post("/api/entitlement-status", async function(req,res) {
+  try {
+    const visitorToken=clean(req.body && req.body.visitorToken);
+    if(!visitorToken) return res.status(400).json({error:"visitor_token_required"});
+    const upstream=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-entitlement",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"status",visitor_token:visitorToken})
+    });
+    const text=await upstream.text();
+    let data={};
+    try{data=JSON.parse(text)}catch{data={error:"entitlement_response_invalid"}}
+    return res.status(upstream.status).json(data);
+  } catch(e) {
+    console.error("MB entitlement status error",e);
+    res.status(502).json({error:"entitlement_status_unavailable"});
+  }
+});
+
 app.get("*", function(req,res) {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
