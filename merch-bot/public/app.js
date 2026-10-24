@@ -84,6 +84,54 @@ $("#merch-form").addEventListener("submit",async e=>{
   }
 });
 
+function productShapeSvg(product){
+  const common='fill="#101013" stroke="#eee8da" stroke-width="6"';
+  switch(product){
+    case "Hoodie":
+      return '<path d="M470 315 Q600 205 730 315 L790 370 L748 430 L715 400 L715 665 L485 665 L485 400 L452 430 L410 370 Z" '+common+'/>'+
+             '<path d="M520 315 Q600 235 680 315" fill="none" stroke="#d3aa45" stroke-width="6"/>'+
+             '<path d="M535 545 Q600 585 665 545" fill="none" stroke="#55515b" stroke-width="4"/>';
+    case "Crewneck":
+      return '<path d="M430 315 L500 270 Q600 305 700 270 L770 315 L735 390 L700 370 L700 665 L500 665 L500 370 L465 390 Z" '+common+'/>'+
+             '<path d="M555 290 Q600 335 645 290" fill="none" stroke="#d3aa45" stroke-width="5"/>';
+    case "Tote":
+      return '<rect x="435" y="335" width="330" height="330" rx="22" '+common+'/>'+
+             '<path d="M505 350 Q505 250 600 250 Q695 250 695 350" fill="none" stroke="#eee8da" stroke-width="10"/>';
+    case "Mug":
+      return '<rect x="420" y="345" width="315" height="245" rx="38" '+common+'/>'+
+             '<path d="M735 390 Q860 385 850 485 Q845 560 735 540" fill="none" stroke="#eee8da" stroke-width="22"/>';
+    case "Tumbler":
+      return '<path d="M485 270 L715 270 L680 665 Q600 700 520 665 Z" '+common+'/>'+
+             '<rect x="505" y="230" width="190" height="52" rx="18" fill="#1b1b20" stroke="#d3aa45" stroke-width="5"/>';
+    case "Hat":
+      return '<path d="M430 470 Q455 315 600 300 Q745 315 770 470 Q650 515 430 470 Z" '+common+'/>'+
+             '<path d="M430 470 Q315 485 300 550 Q470 545 610 505" fill="#17171b" stroke="#eee8da" stroke-width="6"/>'+
+             '<path d="M600 305 L600 470" fill="none" stroke="#55515b" stroke-width="4"/>';
+    case "Apron":
+      return '<path d="M505 300 L695 300 L745 665 L455 665 Z" '+common+'/>'+
+             '<path d="M540 300 Q540 210 600 210 Q660 210 660 300" fill="none" stroke="#eee8da" stroke-width="10"/>'+
+             '<path d="M455 385 L365 455 M745 385 L835 455" fill="none" stroke="#eee8da" stroke-width="8"/>'+
+             '<rect x="525" y="530" width="150" height="80" rx="10" fill="#17171b" stroke="#55515b" stroke-width="4"/>';
+    case "Pillow":
+      return '<rect x="410" y="270" width="380" height="380" rx="65" '+common+'/>'+
+             '<path d="M440 310 Q600 355 760 310 M440 610 Q600 565 760 610" fill="none" stroke="#33323a" stroke-width="4"/>';
+    case "Poster":
+      return '<rect x="415" y="225" width="370" height="470" rx="8" fill="#f4f1e9" stroke="#d3aa45" stroke-width="12"/>'+
+             '<rect x="445" y="255" width="310" height="410" rx="2" fill="#111114"/>';
+    case "Tee":
+    default:
+      return '<path d="M390 300 L475 250 L525 300 L675 300 L725 250 L810 300 L770 390 L725 365 L725 650 L475 650 L475 365 L430 390 Z" '+common+'/>';
+  }
+}
+
+function productTextPosition(product){
+  if(product==="Hat") return {brandY:405,phraseY:442,directionY:610};
+  if(product==="Mug") return {brandY:445,phraseY:490,directionY:640};
+  if(product==="Tumbler") return {brandY:445,phraseY:490,directionY:700};
+  if(product==="Poster") return {brandY:420,phraseY:470,directionY:735};
+  return {brandY:450,phraseY:505,directionY:735};
+}
+
 function previewSvgData(job){
   const c=job.concepts?.find(x=>x.id===job.selectedConcept);
   const safe=v=>String(v||"").replace(/[<>&"]/g,"").slice(0,42);
@@ -91,20 +139,22 @@ function previewSvgData(job){
   const phrase=safe(job.textRequest||"DESIGNED WITH MB");
   const product=safe(c?.product||job.recommendation?.top||"Merch");
   const direction=safe(c?.name||"MB DESIGN");
+  const pos=productTextPosition(product);
+  const artFill=product==="Poster"?"#f0cf71":"#e5c05f";
   const svg=[
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">',
     '<defs><linearGradient id="g"><stop stop-color="#9d7429"/><stop offset=".5" stop-color="#f0cf71"/><stop offset="1" stop-color="#9d7429"/></linearGradient></defs>',
     '<rect width="1200" height="900" fill="#0b0b0d"/>',
     '<text x="70" y="100" font-family="Arial" font-size="72" font-weight="700" fill="url(#g)">MB</text>',
-    '<text x="70" y="145" font-family="Arial" font-size="28" fill="#f4f1e9">MERCH BOT — DESIGN PREVIEW</text>',
-    '<rect x="330" y="205" width="540" height="510" rx="50" fill="#17171b" stroke="#d3aa45" stroke-width="3"/>',
-    '<path d="M390 300 L475 250 L525 300 L675 300 L725 250 L810 300 L770 390 L725 365 L725 650 L475 650 L475 365 L430 390 Z" fill="#0f0f12" stroke="#eee8da" stroke-width="6"/>',
-    '<text x="600" y="450" text-anchor="middle" font-family="Arial" font-size="44" font-weight="700" fill="#e5c05f">'+brand+'</text>',
-    '<text x="600" y="505" text-anchor="middle" font-family="Arial" font-size="25" fill="#f4f1e9">'+phrase+'</text>',
-    '<text x="600" y="600" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#c99e3e">'+direction+'</text>',
+    '<text x="70" y="145" font-family="Arial" font-size="28" fill="#f4f1e9">MERCH BOT — PRODUCT PREVIEW</text>',
+    '<circle cx="600" cy="465" r="330" fill="#141419" stroke="#2f2c25" stroke-width="2"/>',
+    productShapeSvg(product),
+    '<text x="600" y="'+pos.brandY+'" text-anchor="middle" font-family="Arial" font-size="42" font-weight="700" fill="'+artFill+'">'+brand+'</text>',
+    '<text x="600" y="'+pos.phraseY+'" text-anchor="middle" font-family="Arial" font-size="24" fill="#f4f1e9">'+phrase+'</text>',
+    '<text x="600" y="'+pos.directionY+'" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#c99e3e">'+direction+'</text>',
     '<text x="70" y="790" font-family="Arial" font-size="30" font-weight="700" fill="#f4f1e9">'+product+'</text>',
-    '<text x="70" y="832" font-family="Arial" font-size="20" fill="#a8a8ad">Concept visualization only — final production art comes after rendering + preflight.</text>',
+    '<text x="70" y="832" font-family="Arial" font-size="20" fill="#a8a8ad">Concept visualization only — product-specific vendor/template preflight is still required.</text>',
     '</svg>'
   ].join("");
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
@@ -281,7 +331,10 @@ async function loadMyMerch(){
   if(vault?.jobs?.length) remote.push(...vault.jobs);
   try{
     const res=await fetch(`/api/jobs?clientId=${encodeURIComponent(clientId)}`);
-    if(res.ok){const data=await res.json();remote=data.jobs||[]}
+    if(res.ok){
+      const data=await res.json();
+      if(data.jobs?.length) remote.push(...data.jobs);
+    }
   }catch{}
   const merged=[...remote,...readLocalJobs()].filter((j,i,a)=>a.findIndex(x=>x.id===j.id)===i);
   localStorage.setItem(localJobsKey,JSON.stringify(merged.slice(0,30)));
@@ -308,12 +361,14 @@ async function loadMyMerch(){
     if(job.selectedConcept){
       const c=job.concepts.find(x=>x.id===job.selectedConcept);
       $("#preview-title").textContent=job.brandName+" — "+(c?.name||"Selected Direction");
+      renderProductionGuidance(job);
       $("#preview-img").src=previewSvgData(job);
       const exactText=job.textRequest||job.brandName;
       $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
       $("#text-confirm").checked=false;
       $("#finish-design").disabled=true;
       $("#preview").classList.remove("hidden");
+      $("#next-offers").classList.remove("hidden");
       $("#money").classList.remove("hidden");
       calculateMoney();
       $("#preview").scrollIntoView({behavior:"smooth"});
