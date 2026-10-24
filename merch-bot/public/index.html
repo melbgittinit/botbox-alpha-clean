@@ -166,9 +166,10 @@
           </select>
         </label>
         <div class="wide submit-row">
-          <button class="primary" type="submit">MERCH ME — V1 PREVIEW</button>
-          <span>No charge in this build preview.</span>
+          <button class="primary" type="submit">MERCH ME — FREE PREVIEW</button>
+          <span>No charge in this preview.</span>
         </div>
+        <div class="wide micro" id="form-note" aria-live="polite"></div>
       </form>
     </section>
 
@@ -214,7 +215,7 @@
           <div class="action-stack">
             <button class="primary" id="finish-design" disabled>FINISH THIS DESIGN — $1.99</button>
             <button class="secondary hidden" id="check-purchase">CHECK MY PURCHASE</button>
-            <div id="checkout-note" class="micro"></div>
+            <div id="checkout-note" class="micro" aria-live="polite"></div>
             <button class="secondary" id="printer-pack">DOWNLOAD PRINTER BRIEF</button>
             <button class="secondary" id="share-brief">SHARE MERCH BRIEF</button>
             <button class="secondary" id="new-job">MAKE SOMETHING ELSE</button>
@@ -411,7 +412,7 @@
         <h3>Saved MB work</h3>
         <p class="micro">Delete the saved preview jobs tied to this browser from both local storage and the MB job vault. This does not delete Shopify orders, paid commerce records, or external printer/POD records.</p>
         <button class="secondary" id="delete-saved-work" type="button">DELETE MY SAVED MB WORK</button>
-        <div id="delete-saved-work-note" class="micro"></div>
+        <div id="delete-saved-work-note" class="micro" aria-live="polite"></div>
       </div>
     </section>
   </main>
