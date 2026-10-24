@@ -68,8 +68,14 @@ $("#merch-form").addEventListener("submit",async e=>{
 });
 
 function renderJob(job){
-  $("#smart-drop").innerHTML=job.recommendation.items.slice(0,3).map((item,i)=>
-    `<article class="card ${i===0?"active":""}"><div class="rank">${esc(item.status)}</div><h3>${esc(item.product)}</h3><div class="score">${item.score}</div><span class="badge">MB FIT</span><p>${esc(item.reason)}</p></article>`
+  $("#smart-drop").innerHTML=job.recommendation.items.slice(0,5).map((item,i)=>
+    `<article class="card ${i===0?"active":""}">
+      <div class="rank">${esc(item.status)}</div>
+      <h3>${esc(item.product)}</h3>
+      <span class="badge">${esc(item.fitLabel||"MB FIT")}</span>
+      <p>${esc(item.reason)}</p>
+      ${i===0?'<p><strong>If we only make one thing today, I’d start here.</strong></p>':""}
+    </article>`
   ).join("");
   $("#concepts").innerHTML=job.concepts.map(c=>
     `<article class="card"><div class="rank">DIRECTION ${c.id}</div><h3>${esc(c.name)}</h3><p>${esc(c.description)}</p><p><strong>Best for:</strong> ${esc(c.bestFor)}</p><button class="primary choose" data-id="${c.id}">CHOOSE THIS</button></article>`
