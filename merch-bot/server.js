@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
 const { Pool } = require("pg");
+const { getTemplate, getMatchPlan } = require("./lib/productCatalog");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -157,6 +158,10 @@ app.post("/api/jobs/:id/select", async function(req,res) {
     if (![1,2,3].includes(n)) return res.status(400).json({ error:"invalid_concept" });
     job.selectedConcept = n;
     job.status = "DESIGN_PREVIEW_READY";
+    const selected = job.concepts.find(function(x){ return x.id===n; });
+    const product = selected?.product || job.recommendation?.top || "";
+    job.production = getTemplate(product);
+    job.matchPlan = getMatchPlan(product);
     await save(job);
     res.json(job);
   } catch (e) {
