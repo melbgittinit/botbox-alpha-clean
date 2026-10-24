@@ -81,6 +81,31 @@ const PRODUCT_TEMPLATES = {
   }
 };
 
+const REQUIRED_PRODUCTS=["Tee","Hoodie","Crewneck","Tote","Mug","Tumbler","Hat","Apron","Pillow","Poster"];
+const ALLOWED_MATCH_EASE=new Set(["EASY","RECOMPOSE","SIMPLIFY","HARD"]);
+
+function validateCatalog(){
+  const names=Object.keys(PRODUCT_TEMPLATES);
+  const missing=REQUIRED_PRODUCTS.filter(name=>!PRODUCT_TEMPLATES[name]);
+  const extra=names.filter(name=>!REQUIRED_PRODUCTS.includes(name));
+  if(missing.length) throw new Error("Product catalog missing: "+missing.join(", "));
+  if(extra.length) throw new Error("Unexpected product catalog entries: "+extra.join(", "));
+
+  for(const name of REQUIRED_PRODUCTS){
+    const item=PRODUCT_TEMPLATES[name];
+    if(item.product!==name) throw new Error("Product key/name mismatch: "+name);
+    if(!Array.isArray(item.designClasses)||!item.designClasses.length) throw new Error("Missing design classes: "+name);
+    if(!Array.isArray(item.preferredMethods)||!item.preferredMethods.length) throw new Error("Missing preferred methods: "+name);
+    if(!Array.isArray(item.specialtyRisks)) throw new Error("Invalid specialty risks: "+name);
+    if(!String(item.printStatusRule||"").trim()) throw new Error("Missing print status rule: "+name);
+    for(const [target,ease] of Object.entries(item.matchEase||{})){
+      if(!REQUIRED_PRODUCTS.includes(target)) throw new Error(name+" references unknown match target "+target);
+      if(!ALLOWED_MATCH_EASE.has(ease)) throw new Error(name+" has invalid match rating "+ease+" for "+target);
+    }
+  }
+  return {ok:true,products:REQUIRED_PRODUCTS.length};
+}
+
 function getTemplate(product){
   return PRODUCT_TEMPLATES[product] || null;
 }
@@ -98,4 +123,4 @@ function getMatchPlan(fromProduct){
   });
 }
 
-module.exports={PRODUCT_TEMPLATES,getTemplate,getMatchPlan};
+module.exports={PRODUCT_TEMPLATES,REQUIRED_PRODUCTS,validateCatalog,getTemplate,getMatchPlan};
