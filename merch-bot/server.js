@@ -1,10 +1,11 @@
 const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
-const { getTemplate, getMatchPlan } = require("./lib/productCatalog");
+const { validateCatalog, getTemplate, getMatchPlan } = require("./lib/productCatalog");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
+const catalogCheck=validateCatalog();
 app.use(function(req,res,next){
   res.setHeader("X-Content-Type-Options","nosniff");
   res.setHeader("X-Frame-Options","DENY");
@@ -117,7 +118,7 @@ function concepts(input, product) {
 }
 
 app.get("/health", function(req,res) {
-  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault" });
+  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault", productCatalog:catalogCheck });
 });
 
 app.get("/api/jobs", function(req,res) {
