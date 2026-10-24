@@ -19,6 +19,29 @@ app.use(function(req,res,next){
 });
 
 app.use(express.json({ limit: "1mb" }));
+
+const rateBuckets=new Map();
+function rateLimit(name,limit,windowMs){
+  return function(req,res,next){
+    const now=Date.now();
+    const key=name+":"+req.ip;
+    const bucket=rateBuckets.get(key)||[];
+    const fresh=bucket.filter(ts=>now-ts<windowMs);
+    if(fresh.length>=limit){
+      res.setHeader("Retry-After",String(Math.ceil(windowMs/1000)));
+      return res.status(429).json({error:"rate_limited"});
+    }
+    fresh.push(now);
+    rateBuckets.set(key,fresh);
+    next();
+  };
+}
+
+app.use("/api",function(req,res,next){
+  res.setHeader("Cache-Control","no-store");
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 function clean(v,max=300) { return String(v || "").trim().slice(0,max); }
@@ -101,7 +124,7 @@ app.get("/api/jobs", function(req,res) {
   res.status(410).json({error:"deprecated_use_mb_job_vault"});
 });
 
-app.post("/api/jobs", async function(req,res) {
+app.post("/api/jobs", rateLimit("jobs",30,10*60*1000), async function(req,res) {
   try {
     const input = req.body || {};
     const clientId=clean(input.clientId,100);
@@ -165,7 +188,7 @@ app.get("/api/jobs/:id/preview.svg", function(req,res) {
   res.status(410).send("Deprecated: preview is rendered from the saved MB job in the client.");
 });
 
-app.post("/api/checkout", async function(req,res) {
+app.post("/api/checkout", rateLimit("checkout",10,10*60*1000), async function(req,res) {
   try {
     const body=req.body||{};
     const visitorToken=clean(body.visitorToken);
@@ -197,7 +220,7 @@ app.post("/api/checkout", async function(req,res) {
   }
 });
 
-app.post("/api/verify-purchase", async function(req,res) {
+app.post("/api/verify-purchase", rateLimit("verify",20,10*60*1000), async function(req,res) {
   try {
     const contextToken=clean(req.body && req.body.contextToken);
     if(!contextToken) return res.status(400).json({error:"context_token_required"});
@@ -216,7 +239,7 @@ app.post("/api/verify-purchase", async function(req,res) {
   }
 });
 
-app.post("/api/entitlement-status", async function(req,res) {
+app.post("/api/entitlement-status", rateLimit("entitlement",30,10*60*1000), async function(req,res) {
   try {
     const visitorToken=clean(req.body && req.body.visitorToken);
     if(!visitorToken) return res.status(400).json({error:"visitor_token_required"});
