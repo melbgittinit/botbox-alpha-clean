@@ -62,25 +62,37 @@ $$("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>{
 
 $("#merch-form").addEventListener("submit",async e=>{
   e.preventDefault();
-  const button=e.submitter;
-  button.disabled=true;
-  button.textContent="MB IS THINKING…";
+  const button=e.submitter||$("#merch-form button[type='submit']");
+  const note=$("#form-note");
+  if(button){button.disabled=true;button.textContent="MB IS THINKING…";}
+  if(note)note.textContent="";
   try{
     const data=Object.fromEntries(new FormData(e.currentTarget).entries());
     data.clientId=clientId;
     const res=await fetch("/api/jobs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
-    if(!res.ok)throw new Error();
+    if(!res.ok){
+      const problem=await res.json().catch(()=>({}));
+      const err=new Error(problem.error||"create_failed");
+      err.code=problem.error||"create_failed";
+      throw err;
+    }
     currentJob=await res.json();
     saveLocalJob(currentJob);
     renderJob(currentJob);
     await loadMyMerch();
     $("#results").classList.remove("hidden");
     $("#results").scrollIntoView({behavior:"smooth"});
-  }catch{
-    alert("MB could not start this job yet. Please try again.");
+  }catch(err){
+    if(note){
+      const messages={
+        client_and_brand_required:"Please enter your brand or business name.",
+        commercial_rights_confirmation_required:"Please confirm that you own or have commercial permission for anything you provide.",
+        create_failed:"MB could not create the preview yet. Your form has not been charged or submitted for paid production."
+      };
+      note.textContent=messages[err?.code]||"MB could not start this preview yet. Please try again.";
+    }
   }finally{
-    button.disabled=false;
-    button.textContent="MERCH ME — V1 PREVIEW";
+    if(button){button.disabled=false;button.textContent="MERCH ME — FREE PREVIEW";}
   }
 });
 
