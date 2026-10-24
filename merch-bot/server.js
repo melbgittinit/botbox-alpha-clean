@@ -6,6 +6,7 @@ const { validateCatalog, getTemplate, getMatchPlan } = require("./lib/productCat
 const app = express();
 const PORT = process.env.PORT || 10000;
 const catalogCheck=validateCatalog();
+let coreAcceptance=null;
 app.use(function(req,res,next){
   res.setHeader("X-Content-Type-Options","nosniff");
   res.setHeader("X-Frame-Options","DENY");
@@ -106,6 +107,37 @@ function smartDrop(input) {
   };
 }
 
+function runCoreAcceptanceChecks(){
+  const cases=[
+    {name:"bakery",input:{brandName:"Midnight Bakery",businessType:"upscale neighborhood bakery",audience:"Customers",useCase:"Retail / sell it"},expectedTop:"Tote"},
+    {name:"salon",input:{brandName:"Glow House Beauty",businessType:"beauty salon",audience:"Customers",useCase:"Retail / sell it"},expectedTop:"Tumbler"},
+    {name:"church",input:{brandName:"New Hope Community Church",businessType:"church ministry",audience:"Members",useCase:"Event"},expectedTop:"Tee"},
+    {name:"music",input:{brandName:"After Midnight",businessType:"music artist",audience:"Fans",useCase:"Launch / drop"},expectedTop:"Poster"}
+  ];
+  const results=[];
+  for(const test of cases){
+    const rec=smartDrop(test.input);
+    if(rec.top!==test.expectedTop) throw new Error("Acceptance "+test.name+" expected "+test.expectedTop+" but got "+rec.top);
+    if(!Array.isArray(rec.items)||rec.items.length!==5) throw new Error("Acceptance "+test.name+" must return exactly 5 Smart Drop items");
+    if(new Set(rec.items.map(x=>x.product)).size!==rec.items.length) throw new Error("Acceptance "+test.name+" returned duplicate products");
+    if(rec.items[0].status!=="MAKE FIRST") throw new Error("Acceptance "+test.name+" first item must be MAKE FIRST");
+    if(!rec.items.some(x=>x.status==="HOLD FOR NOW")) throw new Error("Acceptance "+test.name+" must include at least one HOLD FOR NOW");
+    results.push({name:test.name,top:rec.top,items:rec.items.length});
+  }
+
+  const explicit=concepts({brandName:"Test Brand",productChoice:"Hat",textRequest:"Exact Phrase"},"Tee");
+  if(explicit.length!==3) throw new Error("Concept acceptance must return exactly 3 directions");
+  if(explicit.some(c=>c.product!=="Hat")) throw new Error("Explicit product choice must be preserved across concepts");
+
+  const auto=concepts({brandName:"Test Brand",productChoice:"MB Choose",textRequest:""},"Tote");
+  if(auto.some(c=>c.product!=="Tote")) throw new Error("MB Choose must use Smart Drop product");
+
+  if(allowed("INVALID",ALLOWED_STYLES,"MB Choose")!=="MB Choose") throw new Error("Invalid style must fail closed to MB Choose");
+  if(allowed("INVALID",ALLOWED_PRODUCTS,"MB Choose")!=="MB Choose") throw new Error("Invalid product must fail closed to MB Choose");
+
+  return {ok:true,demos:results,concepts:3};
+}
+
 function concepts(input, product) {
   const brand = clean(input.brandName) || "YOUR BRAND";
   const phrase = clean(input.textRequest);
@@ -118,7 +150,7 @@ function concepts(input, product) {
 }
 
 app.get("/health", function(req,res) {
-  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault", productCatalog:catalogCheck });
+  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault", productCatalog:catalogCheck, acceptance:coreAcceptance });
 });
 
 app.get("/api/jobs", function(req,res) {
@@ -263,4 +295,8 @@ app.get("*", function(req,res) {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.listen(PORT, "0.0.0.0", function(){ console.log("Merch Bot V1 listening on " + PORT); });
+coreAcceptance=runCoreAcceptanceChecks();
+app.listen(PORT, "0.0.0.0", function(){
+  console.log("Merch Bot V1 listening on " + PORT);
+  console.log("MB core acceptance:", JSON.stringify(coreAcceptance));
+});
