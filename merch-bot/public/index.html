@@ -25,6 +25,7 @@
     </div>
   </header>
 
+  <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
   <main>
   <section class="section onboarding" id="how-it-works">
     <div class="section-head">
@@ -219,7 +220,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="my-merch-section">
       <div class="section-head">
         <span class="eyebrow">MY MERCH</span>
         <h2>Your recent MB jobs on this browser.</h2>
@@ -228,10 +229,28 @@
     </section>
   </main>
 
-  <footer>
+  <footer id="mb-footer">
     <strong>MB — MERCH BOT™</strong>
     <span>Design it. Print it. Sell it.</span>
   </footer>
+
+  <aside class="mb-control-dock" aria-label="Merch Bot voice and scroll controls">
+    <div class="mb-dock-status">
+      <span class="mb-status-dot" id="mb-voice-dot"></span>
+      <span id="mb-section-label">How MB Works</span>
+    </div>
+    <button class="mb-talk" id="mb-talk" type="button" aria-label="Talk to Merch Bot">
+      <span class="mb-mic">●</span>
+      <span>TALK TO MB</span>
+    </button>
+    <div class="mb-dock-row">
+      <button id="mb-back" type="button" aria-label="Previous section">← BACK</button>
+      <button id="mb-read" type="button" aria-label="Read this section aloud">READ</button>
+      <button id="mb-next" type="button" aria-label="Next section">NEXT →</button>
+      <button id="mb-top" type="button" aria-label="Back to top">TOP ↑</button>
+    </div>
+    <div class="mb-voice-status" id="mb-voice-status" aria-live="polite">Say “start”, “bakery”, “next”, “back”, “read this”, or “top”.</div>
+  </aside>
   <script src="/app.js"></script>
 </body>
 </html>
