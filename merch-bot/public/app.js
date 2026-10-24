@@ -133,6 +133,7 @@ async function selectConcept(id){
   saveLocalJob(currentJob);
   const c=currentJob.concepts.find(x=>x.id===id);
   $("#preview-title").textContent=currentJob.brandName+" — "+c.name;
+  renderProductionGuidance(currentJob);
   const exactText=currentJob.textRequest||currentJob.brandName;
   $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
   $("#text-confirm").checked=false;
@@ -155,6 +156,25 @@ $("#new-job").addEventListener("click",()=>{
   $("#money").classList.add("hidden");
   $("#intake").scrollIntoView({behavior:"smooth"});
 });
+
+function renderProductionGuidance(job){
+  const box=$("#production-guidance");
+  if(!box)return;
+  const p=job.production;
+  if(!p){
+    box.innerHTML='<div class="rank">PRODUCTION</div><p class="micro">Product-specific production guidance is not available yet.</p>';
+    return;
+  }
+  box.innerHTML=
+    '<div class="rank">PRODUCTION GUIDANCE</div>'+
+    '<h3 style="margin:.4em 0">'+esc(p.product)+'</h3>'+
+    '<p><strong>Preferred methods:</strong> '+esc((p.preferredMethods||[]).join(" · "))+'</p>'+
+    '<p><strong>Status:</strong> DESIGN READY</p>'+
+    '<p><strong>Before PRINT READY:</strong> '+esc(p.printStatusRule||"Vendor/template preflight required.")+'</p>'+
+    ((p.specialtyRisks||[]).length
+      ? '<p><strong>Watch for:</strong> '+esc(p.specialtyRisks.join(" · "))+'</p>'
+      : '');
+}
 
 function calculateMoney(){
   const cost=Number($("#calc-cost").value)||0;
@@ -579,6 +599,12 @@ function selectedProduct(){
 }
 
 function matchPlan(product){
+  if(currentJob?.matchPlan?.length){
+    return currentJob.matchPlan.slice().sort((a,b)=>{
+      const rank={EASY:0,RECOMPOSE:1,SIMPLIFY:2,HARD:3};
+      return (rank[a.ease]??9)-(rank[b.ease]??9);
+    });
+  }
   const easy={
     "Tee":["Hoodie","Tote","Poster"],
     "Hoodie":["Tee","Tote","Crewneck"],
@@ -605,7 +631,10 @@ $("#preview-match")?.addEventListener("click",()=>{
   const rows=matchPlan(product);
   $("#match-preview").innerHTML=
     '<div class="offer-line"><strong>Starting from '+esc(product)+'</strong></div>'+
-    rows.map(r=>'<div class="offer-line"><strong>'+esc(r.product)+' · '+esc(r.fit)+'</strong><br>'+esc(r.note)+'</div>').join("");
+    rows.slice(0,5).map(r=>{
+      const label=r.ease||r.fit||"MATCH";
+      return '<div class="offer-line"><strong>'+esc(r.product)+' · '+esc(label)+'</strong><br>'+esc(r.note)+'</div>';
+    }).join("");
 });
 
 $("#preview-three")?.addEventListener("click",()=>{
