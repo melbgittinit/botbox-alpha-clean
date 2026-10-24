@@ -201,6 +201,25 @@ app.post("/api/checkout", async function(req,res) {
   }
 });
 
+app.post("/api/verify-purchase", async function(req,res) {
+  try {
+    const contextToken=clean(req.body && req.body.contextToken);
+    if(!contextToken) return res.status(400).json({error:"context_token_required"});
+    const upstream=await fetch("https://agent-qr-system.onrender.com/tbs/merch-bot/verify-purchase",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({context_token:contextToken})
+    });
+    const text=await upstream.text();
+    let data={};
+    try{data=JSON.parse(text)}catch{data={error:"verification_response_invalid"}}
+    return res.status(upstream.status).json(data);
+  } catch(e) {
+    console.error("MB purchase verification error",e);
+    res.status(502).json({error:"purchase_verification_unavailable"});
+  }
+});
+
 app.get("*", function(req,res) {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
