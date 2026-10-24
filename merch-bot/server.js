@@ -27,7 +27,19 @@ app.use(function(req,res,next){
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
-function clean(v) { return String(v || "").trim(); }
+function clean(v,max=300) { return String(v || "").trim().slice(0,max); }
+
+const ALLOWED_AUDIENCES=new Set(["Customers","Fans","Staff","Members","Event guests","Gifts","To sell for profit","Mixed"]);
+const ALLOWED_USES=new Set(["Retail / sell it","Brand building","Staff","Gift / giveaway","Event","Launch / drop"]);
+const ALLOWED_STYLES=new Set(["MB Choose","Luxury","Street","Bold","Elegant","Fun","Minimal","Vintage"]);
+const ALLOWED_PRODUCTS=new Set(["MB Choose","Tee","Hoodie","Crewneck","Tote","Mug","Tumbler","Hat","Apron","Pillow","Poster"]);
+const ALLOWED_BRAND_LOCKS=new Set(["elevate","locked","explore"]);
+const ALLOWED_MODES=new Set(["BEST_SELLER","MAKE_THIS"]);
+
+function allowed(value,set,fallback){
+  const v=clean(value,80);
+  return set.has(v)?v:fallback;
+}
 
 function smartDrop(input) {
   const t = [input.businessType, input.brandName, input.audience, input.useCase]
@@ -134,25 +146,43 @@ app.get("/api/jobs", async function(req,res) {
 app.post("/api/jobs", async function(req,res) {
   try {
     const input = req.body || {};
-    if (!clean(input.clientId) || !clean(input.brandName)) return res.status(400).json({ error:"client_and_brand_required" });
-    const rec = smartDrop(input);
+    const clientId=clean(input.clientId,100);
+    const brandName=clean(input.brandName,100);
+    if (!clientId || !brandName) return res.status(400).json({ error:"client_and_brand_required" });
+    if (clean(input.rightsConfirmed,10)!=="yes") return res.status(400).json({ error:"commercial_rights_confirmation_required" });
+
+    const normalized={
+      clientId,
+      brandName,
+      businessType:clean(input.businessType,160),
+      audience:allowed(input.audience,ALLOWED_AUDIENCES,"Customers"),
+      useCase:allowed(input.useCase,ALLOWED_USES,"Retail / sell it"),
+      style:allowed(input.style,ALLOWED_STYLES,"MB Choose"),
+      productChoice:allowed(input.productChoice,ALLOWED_PRODUCTS,"MB Choose"),
+      textRequest:clean(input.textRequest,120),
+      brandLock:allowed(input.brandLock,ALLOWED_BRAND_LOCKS,"elevate"),
+      rightsConfirmed:true,
+      mode:allowed(input.mode,ALLOWED_MODES,"BEST_SELLER")
+    };
+
+    const rec = smartDrop(normalized);
     const job = {
       id:"mb_" + crypto.randomUUID(),
-      clientId:clean(input.clientId),
+      clientId:normalized.clientId,
       createdAt:new Date().toISOString(),
       status:"WAITING_SELECTION",
-      mode:clean(input.mode) || "BEST_SELLER",
-      brandName:clean(input.brandName),
-      businessType:clean(input.businessType),
-      audience:clean(input.audience),
-      useCase:clean(input.useCase),
-      style:clean(input.style),
-      productChoice:clean(input.productChoice) || "MB Choose",
-      textRequest:clean(input.textRequest),
-      brandLock:clean(input.brandLock) || "elevate",
-      rightsConfirmed:clean(input.rightsConfirmed) === "yes",
+      mode:normalized.mode,
+      brandName:normalized.brandName,
+      businessType:normalized.businessType,
+      audience:normalized.audience,
+      useCase:normalized.useCase,
+      style:normalized.style,
+      productChoice:normalized.productChoice,
+      textRequest:normalized.textRequest,
+      brandLock:normalized.brandLock,
+      rightsConfirmed:true,
       recommendation:rec,
-      concepts:concepts(input, rec.top),
+      concepts:concepts(normalized, rec.top),
       selectedConcept:null
     };
     await save(job);
