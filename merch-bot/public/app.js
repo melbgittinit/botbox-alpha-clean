@@ -668,3 +668,49 @@ $("#preview-smallbiz")?.addEventListener("click",()=>{
     )+'</div>'
   ).join("");
 });
+
+async function loadTrustStatus(){
+  try{
+    const res=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-trust-status");
+    if(!res.ok)throw new Error();
+    const data=await res.json();
+    const c=data.certification||{};
+    $("#bbb-cert-status").textContent=(c.name||"BOTS BUILT BETTER™")+" — "+(c.status||"STATUS UNKNOWN");
+    $("#bbb-gates-passed").textContent=String(c.passed_required??"—");
+    $("#bbb-gates-total").textContent=String(c.required_total??"—");
+    $("#bbb-progress").textContent=(c.progress_percent??0)+"%";
+    $("#bbb-certified").textContent=c.certified?"YES":"NO";
+    $("#bbb-cert-statement").textContent=c.statement||"Certification facts unavailable.";
+
+    const gates=data.gates||[];
+    $("#bbb-gates").innerHTML=gates.map(g=>`
+      <article class="card ${g.passed?"active":""}">
+        <div class="rank">${esc(g.status||"UNKNOWN")}</div>
+        <h3>${esc(g.display_name)}</h3>
+        <p>${esc(g.customer_fact||"")}</p>
+        ${g.evidence_note?`<p class="micro"><strong>Evidence:</strong> ${esc(g.evidence_note)}</p>`:""}
+      </article>
+    `).join("");
+
+    const ext=data.external_assurance||{};
+    const labels={
+      nist_ai_rmf:"NIST AI RMF",
+      iso_27001:"ISO/IEC 27001",
+      iso_27701_2025:"ISO/IEC 27701:2025",
+      iso_42001:"ISO/IEC 42001",
+      soc_2:"SOC 2"
+    };
+    $("#external-assurance").innerHTML=Object.entries(ext).map(([k,v])=>`
+      <article class="card">
+        <div class="rank">EXTERNAL / SEPARATE</div>
+        <h3>${esc(labels[k]||k)}</h3>
+        <p>${esc(v)}</p>
+      </article>
+    `).join("");
+  }catch{
+    $("#bbb-cert-status").textContent="BOTS BUILT BETTER™ — status temporarily unavailable";
+    $("#bbb-cert-statement").textContent="Trust facts could not be loaded right now. No certification claim is made when status cannot be verified.";
+  }
+}
+
+loadTrustStatus();
