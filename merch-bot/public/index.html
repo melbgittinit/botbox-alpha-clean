@@ -151,6 +151,20 @@
           <span>Words / phrase / idea to use (optional)</span>
           <input name="textRequest" placeholder="e.g. Baked After Dark" maxlength="120" />
         </label>
+        <label>
+          <span>Brand handling</span>
+          <select name="brandLock">
+            <option value="elevate">Elevate it without changing my identity</option>
+            <option value="locked">Keep my supplied brand exactly as-is</option>
+            <option value="explore">MB can explore a new direction</option>
+          </select>
+        </label>
+        <label>
+          <span>Commercial rights</span>
+          <select name="rightsConfirmed" required>
+            <option value="yes">I own or have permission to use anything I provide commercially</option>
+          </select>
+        </label>
         <div class="wide submit-row">
           <button class="primary" type="submit">MERCH ME — V1 PREVIEW</button>
           <span>No charge in this build preview.</span>
@@ -184,12 +198,20 @@
           <p>This V1 proves the intake → recommendation → concept → selection → saved-job loop without spending image-generation credits.</p>
           <div class="status-list">
             <div><span>Design direction</span><b>READY</b></div>
+            <div><span>Production status</span><b>DESIGN READY</b></div>
             <div><span>Saved to My Merch</span><b>READY</b></div>
-            <div><span>Final AI render</span><b class="pending">NEXT</b></div>
-            <div><span>Printer preflight</span><b class="pending">NEXT</b></div>
+            <div><span>Final AI render</span><b class="pending">AFTER PAYMENT</b></div>
+            <div><span>Vendor/template preflight</span><b class="pending">REQUIRED BEFORE PRINT</b></div>
           </div>
+          <label style="margin:18px 0 8px;">
+            <span>Exact wording check</span>
+            <span style="display:flex;gap:10px;align-items:flex-start;font-weight:400;">
+              <input type="checkbox" id="text-confirm" style="width:auto;margin-top:4px;" />
+              <span id="text-confirm-copy">I confirm MB should use exactly the wording shown above.</span>
+            </span>
+          </label>
           <div class="action-stack">
-            <button class="primary" id="finish-design">FINISH THIS DESIGN — $1.99</button>
+            <button class="primary" id="finish-design" disabled>FINISH THIS DESIGN — $1.99</button>
             <button class="secondary hidden" id="check-purchase">CHECK MY PURCHASE</button>
             <div id="checkout-note" class="micro"></div>
             <button class="secondary" id="printer-pack">DOWNLOAD PRINTER BRIEF</button>
