@@ -234,8 +234,40 @@ async function loadMyMerch(){
   localStorage.setItem(localJobsKey,JSON.stringify(merged.slice(0,30)));
   $("#my-merch").innerHTML=merged.length?merged.map(job=>{
     const selected=job.concepts?.find(c=>c.id===job.selectedConcept);
-    return `<article class="card"><div class="rank">${esc(job.status)}</div><h3>${esc(job.brandName)}</h3><p>${esc(selected?.name||"Direction not selected yet")}</p><p><strong>MB pick:</strong> ${esc(job.recommendation?.top||"")}</p>${job.selectedConcept?`<a class="link" href="/api/jobs/${job.id}/preview.svg" target="_blank">View preview</a>`:""}</article>`;
+    return `<article class="card">
+      <div class="rank">${esc(job.status)}</div>
+      <h3>${esc(job.brandName)}</h3>
+      <p>${esc(selected?.name||"Direction not selected yet")}</p>
+      <p><strong>MB pick:</strong> ${esc(job.recommendation?.top||"")}</p>
+      <div class="action-stack">
+        <button class="secondary reopen-job" data-job-id="${esc(job.id)}">REOPEN</button>
+        ${job.selectedConcept?`<a class="link" href="/api/jobs/${job.id}/preview.svg" target="_blank">View preview</a>`:""}
+      </div>
+    </article>`;
   }).join(""):`<article class="card"><p>Your saved MB jobs will appear here.</p></article>`;
+
+  document.querySelectorAll(".reopen-job").forEach(btn=>btn.addEventListener("click",()=>{
+    const job=merged.find(x=>x.id===btn.dataset.jobId);
+    if(!job)return;
+    currentJob=job;
+    renderJob(job);
+    $("#results").classList.remove("hidden");
+    if(job.selectedConcept){
+      const c=job.concepts.find(x=>x.id===job.selectedConcept);
+      $("#preview-title").textContent=job.brandName+" — "+(c?.name||"Selected Direction");
+      $("#preview-img").src=`/api/jobs/${job.id}/preview.svg?t=${Date.now()}`;
+      const exactText=job.textRequest||job.brandName;
+      $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
+      $("#text-confirm").checked=false;
+      $("#finish-design").disabled=true;
+      $("#preview").classList.remove("hidden");
+      $("#money").classList.remove("hidden");
+      calculateMoney();
+      $("#preview").scrollIntoView({behavior:"smooth"});
+    }else{
+      $("#results").scrollIntoView({behavior:"smooth"});
+    }
+  }));
 }
 
 loadMyMerch();
