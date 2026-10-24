@@ -207,10 +207,12 @@ $("#printer-pack").addEventListener("click",()=>{
     "Requested wording: "+(currentJob.textRequest||"(none)"),
     "Brand handling: "+(currentJob.brandLock||"elevate"),
     "Commercial rights confirmed: "+(currentJob.rightsConfirmed?"Yes":"No"),
+    "Preferred production methods: "+((currentJob.production?.preferredMethods||[]).join(", ")||"Vendor review required"),
+    "Production warnings: "+((currentJob.production?.specialtyRisks||[]).join(" | ")||"None listed"),
     "",
-    "STATUS: DESIGN DIRECTION APPROVED — FINAL VENDOR TEMPLATE REQUIRED",
+    "STATUS: DESIGN READY — FINAL VENDOR TEMPLATE / METHOD PREFLIGHT REQUIRED",
     "",
-    "Printer: Please confirm the final blank/SKU, exact print area, production method, color handling, file format, resolution, bleed/safe-zone requirements, and any specialty preparation before manufacturing.",
+    "Printer: "+(currentJob.production?.printStatusRule||"Please confirm the final blank/SKU, exact print area, production method, color handling, file format, resolution, bleed/safe-zone requirements, and any specialty preparation before manufacturing."),
     "",
     "This preview packet is a production brief, not final print-ready art."
   ];
