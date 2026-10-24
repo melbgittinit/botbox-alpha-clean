@@ -113,6 +113,8 @@ app.post("/api/jobs", async function(req,res) {
       style:clean(input.style),
       productChoice:clean(input.productChoice) || "MB Choose",
       textRequest:clean(input.textRequest),
+      brandLock:clean(input.brandLock) || "elevate",
+      rightsConfirmed:clean(input.rightsConfirmed) === "yes",
       recommendation:rec,
       concepts:concepts(input, rec.top),
       selectedConcept:null
