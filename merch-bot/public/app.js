@@ -184,8 +184,11 @@ async function selectConcept(id){
   const c=currentJob.concepts.find(x=>x.id===id);
   $("#preview-title").textContent=currentJob.brandName+" — "+c.name;
   renderProductionGuidance(currentJob);
-  const exactText=currentJob.textRequest||currentJob.brandName;
-  $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
+  const proofBrand=currentJob.brandName||"";
+  const proofPhrase=currentJob.textRequest||"";
+  $("#text-confirm-copy").textContent=proofPhrase
+    ? 'I confirm the printed text exactly as shown — Brand: "'+proofBrand+'" · Phrase: "'+proofPhrase+'"'
+    : 'I confirm the printed text exactly as shown — Brand: "'+proofBrand+'"';
   $("#text-confirm").checked=false;
   $("#finish-design").disabled=true;
   $("#checkout-note").textContent="Confirm the exact wording above before any paid finish action.";
@@ -363,8 +366,11 @@ async function loadMyMerch(){
       $("#preview-title").textContent=job.brandName+" — "+(c?.name||"Selected Direction");
       renderProductionGuidance(job);
       $("#preview-img").src=previewSvgData(job);
-      const exactText=job.textRequest||job.brandName;
-      $("#text-confirm-copy").textContent='I confirm MB should use exactly: "'+exactText+'"';
+      const proofBrand=currentJob.brandName||"";
+      const proofPhrase=currentJob.textRequest||"";
+      $("#text-confirm-copy").textContent=proofPhrase
+        ? 'I confirm the printed text exactly as shown — Brand: "'+proofBrand+'" · Phrase: "'+proofPhrase+'"'
+        : 'I confirm the printed text exactly as shown — Brand: "'+proofBrand+'"';
       $("#text-confirm").checked=false;
       $("#finish-design").disabled=true;
       $("#preview").classList.remove("hidden");
