@@ -80,6 +80,7 @@ $("#merch-form").addEventListener("submit",async e=>{
     saveLocalJob(currentJob);
     renderJob(currentJob);
     renderBusinessPlaybook(currentJob);
+    updateStudioRail();
     await loadMyMerch();
     $("#results").classList.remove("hidden");
     $("#results").scrollIntoView({behavior:"smooth"});
@@ -233,6 +234,7 @@ async function selectConcept(id){
   $("#next-offers").classList.remove("hidden");
   $("#money").classList.remove("hidden");
   calculateMoney();
+  updateStudioRail();
   $("#preview").scrollIntoView({behavior:"smooth"});
   await loadMyMerch();
 }
@@ -280,6 +282,7 @@ function calculateMoney(){
   const source=$("#calc-source")?.value||"estimate";
   const labels={estimate:"MB ESTIMATE",quote:"CUSTOMER-ENTERED QUOTE",live:"LIVE VENDOR PRICE"};
   $("#calc-source-label").textContent=labels[source]||"MB ESTIMATE";
+  updateStudioRail();
 }
 ["calc-cost","calc-price","calc-qty","calc-other","calc-source"].forEach(id=>$("#"+id).addEventListener("input",calculateMoney));
 
@@ -910,3 +913,27 @@ async function openMbCompanion(){
   }
 }
 document.getElementById("mb-companion")?.addEventListener("click",openMbCompanion);
+
+
+function updateStudioRail(){
+  const section=currentSectionIndex?.();
+  const selected=currentJob?.concepts?.find(c=>c.id===currentJob?.selectedConcept);
+  const spread=$("#calc-spread")?.textContent||"—";
+  const jobs=readLocalJobs();
+  const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value||"—";};
+  set("studio-brand",currentJob?.brandName||"No active merch job");
+  set("studio-lane",currentJob?.playbook?.label||"General");
+  set("studio-top-pick",currentJob?.recommendation?.top||"—");
+  set("studio-product",selected?.product||currentJob?.productChoice||"—");
+  set("studio-production",currentJob?.selectedConcept?(currentJob?.production?"DESIGN READY":"GUIDANCE PENDING"):"PREVIEW");
+  set("studio-spread",spread);
+  set("studio-saved",String(jobs.length));
+  set("studio-section",section?.sections?.[section.index]?.label||"How MB Works");
+}
+
+document.getElementById("studio-read")?.addEventListener("click",()=>speak(currentSectionText()));
+document.getElementById("studio-companion")?.addEventListener("click",openMbCompanion);
+window.addEventListener("scroll",updateStudioRail,{passive:true});
+window.addEventListener("resize",updateStudioRail);
+
+updateStudioRail();
