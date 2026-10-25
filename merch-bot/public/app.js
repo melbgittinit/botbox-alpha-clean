@@ -937,3 +937,66 @@ window.addEventListener("scroll",updateStudioRail,{passive:true});
 window.addEventListener("resize",updateStudioRail);
 
 updateStudioRail();
+
+
+const MB_CONTEXT_KEY="mb_ui_context_v1";
+let lastViewportMode=null;
+
+function viewportMode(){
+  if(window.matchMedia("(min-width: 1200px)").matches)return "studio";
+  if(window.matchMedia("(max-width: 480px)").matches)return "pocket";
+  return "standard";
+}
+
+function saveUiContext(){
+  try{
+    const state=currentSectionIndex();
+    const section=state.sections[state.index];
+    localStorage.setItem(MB_CONTEXT_KEY,JSON.stringify({
+      sectionId:section?.id||null,
+      scrollY:window.scrollY,
+      viewportMode:viewportMode(),
+      jobId:currentJob?.id||null,
+      selectedConcept:currentJob?.selectedConcept||null,
+      savedAt:Date.now()
+    }));
+  }catch{}
+}
+
+function restoreUiContext({forceSection=false}={}){
+  try{
+    const saved=JSON.parse(localStorage.getItem(MB_CONTEXT_KEY)||"null");
+    if(!saved)return;
+    if(forceSection&&saved.sectionId){
+      const el=document.getElementById(saved.sectionId);
+      if(el&&!el.classList.contains("hidden")){
+        el.scrollIntoView({behavior:"auto",block:"start"});
+        return;
+      }
+    }
+    if(Number.isFinite(saved.scrollY))window.scrollTo({top:saved.scrollY,behavior:"auto"});
+  }catch{}
+}
+
+function handleViewportTransition(){
+  const next=viewportMode();
+  const changed=lastViewportMode&&lastViewportMode!==next;
+  saveUiContext();
+  lastViewportMode=next;
+  updateAdaptiveMode();
+  updateStudioRail();
+  if(changed)setTimeout(()=>restoreUiContext({forceSection:true}),60);
+}
+
+window.addEventListener("orientationchange",()=>setTimeout(handleViewportTransition,120));
+window.addEventListener("resize",()=>{
+  clearTimeout(window.__mbResizeTimer);
+  window.__mbResizeTimer=setTimeout(handleViewportTransition,120);
+});
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden")saveUiContext();
+  else setTimeout(()=>restoreUiContext(),50);
+});
+window.addEventListener("pagehide",saveUiContext);
+lastViewportMode=viewportMode();
+setTimeout(()=>restoreUiContext(),50);
