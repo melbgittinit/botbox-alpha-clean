@@ -252,6 +252,17 @@
               <span id="text-confirm-copy">I confirm MB should use exactly the wording shown above.</span>
             </span>
           </label>
+          <div id="finish-job-status" class="panel hidden" style="margin:16px 0;padding:16px;">
+            <div class="rank">FINISH ONE STATUS</div>
+            <div class="status-list">
+              <div><span>Payment / credit</span><b id="finish-status-payment">NOT STARTED</b></div>
+              <div><span>Final render</span><b id="finish-status-render" class="pending">LOCKED</b></div>
+              <div><span>Production preflight</span><b id="finish-status-preflight" class="pending">NOT STARTED</b></div>
+              <div><span>Light correction</span><b id="finish-status-correction">1 INCLUDED</b></div>
+              <div><span>Final state</span><b id="finish-status-final" class="pending">WAITING</b></div>
+            </div>
+            <p class="micro" id="finish-status-note">Paid finishing is not active yet.</p>
+          </div>
           <div class="action-stack">
             <button class="primary" id="finish-design" disabled>FINISH THIS DESIGN — $1.99</button>
             <button class="secondary hidden" id="check-purchase">CHECK MY PURCHASE</button>
