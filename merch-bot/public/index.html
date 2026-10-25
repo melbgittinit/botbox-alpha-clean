@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>MB — Merch Bot</title>
   <meta name="description" content="Tell MB what you do. We'll make the merch." />
+  <meta name="theme-color" content="#0b0b0d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Merch Bot" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -473,6 +478,8 @@
       <button id="mb-top" type="button" aria-label="Back to top">TOP ↑</button>
     </div>
     <button id="mb-companion" type="button" class="secondary" style="width:100%;margin-top:8px;">TAKE MB WITH YOU™</button>
+    <button id="mb-install" type="button" class="secondary" style="width:100%;margin-top:8px;">INSTALL MB</button>
+    <div id="mb-install-note" class="mb-voice-status" aria-live="polite"></div>
     <div class="mb-voice-status" id="mb-voice-status" aria-live="polite">Say “start”, “bakery”, “next”, “back”, “read this”, or “top”.</div>
   </aside>
   <script src="/app.js"></script>
