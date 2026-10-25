@@ -180,6 +180,9 @@ function renderBusinessPlaybook(job){
   if(!section||!p)return;
   section.classList.remove("hidden");
   $("#playbook-title").textContent=(p.label||"Business")+" playbook";
+  const mission=job?.mission;
+  const missionLabel=$("#mission-label");
+  if(missionLabel)missionLabel.textContent=mission?("Mission: "+mission.label):"Merch mission";
   $("#playbook-copy").textContent="MB inferred this lane from your current project and adjusted the advice underneath.";
   const renderList=items=>(items||[]).map(x=>'<p>• '+esc(x)+'</p>').join("");
   $("#playbook-priorities").innerHTML=renderList(p.priorities);
@@ -930,6 +933,7 @@ function updateStudioRail(){
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value||"—";};
   set("studio-brand",currentJob?.brandName||"No active merch job");
   set("studio-lane",currentJob?.playbook?.label||"General");
+  set("studio-mission",currentJob?.mission?.label||"—");
   set("studio-top-pick",currentJob?.recommendation?.top||"—");
   set("studio-product",selected?.product||currentJob?.productChoice||"—");
   set("studio-production",currentJob?.selectedConcept?(currentJob?.production?"DESIGN READY":"GUIDANCE PENDING"):"PREVIEW");
