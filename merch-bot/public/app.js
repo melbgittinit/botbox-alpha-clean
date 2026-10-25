@@ -861,6 +861,8 @@ $("#delete-saved-work")?.addEventListener("click",async()=>{
 function updateAdaptiveMode(){
   const wide=window.matchMedia("(min-width: 1200px)").matches;
   document.body.classList.toggle("mb-studio",wide);
+  const label=document.getElementById("mb-mode-label");
+  if(label)label.textContent=wide?"STUDIO":"POCKET";
 }
 window.addEventListener("resize",updateAdaptiveMode);
 updateAdaptiveMode();
@@ -874,6 +876,8 @@ async function openMbCompanion(){
   try{
     const pip=await window.documentPictureInPicture.requestWindow({width:360,height:520});
     pip.document.title="MB — Take With You";
+    const mainMode=document.getElementById("mb-mode-label");
+    if(mainMode)mainMode.textContent="COMPANION";
     const style=pip.document.createElement("style");
     style.textContent=`
       body{margin:0;background:#0b0b0d;color:#f7f5ef;font-family:system-ui,-apple-system,sans-serif;padding:16px}
@@ -906,7 +910,10 @@ async function openMbCompanion(){
     pip.document.getElementById("mbc-next").onclick=()=>{goSection(1);sync();};
     pip.document.getElementById("mbc-top").onclick=()=>{window.scrollTo({top:0,behavior:"smooth"});setTimeout(sync,250);};
 
-    pip.addEventListener("pagehide",()=>window.removeEventListener("scroll",sync));
+    pip.addEventListener("pagehide",()=>{
+      window.removeEventListener("scroll",sync);
+      updateAdaptiveMode();
+    });
     if(status)status.textContent="MB Companion is open in an always-on-top window.";
   }catch{
     if(status)status.textContent="Companion mode could not open. The floating MB dock is still available.";
