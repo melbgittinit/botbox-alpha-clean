@@ -886,6 +886,47 @@ document.getElementById("mb-talk")?.addEventListener("click",()=>{
 });
 
 
+
+function renderFinishStatus(job){
+  const panel=$("#finish-job-status");
+  if(!panel)return;
+  panel.classList.remove("hidden");
+  const status=job?.status||"NOT_STARTED";
+  const renderMap={
+    NOT_STARTED:"LOCKED",
+    READY_TO_RENDER:"READY",
+    RENDERING:"IN PROGRESS",
+    RENDERED:"COMPLETE",
+    CORRECTION_REQUESTED:"CORRECTION REQUESTED",
+    COMPLETE:"COMPLETE"
+  };
+  $("#finish-status-payment").textContent=job?"VERIFIED / CREDIT USED":"NOT STARTED";
+  $("#finish-status-render").textContent=renderMap[status]||status.replaceAll("_"," ");
+  $("#finish-status-preflight").textContent=job?.preflight_status||"NOT STARTED";
+  $("#finish-status-correction").textContent=((job?.corrections_allowed??1)-(job?.corrections_used??0))+" REMAINING";
+  $("#finish-status-final").textContent=status==="COMPLETE"?"COMPLETE":"WAITING";
+  $("#finish-status-note").textContent=job?.block_reason==="RENDER_PROVIDER_NOT_CONNECTED"
+    ?"The paid job is ready, but final rendering is intentionally paused until a render provider is connected and approved."
+    :"Finish One status is shown from the paid job record.";
+}
+
+async function loadFinishStatus(){
+  try{
+    const res=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-finish-job",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"status",visitor_token:visitorToken})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(res.ok&&data?.jobs?.length){
+      const match=currentJob
+        ? data.jobs.find(j=>j.preview_job_id===currentJob.id&&j.concept_id===currentJob.selectedConcept)
+        : data.jobs[0];
+      if(match)renderFinishStatus(match);
+    }
+  }catch{}
+}
+
 async function createFinishJob(){
   if(!currentJob||!currentJob.selectedConcept)return {ok:false,error:"no_selected_job"};
   const selected=currentJob.concepts?.find(c=>c.id===currentJob.selectedConcept);
@@ -952,6 +993,7 @@ async function verifySavedPurchase(){
         $("#finish-design").disabled=true;
         localStorage.setItem("mb_paid_finish_ready","1");
         localStorage.setItem("mb_finish_job_id",created.data?.finish_job?.id||"");
+        renderFinishStatus(created.data?.finish_job||null);
         track("PURCHASE_VERIFIED",{job_id:saved.jobId||null,order_id:verify.orderId||null});
       }else{
         note.textContent=created.data?.error==="no_make_one_credit"
@@ -1346,3 +1388,5 @@ if("serviceWorker" in navigator){
 }
 
 loadMerchDna();
+
+loadFinishStatus();
