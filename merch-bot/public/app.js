@@ -16,6 +16,83 @@ const visitorToken=(()=>{
 const localJobsKey="mb_local_jobs_"+clientId;
 let currentJob=null;
 
+
+let merchDnaProfile=null;
+
+async function merchDnaRequest(action,payload={}){
+  try{
+    const res=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-merch-dna",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action,visitor_token:visitorToken,...payload})
+    });
+    if(!res.ok)return null;
+    return await res.json();
+  }catch{return null}
+}
+
+function renderMerchDna(profile){
+  const panel=$("#merch-dna-panel");
+  if(!panel||!profile)return;
+  merchDnaProfile=profile;
+  panel.classList.remove("hidden");
+  $("#merch-dna-title").textContent="MB remembers "+(profile.brand_name||"this brand")+".";
+  const facts=[
+    profile.inferred_role,
+    profile.primary_goal,
+    profile.audience?("Audience: "+profile.audience):null,
+    profile.preferred_style?("Style: "+profile.preferred_style):null,
+    profile.preferred_product?("Product: "+profile.preferred_product):null
+  ].filter(Boolean);
+  $("#merch-dna-copy").textContent=facts.join(" · ");
+}
+
+function applyMerchDna(profile){
+  if(!profile)return;
+  const form=$("#merch-form");
+  const map={
+    brandName:profile.brand_name,
+    businessType:profile.business_type,
+    audience:profile.audience,
+    style:profile.preferred_style,
+    productChoice:profile.preferred_product,
+    brandLock:profile.brand_lock
+  };
+  Object.entries(map).forEach(([name,value])=>{
+    if(value==null||value==="")return;
+    const el=form.elements.namedItem(name);
+    if(!el)return;
+    if(el.tagName==="SELECT"){
+      const option=[...el.options].find(o=>o.value===value||o.text===value);
+      if(option)el.value=option.value;
+    }else{
+      el.value=value;
+    }
+  });
+  form.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+async function learnMerchDna(job){
+  const data=await merchDnaRequest("learn",{job});
+  if(data?.profile)renderMerchDna(data.profile);
+}
+
+async function loadMerchDna(){
+  const data=await merchDnaRequest("get");
+  if(data?.profile)renderMerchDna(data.profile);
+}
+
+$("#merch-dna-apply")?.addEventListener("click",()=>applyMerchDna(merchDnaProfile));
+$("#merch-dna-reset")?.addEventListener("click",async()=>{
+  const ok=confirm("Reset the saved Merch DNA for this browser? Your individual My Merch jobs will remain.");
+  if(!ok)return;
+  const data=await merchDnaRequest("reset");
+  if(data?.ok){
+    merchDnaProfile=null;
+    $("#merch-dna-panel")?.classList.add("hidden");
+  }
+});
+
 async function track(eventName, metadata={}){
   try{
     await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-usage",{
@@ -78,6 +155,7 @@ $("#merch-form").addEventListener("submit",async e=>{
     }
     currentJob=await res.json();
     saveLocalJob(currentJob);
+    learnMerchDna(currentJob);
     renderJob(currentJob);
     renderBusinessPlaybook(currentJob);
     renderMissionGuidance(currentJob);
@@ -371,6 +449,7 @@ async function selectConcept(id){
   }catch{}
   currentJob={...currentJob,selectedConcept:id,status:"DESIGN_PREVIEW_READY",production,matchPlan};
   saveLocalJob(currentJob);
+  learnMerchDna(currentJob);
   $("#preview-title").textContent=currentJob.brandName+" — "+c.name;
   renderProductionGuidance(currentJob);
   const proofBrand=currentJob.brandName||"";
@@ -1231,3 +1310,5 @@ if("serviceWorker" in navigator){
     navigator.serviceWorker.register("/service-worker.js").catch(()=>{});
   });
 }
+
+loadMerchDna();
