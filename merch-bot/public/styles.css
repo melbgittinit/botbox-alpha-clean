@@ -170,3 +170,12 @@ body{padding-bottom:150px}
     top:max(18px,env(viewport-segment-top 1 0,0px) + 18px)
   }
 }
+
+/* Avoid rail/dock competition on medium unfolded widths */
+@media (min-width:1200px) and (max-width:1349px){
+  body.mb-studio main{padding-right:24px}
+  .mb-studio-rail{display:none}
+}
+@media (horizontal-viewport-segments:2){
+  .mb-studio-rail{display:grid}
+}
