@@ -137,3 +137,36 @@ body{padding-bottom:150px}
   .panel,.card{border-radius:16px;padding:18px}
   .mb-control-dock{border-radius:16px}
 }
+
+.mb-studio-rail{display:none}
+@media (min-width:1200px){
+  body.mb-studio main{padding-right:330px}
+  .mb-studio-rail{
+    display:grid;
+    gap:10px;
+    position:fixed;
+    right:max(18px,env(safe-area-inset-right,0px));
+    top:88px;
+    width:290px;
+    max-height:calc(100vh - 260px);
+    overflow:auto;
+    z-index:9996;
+    background:rgba(18,18,22,.97);
+    border:1px solid #5d4a27;
+    border-radius:20px;
+    padding:16px;
+    box-shadow:0 18px 60px rgba(0,0,0,.42)
+  }
+  .studio-fact{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid #2d2d32}
+  .studio-fact span{color:#9999a0;font-size:.78rem}
+  .studio-fact strong{color:#f0d47e;font-size:.82rem;text-align:right}
+  .mb-control-dock{width:290px}
+}
+@media (horizontal-viewport-segments:2){
+  body.mb-studio main{padding-right:24px}
+  .mb-studio-rail{
+    width:min(320px,calc(env(viewport-segment-width 1 0,50vw) - 28px));
+    right:max(12px,calc(100vw - env(viewport-segment-right 1 0,100vw) + 12px));
+    top:max(18px,env(viewport-segment-top 1 0,0px) + 18px)
+  }
+}
