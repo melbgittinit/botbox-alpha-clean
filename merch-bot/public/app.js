@@ -81,6 +81,7 @@ $("#merch-form").addEventListener("submit",async e=>{
     renderJob(currentJob);
     renderBusinessPlaybook(currentJob);
     renderMissionGuidance(currentJob);
+    renderContextDesk(currentJob);
     updateStudioRail();
     await loadMyMerch();
     $("#results").classList.remove("hidden");
@@ -175,6 +176,140 @@ function previewSvgData(job){
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
 }
 
+
+
+function money(v){return "$"+Number(v||0).toFixed(2)}
+
+function renderContextDesk(job){
+  const section=$("#context-desk");
+  const cards=$("#context-tool-cards");
+  const workspace=$("#context-tool-workspace");
+  const tools=job?.contextTools||[];
+  if(!section||!cards||!tools.length)return;
+  section.classList.remove("hidden");
+  cards.innerHTML=tools.map(t=>`
+    <article class="card">
+      <div class="rank">${esc(t.kind||"TOOL")}</div>
+      <h3>${esc(t.label)}</h3>
+      <p>${esc(t.description||"")}</p>
+      <button class="secondary context-tool-open" data-tool="${esc(t.key)}">OPEN TOOL</button>
+    </article>`
+  ).join("");
+  workspace.classList.add("hidden");
+  workspace.innerHTML="";
+  cards.querySelectorAll(".context-tool-open").forEach(btn=>btn.addEventListener("click",()=>{
+    openContextTool(btn.dataset.tool,job);
+  }));
+}
+
+function openContextTool(key,job){
+  const workspace=$("#context-tool-workspace");
+  if(!workspace)return;
+  workspace.classList.remove("hidden");
+  const selected=job?.concepts?.find(c=>c.id===job.selectedConcept);
+  const product=selected?.product||job?.recommendation?.top||"Merch";
+
+  if(key==="fundraiser"){
+    workspace.innerHTML=`
+      <div class="rank">FUNDRAISER GOAL</div>
+      <h3>How many units need to sell?</h3>
+      <div class="form-grid">
+        <label><span>Fundraising goal</span><input id="ctx-goal" type="number" min="0" step="1" value="1000"></label>
+        <label><span>Estimated spread per item</span><input id="ctx-profit" type="number" min="0" step=".01" value="15"></label>
+        <div class="wide status-list"><div><span>Units needed</span><b id="ctx-result">—</b></div></div>
+      </div>`;
+    const calc=()=>{
+      const goal=Number($("#ctx-goal").value)||0;
+      const profit=Number($("#ctx-profit").value)||0;
+      $("#ctx-result").textContent=profit>0?Math.ceil(goal/profit)+" units":"Enter a positive spread";
+    };
+    ["ctx-goal","ctx-profit"].forEach(id=>$("#"+id).addEventListener("input",calc)); calc();
+  }else if(key==="deadline"){
+    workspace.innerHTML=`
+      <div class="rank">DEADLINE GUARD</div>
+      <h3>Work backward before the event.</h3>
+      <div class="form-grid">
+        <label><span>Event date</span><input id="ctx-event-date" type="date"></label>
+        <label><span>Printer/POD production days</span><input id="ctx-production-days" type="number" min="1" step="1" value="7"></label>
+        <label><span>Shipping/buffer days</span><input id="ctx-buffer-days" type="number" min="1" step="1" value="7"></label>
+        <div class="wide status-list"><div><span>Recommended artwork lock date</span><b id="ctx-deadline-result">—</b></div></div>
+      </div>`;
+    const calc=()=>{
+      const raw=$("#ctx-event-date").value;
+      const prod=Number($("#ctx-production-days").value)||0;
+      const buffer=Number($("#ctx-buffer-days").value)||0;
+      if(!raw){$("#ctx-deadline-result").textContent="Choose an event date";return;}
+      const d=new Date(raw+"T12:00:00");
+      d.setDate(d.getDate()-(prod+buffer));
+      $("#ctx-deadline-result").textContent=d.toLocaleDateString();
+    };
+    ["ctx-event-date","ctx-production-days","ctx-buffer-days"].forEach(id=>$("#"+id).addEventListener("input",calc));
+  }else if(key==="gift_budget"){
+    workspace.innerHTML=`
+      <div class="rank">CLIENT GIFT BUDGET</div>
+      <h3>Turn the total budget into a per-client target.</h3>
+      <div class="form-grid">
+        <label><span>Total budget</span><input id="ctx-budget" type="number" min="0" step=".01" value="500"></label>
+        <label><span>Recipients</span><input id="ctx-recipients" type="number" min="1" step="1" value="20"></label>
+        <label><span>Packaging/shipping per recipient</span><input id="ctx-gift-extra" type="number" min="0" step=".01" value="5"></label>
+        <div class="wide status-list"><div><span>Target merchandise cost per recipient</span><b id="ctx-gift-result">—</b></div></div>
+      </div>`;
+    const calc=()=>{
+      const budget=Number($("#ctx-budget").value)||0;
+      const people=Math.max(1,Number($("#ctx-recipients").value)||1);
+      const extra=Number($("#ctx-gift-extra").value)||0;
+      $("#ctx-gift-result").textContent=money(Math.max(0,budget/people-extra));
+    };
+    ["ctx-budget","ctx-recipients","ctx-gift-extra"].forEach(id=>$("#"+id).addEventListener("input",calc)); calc();
+  }else if(key==="staff_retail"||key==="role_split"){
+    workspace.innerHTML=`
+      <div class="rank">ROLE SPLIT</div>
+      <h3>Keep different merchandise jobs separate.</h3>
+      <div class="cards">
+        <article class="card"><div class="rank">OPERATIONAL</div><h3>Staff / team</h3><p>Optimize fit, consistency, reorder simplicity and role identification.</p></article>
+        <article class="card"><div class="rank">CUSTOMER / FUNDRAISER</div><h3>Retail / public</h3><p>Optimize desirability, margin, giftability and visible brand value.</p></article>
+        <article class="card"><div class="rank">CURRENT MB PICK</div><h3>${esc(product)}</h3><p>Decide whether this product belongs in one lane, both lanes, or neither before ordering.</p></article>
+      </div>`;
+  }else if(key==="bundle"||key==="reader_bundle"){
+    const items=(job?.recommendation?.items||[]).slice(0,3);
+    workspace.innerHTML=`
+      <div class="rank">BUNDLE BUILDER</div>
+      <h3>Keep the bundle easy to understand.</h3>
+      <div class="cards">
+        ${items.map((x,i)=>`<article class="card"><div class="rank">${i===0?"HERO":"ADD-ON"}</div><h3>${esc(x.product)}</h3><p>${esc(x.reason||"")}</p></article>`).join("")}
+      </div>
+      <p class="micro">Start with one hero product plus one useful add-on. Add a third item only if it materially improves perceived value or average order value.</p>`;
+  }else if(key==="clean_house"){
+    workspace.innerHTML=`
+      <div class="rank">KEEP / PUSH / CHANGE / STOP</div>
+      <h3>Audit an existing merch SKU.</h3>
+      <div class="form-grid">
+        <label><span>Sales / demand</span><select id="ctx-demand"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+        <label><span>Margin</span><select id="ctx-margin"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+        <label><span>Brand fit</span><select id="ctx-fit"><option value="high">Strong</option><option value="medium">Okay</option><option value="low">Weak</option></select></label>
+        <div class="wide status-list"><div><span>MB action</span><b id="ctx-audit-result">—</b></div></div>
+      </div>`;
+    const calc=()=>{
+      const d=$("#ctx-demand").value,m=$("#ctx-margin").value,f=$("#ctx-fit").value;
+      let result="CHANGE";
+      if(d==="high"&&m!=="low"&&f==="high") result="PUSH";
+      else if(d==="high"&&f!=="low") result="KEEP";
+      else if(d==="low"&&m==="low") result="STOP";
+      else if(f==="low") result="CHANGE";
+      $("#ctx-audit-result").textContent=result;
+    };
+    ["ctx-demand","ctx-margin","ctx-fit"].forEach(id=>$("#"+id).addEventListener("change",calc)); calc();
+  }else{
+    const items=(job?.recommendation?.items||[]).slice(0,3);
+    workspace.innerHTML=`
+      <div class="rank">MERCH DESK</div>
+      <h3>Keep the first test focused.</h3>
+      <div class="cards">
+        ${items.map((x,i)=>`<article class="card"><div class="rank">${i===0?"TEST FIRST":"NEXT"}</div><h3>${esc(x.product)}</h3><p>${esc(x.reason||"")}</p></article>`).join("")}
+      </div>`;
+  }
+  workspace.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
 
 function renderMissionGuidance(job){
   const mission=job?.mission;
@@ -423,6 +558,7 @@ async function loadMyMerch(){
     renderJob(currentJob);
     renderBusinessPlaybook(currentJob);
     renderMissionGuidance(currentJob);
+    renderContextDesk(currentJob);
     $("#results").classList.remove("hidden");
     if(currentJob.selectedConcept){
       const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
@@ -506,6 +642,7 @@ const mbSections=[
   {id:"intake",label:"Make Something"},
   {id:"results",label:"Smart Drop"},
   {id:"business-playbook",label:"Your Business Playbook"},
+  {id:"context-desk",label:"MB Merch Desk"},
   {id:"preview",label:"Your Merch"},
   {id:"next-offers",label:"What Could This Become?"},
   {id:"money",label:"If I Sell This"},
