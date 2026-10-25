@@ -80,6 +80,7 @@ $("#merch-form").addEventListener("submit",async e=>{
     saveLocalJob(currentJob);
     renderJob(currentJob);
     renderBusinessPlaybook(currentJob);
+    renderMissionGuidance(currentJob);
     updateStudioRail();
     await loadMyMerch();
     $("#results").classList.remove("hidden");
@@ -172,6 +173,19 @@ function previewSvgData(job){
     '</svg>'
   ].join("");
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+
+
+function renderMissionGuidance(job){
+  const mission=job?.mission;
+  const note=$("#mission-money-note");
+  const next=$("#mission-next-action");
+  if(note){
+    note.textContent=mission?.moneyPrompt
+      ? mission.moneyPrompt+" Replace estimates with a live vendor price or actual printer quote when available."
+      : "Estimate only. Replace unit cost with a live vendor price or your actual printer quote when available.";
+  }
+  if(next)next.textContent=mission?.nextAction||"Use Smart Drop to decide what to test first.";
 }
 
 function renderBusinessPlaybook(job){
@@ -408,6 +422,7 @@ async function loadMyMerch(){
     }
     renderJob(currentJob);
     renderBusinessPlaybook(currentJob);
+    renderMissionGuidance(currentJob);
     $("#results").classList.remove("hidden");
     if(currentJob.selectedConcept){
       const c=currentJob.concepts.find(x=>x.id===currentJob.selectedConcept);
