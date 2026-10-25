@@ -3,6 +3,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { validateCatalog, getTemplate, getMatchPlan } = require("./lib/productCatalog");
 const { inferPlaybook } = require("./lib/businessPlaybooks");
+const { inferMission } = require("./lib/merchMissions");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -198,6 +199,7 @@ app.post("/api/jobs", rateLimit("jobs",30,10*60*1000), async function(req,res) {
       rightsConfirmed:true,
       recommendation:rec,
       playbook:inferPlaybook(normalized),
+      mission:inferMission(normalized),
       concepts:concepts(normalized, rec.top),
       selectedConcept:null
     };
