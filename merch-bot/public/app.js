@@ -885,6 +885,32 @@ document.getElementById("mb-talk")?.addEventListener("click",()=>{
   try{recognition.start()}catch{}
 });
 
+
+async function createFinishJob(){
+  if(!currentJob||!currentJob.selectedConcept)return {ok:false,error:"no_selected_job"};
+  const selected=currentJob.concepts?.find(c=>c.id===currentJob.selectedConcept);
+  const res=await fetch("https://lcuvhizjhccvzprpuoij.supabase.co/functions/v1/mb-finish-job",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      action:"create",
+      visitor_token:visitorToken,
+      preview_job_id:currentJob.id,
+      concept_id:currentJob.selectedConcept,
+      exact_text:{
+        brand:currentJob.brandName||"",
+        phrase:currentJob.textRequest||""
+      },
+      production:{
+        product:selected?.product||currentJob.recommendation?.top||"",
+        guidance:currentJob.production||null
+      }
+    })
+  });
+  const data=await res.json().catch(()=>({}));
+  return {ok:res.ok&&data.ok===true,status:res.status,data};
+}
+
 async function verifySavedPurchase(){
   const saved=JSON.parse(localStorage.getItem("mb_checkout_context")||"null");
   const note=$("#checkout-note");
@@ -918,12 +944,20 @@ async function verifySavedPurchase(){
     });
     const ent=await entRes.json().catch(()=>({}));
     if(entRes.ok&&ent.make_one_available){
-      note.textContent="Payment verified. Your Finish One credit is ready.";
-      btn.classList.add("hidden");
-      $("#finish-design").textContent="FINISH CREDIT READY";
-      $("#finish-design").disabled=true;
-      localStorage.setItem("mb_paid_finish_ready","1");
-      track("PURCHASE_VERIFIED",{job_id:saved.jobId||null,order_id:verify.orderId||null});
+      const created=await createFinishJob();
+      if(created.ok){
+        note.textContent="Payment verified. Finish One job created. Status: READY TO RENDER. Final rendering is still intentionally off until a renderer is connected.";
+        btn.classList.add("hidden");
+        $("#finish-design").textContent="READY TO RENDER";
+        $("#finish-design").disabled=true;
+        localStorage.setItem("mb_paid_finish_ready","1");
+        localStorage.setItem("mb_finish_job_id",created.data?.finish_job?.id||"");
+        track("PURCHASE_VERIFIED",{job_id:saved.jobId||null,order_id:verify.orderId||null});
+      }else{
+        note.textContent=created.data?.error==="no_make_one_credit"
+          ?"Payment is verified, but the Finish One credit is not available yet."
+          :"Payment is verified, but the finish job could not be created yet. Your selected direction remains saved.";
+      }
     }else{
       note.textContent="Payment is verified. Your finish credit is being attached; check again shortly.";
     }
