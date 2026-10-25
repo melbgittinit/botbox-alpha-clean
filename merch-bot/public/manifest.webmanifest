@@ -1,0 +1,17 @@
+{
+  "name":"MB — Merch Bot™",
+  "short_name":"Merch Bot",
+  "description":"Design it. Print it. Sell it. A merch strategy and production assistant from The Bot Stores.",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "background_color":"#0b0b0d",
+  "theme_color":"#0b0b0d",
+  "orientation":"any",
+  "categories":["business","productivity","design"],
+  "shortcuts":[
+    {"name":"Start Free Preview","short_name":"Start","url":"/#intake"},
+    {"name":"My Merch","short_name":"My Merch","url":"/#my-merch-section"},
+    {"name":"BOTS BUILT BETTER","short_name":"Trust","url":"/#trust-standards"}
+  ]
+}
