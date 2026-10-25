@@ -1000,3 +1000,65 @@ document.addEventListener("visibilitychange",()=>{
 window.addEventListener("pagehide",saveUiContext);
 lastViewportMode=viewportMode();
 setTimeout(()=>restoreUiContext(),50);
+
+
+let mbInstallPrompt=null;
+const installBtn=document.getElementById("mb-install");
+const installNote=document.getElementById("mb-install-note");
+
+function isStandaloneMode(){
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone===true;
+}
+
+function isAppleMobile(){
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function updateInstallUi(){
+  if(!installBtn)return;
+  if(isStandaloneMode()){
+    installBtn.classList.add("hidden");
+    if(installNote)installNote.textContent="MB is already installed on this device.";
+    return;
+  }
+  installBtn.classList.remove("hidden");
+  if(mbInstallPrompt){
+    installBtn.textContent="INSTALL MB";
+    if(installNote)installNote.textContent="Install MB for faster access and a standalone app window.";
+  }else if(isAppleMobile()){
+    installBtn.textContent="ADD MB TO HOME SCREEN";
+    if(installNote)installNote.textContent="On iPhone/iPad: use the Share menu, then choose Add to Home Screen.";
+  }else{
+    installBtn.textContent="KEEP MB HANDY";
+    if(installNote)installNote.textContent="Your browser may offer Install or Add to Home Screen from its menu.";
+  }
+}
+
+window.addEventListener("beforeinstallprompt",event=>{
+  event.preventDefault();
+  mbInstallPrompt=event;
+  updateInstallUi();
+});
+
+window.addEventListener("appinstalled",()=>{
+  mbInstallPrompt=null;
+  updateInstallUi();
+});
+
+installBtn?.addEventListener("click",async()=>{
+  if(isStandaloneMode())return;
+  if(mbInstallPrompt){
+    mbInstallPrompt.prompt();
+    await mbInstallPrompt.userChoice.catch(()=>null);
+    mbInstallPrompt=null;
+    updateInstallUi();
+    return;
+  }
+  if(isAppleMobile()){
+    if(installNote)installNote.textContent="Tap Share in Safari, then Add to Home Screen. MB will open in a standalone app-like view.";
+  }else{
+    if(installNote)installNote.textContent="Open your browser menu and look for Install app or Add to Home Screen.";
+  }
+});
+
+updateInstallUi();
