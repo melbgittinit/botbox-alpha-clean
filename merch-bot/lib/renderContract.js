@@ -27,7 +27,7 @@ function validateRenderResult(result){
       return {ok:false,error:"missing_"+key};
     }
   }
-  if(!/^https:///.test(String(result.assetUrl))) return {ok:false,error:"asset_url_must_be_https"};
+  if(!/^https:\/\//.test(String(result.assetUrl))) return {ok:false,error:"asset_url_must_be_https"};
   if(!Number.isFinite(Number(result.width)) || Number(result.width)<=0) return {ok:false,error:"invalid_width"};
   if(!Number.isFinite(Number(result.height)) || Number(result.height)<=0) return {ok:false,error:"invalid_height"};
   return {ok:true};
