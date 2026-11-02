@@ -5,11 +5,13 @@ const { validateCatalog, getTemplate, getMatchPlan } = require("./lib/productCat
 const { inferPlaybook } = require("./lib/businessPlaybooks");
 const { inferMission } = require("./lib/merchMissions");
 const { toolsFor } = require("./lib/contextTools");
+const { validateRenderResult, preflightChecklist } = require("./lib/renderContract");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 const catalogCheck=validateCatalog();
 let coreAcceptance=null;
+let renderContractCheck=null;
 app.use(function(req,res,next){
   res.setHeader("X-Content-Type-Options","nosniff");
   res.setHeader("X-Frame-Options","DENY");
@@ -110,6 +112,45 @@ function smartDrop(input) {
   };
 }
 
+function runRenderContractChecks(){
+  const base={
+    provider:"test-provider",
+    taskId:"task_123",
+    assetUrl:"https://example.com/final.png",
+    width:4500,
+    height:5400,
+    mimeType:"image/png",
+    sourceJobId:"mb_test",
+    conceptId:1
+  };
+  const valid=validateRenderResult(base);
+  if(!valid.ok)throw new Error("Valid render payload rejected: "+valid.error);
+
+  const missing=validateRenderResult({...base,width:0});
+  if(missing.ok||missing.error!=="invalid_width")throw new Error("Invalid width must fail render validation");
+
+  const tee=preflightChecklist({
+    product:"Tee",
+    production:getTemplate("Tee"),
+    result:base
+  });
+  if(!tee.checks.some(c=>c.key==="render_result"&&c.pass))throw new Error("Tee render payload check failed");
+
+  const hat=preflightChecklist({product:"Hat",production:getTemplate("Hat"),result:base});
+  if(!hat.checks.some(c=>c.key==="embroidery_guard"&&c.pass))throw new Error("Hat embroidery guard failed");
+
+  const mug=preflightChecklist({product:"Mug",production:getTemplate("Mug"),result:base});
+  if(!mug.checks.some(c=>c.key==="wrap_guard"&&c.pass))throw new Error("Mug wrap guard failed");
+
+  const tumbler=preflightChecklist({product:"Tumbler",production:getTemplate("Tumbler"),result:base});
+  if(!tumbler.checks.some(c=>c.key==="wrap_guard"&&c.pass))throw new Error("Tumbler wrap guard failed");
+
+  const poster=preflightChecklist({product:"Poster",production:getTemplate("Poster"),result:base});
+  if(!poster.checks.some(c=>c.key==="bleed_trim_guard"&&c.pass))throw new Error("Poster bleed/trim guard failed");
+
+  return {ok:true,products:["Tee","Hat","Mug","Tumbler","Poster"],manualTextProofRequired:true};
+}
+
 function runCoreAcceptanceChecks(){
   const cases=[
     {name:"bakery",input:{brandName:"Midnight Bakery",businessType:"upscale neighborhood bakery",audience:"Customers",useCase:"Retail / sell it"},expectedTop:"Tote"},
@@ -153,7 +194,7 @@ function concepts(input, product) {
 }
 
 app.get("/health", function(req,res) {
-  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault", productCatalog:catalogCheck, acceptance:coreAcceptance });
+  res.json({ ok:true, service:"merch-bot-v1", persistence:"browser-plus-mb-vault", productCatalog:catalogCheck, acceptance:coreAcceptance, renderContract:renderContractCheck });
 });
 
 app.get("/api/jobs", function(req,res) {
@@ -302,7 +343,9 @@ app.get("*", function(req,res) {
 });
 
 coreAcceptance=runCoreAcceptanceChecks();
+renderContractCheck=runRenderContractChecks();
 app.listen(PORT, "0.0.0.0", function(){
   console.log("Merch Bot V1 listening on " + PORT);
   console.log("MB core acceptance:", JSON.stringify(coreAcceptance));
+  console.log("MB render contract:", JSON.stringify(renderContractCheck));
 });
