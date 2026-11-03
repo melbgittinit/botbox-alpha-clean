@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "build:render": "npm run prisma:generate && npm run build",
+    "db:sync": "prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
