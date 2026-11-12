@@ -192,3 +192,5 @@ Status: article content and original illustrations LIVE in blog; homepage integr
 
 ## Network Today refresh
 November 12, 2026: Verified WOC shop 76603359530, MAIN 193016168746; no theme writes. Nov 3 task stopped on HUB identity mismatch. Verified correct WOC identity and re-enabled existing WOC Daily Editorial with its 48-hour freshness alert and mandatory original illustration. Next configured Nov 13 08:00 ET; unattended success not yet verified. Published Network article 619604443434 at 19:12:36Z, /blogs/the-network/network-2026-11-12-reading-camonghne-felix. Original art 45457803313450, alt and square/wide crops reviewed. National Book Foundation finalists announcement and awards2026 ceremony listing verified; preview, not results. Shared editorial_feed updated with compareDigest and edition read back; previous records archived. Public reader fetch initially unavailable; check live card and next unattended publish.
+
+Public readback subsequently passed: both the homepage and the canonical article returned HTTP 200 and contained the new headline. Next checkpoint: unattended run.
